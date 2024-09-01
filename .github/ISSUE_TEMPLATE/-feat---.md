@@ -2,8 +2,8 @@
 name: "\bFEAT : "
 about: "\bfeature template"
 title: ''
-labels: ''
-assignees: ''
+labels: feat
+assignees: jinyngg
 
 ---
 
