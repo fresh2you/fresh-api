@@ -1,1 +1,18 @@
-#spring.application.name=fresh-api
+spring:
+  profiles:
+    active: local
+
+# swagger
+springdoc:
+  api-docs:
+    path: /api-docs
+    groups:
+      enabled: true
+  packages-to-scan: com.zb.fresh_api.api
+  swagger-ui:
+    tags-sorter: alpha
+    groups-order: asc
+    syntax-highlight:
+      activated: true
+    try-it-out-enabled: false
+  enable-kotlin: false
