@@ -6,9 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ResponseCode {
-
-    SUCCESS("0200", "응답 성공");
+    TERMS_NOT_FOUND("0404"),
+    SUCCESS("0200");
     private final String code;
-    private final String message;
 
 }
