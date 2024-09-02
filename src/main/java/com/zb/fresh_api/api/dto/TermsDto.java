@@ -7,13 +7,15 @@ import lombok.Builder;
 public record TermsDto(
     Long termsId,
     String title,
-    boolean isRequired
+    boolean isRequired,
+    String content
 ) {
     public static TermsDto from(Terms terms) {
         return TermsDto.builder()
             .termsId(terms.getId())
             .title(terms.getTitle())
             .isRequired(terms.isRequired())
+            .content(terms.getContent())
             .build();
     }
 }
