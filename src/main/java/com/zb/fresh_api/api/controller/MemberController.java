@@ -41,4 +41,23 @@ public class MemberController {
             .code(ResponseCode.SUCCESS.getCode())
             .build();
     }
+    @Operation(
+        summary = "이메일 중복 검사",
+        description = "이메일로 회원가입한 사용자 중 중복된 이메일이 있는지 검사합니다"
+    )
+    @GetMapping("/check-email")
+    public GlobalResponse<?> checkEmailAvailability(
+        @RequestParam String email
+    ) {
+        if (email == null || email.isEmpty()) {
+            throw new CustomException(ErrorCode.PARAM_NICKNAME_NOT_VALID);
+
+        }
+        memberService.emailValidate(email);
+        return GlobalResponse.builder()
+            .success(true)
+            .message("이메일 중복 확인 성공(중복X)")
+            .code(ResponseCode.SUCCESS.getCode())
+            .build();
+    }
 }
