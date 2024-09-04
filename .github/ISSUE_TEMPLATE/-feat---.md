@@ -3,7 +3,7 @@ name: "\bFEAT : "
 about: "\bfeature template"
 title: ''
 labels: feat
-assignees: jinyngg
+assignees: ''
 
 ---
 
