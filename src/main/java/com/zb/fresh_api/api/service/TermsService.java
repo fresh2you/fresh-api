@@ -1,10 +1,10 @@
 package com.zb.fresh_api.api.service;
 
-import com.zb.fresh_api.api.common.exception.CustomException;
-import com.zb.fresh_api.api.common.exception.ErrorCode;
+import com.zb.fresh_api.common.exception.CustomException;
+import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.api.dto.TermsDto;
 import com.zb.fresh_api.domain.entity.terms.Terms;
-import com.zb.fresh_api.domain.repository.TermsRepository;
+import com.zb.fresh_api.domain.repository.jpa.TermsRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,14 +23,14 @@ public class TermsService {
         List<Terms> terms = termsRepository.findAll();
 
         return terms.stream().map(
-            TermsDto::from
+            TermsDto::fromEntity
         ).toList();
     }
 
     public TermsDto getTerm(final Long termsId) {
         Terms terms = termsRepository.findById(termsId).orElseThrow(
-            () -> new CustomException(ErrorCode.TERMS_NOT_FOUND)
+            () -> new CustomException(ResponseCode.TERMS_NOT_FOUND)
         );
-        return TermsDto.from(terms);
+        return TermsDto.fromEntity(terms);
     }
 }

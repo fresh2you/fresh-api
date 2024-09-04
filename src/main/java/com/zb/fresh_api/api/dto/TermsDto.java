@@ -10,7 +10,7 @@ public record TermsDto(
     boolean isRequired,
     String content
 ) {
-    public static TermsDto from(Terms terms) {
+    public static TermsDto fromEntity(Terms terms) {
         return TermsDto.builder()
             .termsId(terms.getId())
             .title(terms.getTitle())
