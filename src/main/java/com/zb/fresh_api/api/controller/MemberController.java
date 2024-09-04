@@ -60,7 +60,7 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid SignUpRequest request) {
-        memberService.signUp(request.email(), request.password(), request.nickname());
+        memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements());
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
