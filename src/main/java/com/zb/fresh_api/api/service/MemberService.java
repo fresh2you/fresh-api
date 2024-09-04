@@ -10,9 +10,11 @@ import com.zb.fresh_api.domain.repository.jpa.MemberJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberJpaRepository memberJpaRepository;
@@ -30,6 +32,8 @@ public class MemberService {
             throw new CustomException(ResponseCode.EMAIL_ALREADY_IN_USE);
         }
     }
+
+    @Transactional(readOnly = false)
     public void signUp(String email, String password, String nickName) {
         this.nickNameValidate(nickName);
         this.emailValidate(email);
