@@ -34,6 +34,8 @@ public enum ResponseCode {
      * Terms (1100 ~ 1200)
      */
     TERMS_NOT_FOUND("1100", "약관 정보가 존재하지 않습니다"),
+    TERMS_MANDATORY_NOT_FOUND("1101", "필수 약관이 포함되지 않았습니다"),
+    TERMS_MANDATORY_NOT_AGREED("1102", "필수 약관에 동의하지 않았습니다"),
 
     /**
      * Authentication (1200 ~ 1300)
