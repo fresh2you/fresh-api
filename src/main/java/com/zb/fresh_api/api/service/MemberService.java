@@ -86,7 +86,7 @@ public class MemberService {
 
         for (Terms terms : mandatoryTerms) {
             if (!agreedTermsIds.contains(terms.getId())) {
-                throw new CustomException(ResponseCode.NOT_FOUND_OAUTH_PROVIDER);
+                throw new CustomException(ResponseCode.TERMS_MANDATORY_NOT_FOUND);
             }
         }
     }
