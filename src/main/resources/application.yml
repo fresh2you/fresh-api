@@ -15,3 +15,14 @@ springdoc:
       activated: true
     try-it-out-enabled: false
   enable-kotlin: false
+# kakao
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: {098e084b2db7823ea9e62ebdd2e0c672}
+            redirect-uri: "http://localhost:8000/oauth2/callback/kakao"
+            authorization-grant-type: authorization_code
+            scope: profile_nickname, profile_image, account_email
+

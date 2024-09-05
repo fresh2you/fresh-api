@@ -64,6 +64,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// oAuth2
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-oauth2-client'
+	implementation 'org.springframework.security:spring-security-oauth2-jose'
 }
 
 def generatedQueryDsl = 'src/main/generated'
