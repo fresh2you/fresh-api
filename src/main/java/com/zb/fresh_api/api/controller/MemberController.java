@@ -58,6 +58,11 @@ public class MemberController {
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
+    
+    @Operation(
+        summary = "회원 가입",
+        description = "이메일회원가입, Oauth2회원가입에 사용되는 API입니다"
+    )
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid SignUpRequest request) {
         memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements());
