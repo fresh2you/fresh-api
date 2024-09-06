@@ -61,6 +61,11 @@ dependencies {
 	// validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation:3.3.3'
 
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.3.3'
+	// sms
+	implementation 'net.nurigo:sdk:4.3.0'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
