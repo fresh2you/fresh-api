@@ -39,9 +39,9 @@ public class MemberService {
         }
     }
 
-    public void emailValidate(String email) {
+    public void emailValidate(String email, Provider provider) {
         boolean existsByEmailAndProvider = memberJpaRepository.existsByEmailAndProvider(email,
-            Provider.EMAIL);
+            provider);
         if (existsByEmailAndProvider) {
             throw new CustomException(ResponseCode.EMAIL_ALREADY_IN_USE);
         }
@@ -57,16 +57,17 @@ public class MemberService {
      */
     @Transactional(readOnly = false)
     public void signUp(String email, String password, String nickName,
-        List<TermsAgreementDto> termsAgreementDtos) {
+        List<TermsAgreementDto> termsAgreementDtos, Provider provider, String providerId) {
         this.nickNameValidate(nickName);
-        this.emailValidate(email);
+        this.emailValidate(email, provider);
         validateMandatoryTermsIncluded(termsAgreementDtos);
         Member member = memberJpaRepository.save(
             Member.builder()
                 .nickname(nickName)
                 .email(email)
                 .password(passwordEncoder.encode(password))
-                .provider(Provider.EMAIL)
+                .provider(provider)
+                .providerId(providerId)
                 .role(MemberRole.ROLE_USER)
                 .status(MemberStatus.ACTIVE)
                 .build()
