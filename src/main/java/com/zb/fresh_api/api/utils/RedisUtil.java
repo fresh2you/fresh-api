@@ -1,4 +1,4 @@
-package com.zb.fresh_api.api.service;
+package com.zb.fresh_api.api.utils;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RedisService {
+public class RedisUtil {
 
     private final StringRedisTemplate redisTemplate;
 
