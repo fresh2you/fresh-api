@@ -5,6 +5,7 @@ import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.api.dto.SignUpRequest;
 import com.zb.fresh_api.api.service.MemberService;
+import com.zb.fresh_api.domain.enums.member.Provider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -54,7 +55,7 @@ public class MemberController {
             throw new CustomException(ResponseCode.PARAM_NICKNAME_NOT_VALID);
 
         }
-        memberService.emailValidate(email);
+        memberService.emailValidate(email, Provider.EMAIL);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
@@ -65,7 +66,8 @@ public class MemberController {
     )
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid SignUpRequest request) {
-        memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements());
+        memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements()
+        ,request.provider(), request.providerId());
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
