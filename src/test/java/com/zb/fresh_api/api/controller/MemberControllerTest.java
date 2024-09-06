@@ -1,5 +1,8 @@
 package com.zb.fresh_api.api.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,7 +16,9 @@ import com.zb.fresh_api.api.dto.SignUpRequest;
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.provider.TokenProvider;
 import com.zb.fresh_api.api.service.MemberService;
+import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.enums.member.Provider;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,19 +80,21 @@ class MemberControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(ResponseCode.SUCCESS.getCode()));
 
-        verify(memberService, times(1)).emailValidate(email);
+        verify(memberService, times(1)).emailValidate(email, Provider.EMAIL);
     }
 
     @Test
     @DisplayName("이메일 중복 검사 실패")
     void checkEmailAvailability_fail_emailInvalid() throws Exception {
-        String email = "";
+        //given
+        doThrow(new CustomException(ResponseCode.PARAM_EMAIL_NOT_VALID))
+            .when(memberService).emailValidate(anyString(), any(Provider.class));
+
 
         mockMvc.perform(get("/v1/api/members/check-email")
-                .param("email", email))
+                .param("email", ""))
             .andExpect(status().isBadRequest());
 
-        verify(memberService, never()).emailValidate(email);
     }
 
     @Test
@@ -95,7 +102,8 @@ class MemberControllerTest {
     void signUp_success() throws Exception {
         TermsAgreementDto termsAgreementDto = new TermsAgreementDto(1L, true);
         SignUpRequest request = new SignUpRequest("test@example.com", "password",
-            "password", "nickname", List.of(termsAgreementDto));
+            "password", "nickname", List.of(termsAgreementDto), Provider.EMAIL,
+            "1");
 
         mockMvc.perform(post("/v1/api/members/signup")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -103,7 +111,8 @@ class MemberControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(ResponseCode.SUCCESS.getCode()));
 
-        verify(memberService, times(1)).signUp(request.email(), request.password(), request.nickname(), request.termsAgreements());
+        verify(memberService, times(1)).signUp(request.email(), request.password(),
+            request.nickname(), request.termsAgreements(), request.provider(),request.providerId());
     }
 
 }
