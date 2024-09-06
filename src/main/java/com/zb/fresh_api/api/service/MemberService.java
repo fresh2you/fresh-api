@@ -40,6 +40,9 @@ public class MemberService {
     }
 
     public void emailValidate(String email, Provider provider) {
+        if (email == null || email.isEmpty()) {
+            throw new CustomException(ResponseCode.PARAM_EMAIL_NOT_VALID);
+        }
         boolean existsByEmailAndProvider = memberJpaRepository.existsByEmailAndProvider(email,
             provider);
         if (existsByEmailAndProvider) {

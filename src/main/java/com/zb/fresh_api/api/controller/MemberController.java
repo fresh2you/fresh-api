@@ -51,10 +51,6 @@ public class MemberController {
     public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
         @RequestParam String email
     ) {
-        if (email == null || email.isEmpty()) {
-            throw new CustomException(ResponseCode.PARAM_NICKNAME_NOT_VALID);
-
-        }
         memberService.emailValidate(email, Provider.EMAIL);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
