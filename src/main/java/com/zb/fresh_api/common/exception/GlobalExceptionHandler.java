@@ -1,5 +1,6 @@
 package com.zb.fresh_api.common.exception;
 
+import com.zb.fresh_api.api.dto.KakaoOAuthResponse;
 import com.zb.fresh_api.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,5 +17,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("Custom Exception : {} ", e.getMessage());
         return ApiResponse.fail(e.getResponseCode());
     }
-
+    public static GlobalExceptionHandler<KakaoOAuthResponse> ofSuccess(KakaoOAuthResponse response, String 카카오_로그인_성공) {
+        return GlobalExceptionHandler.<KakaoOAuthResponse>builder().build();
+    }
 }
