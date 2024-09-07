@@ -7,3 +7,5 @@ public record KakaoOAuthRequest(
         @Schema(description = "인가 코드", example = "authorization_code") String code,
         @Schema(description = "상태 값", example = "state_value") String state
 ) {}
+
+
