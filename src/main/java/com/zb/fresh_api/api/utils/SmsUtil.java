@@ -41,11 +41,10 @@ public class SmsUtil {
     public String generateRandomString() {
         StringBuilder sb = new StringBuilder(SmsConstants.CODE_LENGTH);
         for (int i = 0; i < SmsConstants.CODE_LENGTH; i++) {
-            int rndCharAt = random.nextInt(SmsConstants.DATA_FOR_RANDOM_STRING.length());
-            char rndChar = SmsConstants.DATA_FOR_RANDOM_STRING.charAt(rndCharAt);
+            int rndCharAt = random.nextInt(SmsConstants.NUMBER.length());
+            char rndChar = SmsConstants.NUMBER.charAt(rndCharAt);
             sb.append(rndChar);
         }
-
         return sb.toString();
     }
 
