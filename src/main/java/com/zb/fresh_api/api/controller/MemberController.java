@@ -5,6 +5,7 @@ import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.api.dto.SignUpRequest;
 import com.zb.fresh_api.api.service.MemberService;
+import com.zb.fresh_api.domain.enums.member.Provider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -50,17 +51,19 @@ public class MemberController {
     public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
         @RequestParam String email
     ) {
-        if (email == null || email.isEmpty()) {
-            throw new CustomException(ResponseCode.PARAM_NICKNAME_NOT_VALID);
-
-        }
-        memberService.emailValidate(email);
+        memberService.emailValidate(email, Provider.EMAIL);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
+    
+    @Operation(
+        summary = "회원 가입",
+        description = "이메일회원가입, Oauth2회원가입에 사용되는 API입니다"
+    )
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid SignUpRequest request) {
-        memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements());
+        memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements()
+        ,request.provider(), request.providerId());
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 

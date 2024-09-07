@@ -68,7 +68,7 @@ class MemberServiceTest {
             any(Provider.class))).thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> memberService.emailValidate("test@test.com"))
+        assertThatThrownBy(() -> memberService.emailValidate("test@test.com", Provider.EMAIL))
             .isInstanceOf(CustomException.class)
             .hasMessage(ResponseCode.EMAIL_ALREADY_IN_USE.getMessage());
     }
@@ -106,7 +106,8 @@ class MemberServiceTest {
         );
 
         // when
-        memberService.signUp("test@test.com", "password", "gin", termsAgreementDtos);
+        memberService.signUp("test@test.com", "password", "gin", termsAgreementDtos,
+            Provider.EMAIL, "1");
 
         // then
         verify(memberJpaRepository, times(1)).save(any(Member.class));
@@ -133,7 +134,7 @@ class MemberServiceTest {
         when(termsJpaRepository.findById(anyLong())).thenReturn(Optional.of(terms));
         // then
         assertThatThrownBy(() -> memberService.signUp("test@test.com", "password", "gin",
-            requestTermsAgreementDtos))
+            requestTermsAgreementDtos, Provider.EMAIL, "1"))
             .isInstanceOf(CustomException.class)
             .hasMessage(ResponseCode.TERMS_MANDATORY_NOT_AGREED.getMessage());
     }

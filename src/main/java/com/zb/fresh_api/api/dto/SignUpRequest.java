@@ -1,6 +1,7 @@
 package com.zb.fresh_api.api.dto;
 
 import com.zb.fresh_api.api.validation.annotation.PasswordMatch;
+import com.zb.fresh_api.domain.enums.member.Provider;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,5 +22,10 @@ public record SignUpRequest (
     String nickname,
 
     @NotNull(message = "사용자 이용약관 동의은 필수입니다")
-    List<@Valid TermsAgreementDto> termsAgreements
+    List<@Valid TermsAgreementDto> termsAgreements,
+
+    @NotNull(message = "Provider는 필수입니다")
+    Provider provider,
+
+    String providerId
 ){}
