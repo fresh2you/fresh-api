@@ -61,7 +61,8 @@ public enum ResponseCode {
      */
     EXCEEDED_CERTIFICATION_ATTEMPS("1400", "30분 내에 인증 요청 횟수를 초과했습니다."),
     CERTIFICATION_NOT_FOUND("1401", "인증 유효시간을 초과했습니다"),
-    CERTIFICATION_CODE_NOT_CORRECT("1402", "인증 코드가 일치하지 않습니다")
+    CERTIFICATION_CODE_NOT_CORRECT("1402", "인증 코드가 일치하지 않습니다"),
+    NOT_ENOUGH_BALANCE("1403", "서버 관리자에게 문의하세요")
     ;
 
     private final String code;
