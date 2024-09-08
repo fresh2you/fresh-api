@@ -1,9 +1,6 @@
 package com.zb.fresh_api.api.utils;
 
 
-import static com.zb.fresh_api.common.constants.SmsConstants.random;
-
-import com.zb.fresh_api.common.constants.SmsConstants;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import jakarta.annotation.PostConstruct;
@@ -38,15 +35,6 @@ public class SmsUtil {
         this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, apiUrl);
     }
 
-    public String generateRandomString() {
-        StringBuilder sb = new StringBuilder(SmsConstants.CODE_LENGTH);
-        for (int i = 0; i < SmsConstants.CODE_LENGTH; i++) {
-            int rndCharAt = random.nextInt(SmsConstants.NUMBER.length());
-            char rndChar = SmsConstants.NUMBER.charAt(rndCharAt);
-            sb.append(rndChar);
-        }
-        return sb.toString();
-    }
 
     // 인증 문자 전송 메서드
     public void sendCertificationCode(String toNumber, String certificationCode) {
