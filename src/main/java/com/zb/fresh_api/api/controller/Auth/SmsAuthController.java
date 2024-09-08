@@ -5,6 +5,8 @@ import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +30,8 @@ public class SmsAuthController {
         description = "입력한 휴대전화로 인증번호를 전송합니다"
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<Void>> sendSms(@RequestParam String phoneNumber) {
+    public ResponseEntity<ApiResponse<Void>> sendSms(@Valid @Pattern(regexp="(^$|[0-9]{10})")
+    @RequestParam String phoneNumber) {
         smsService.sendSms(phoneNumber);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
@@ -38,7 +41,8 @@ public class SmsAuthController {
         description = "휴대전화로 온 인증코드를 통해 인증합니다"
     )
     @GetMapping("/certificate")
-    public ResponseEntity<ApiResponse<Void>> certificateSms(@RequestParam String phoneNumber,
+    public ResponseEntity<ApiResponse<Void>> certificateSms(@Valid @Pattern(regexp="(^$|[0-9]{10})")
+    @RequestParam String phoneNumber,
         @RequestParam String certificationCode) {
         smsService.certificateCode(phoneNumber, certificationCode);
         return ApiResponse.success(ResponseCode.SUCCESS);
