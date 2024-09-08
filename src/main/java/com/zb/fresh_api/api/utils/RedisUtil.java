@@ -1,7 +1,7 @@
 package com.zb.fresh_api.api.utils;
 
 import java.time.Duration;
-import java.util.Objects;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -14,8 +14,8 @@ public class RedisUtil {
 
     private static final String PREFIX = "sms:";
     private static final String ATTEMPT_PREFIX = "attempt:";
-    private static final int CODE_EXPIRATION_TIME = 5 * 60;
-    private static final int ATTEMPT_EXPIRATION_TIME = 30 * 60;
+    private static final int CODE_EXPIRATION_TIME = 3 * 60;
+    private static final int ATTEMPT_EXPIRATION_TIME = 24 * 60 * 60;
     private static final int MAX_ATTEMPTS = 5;
 
     // 문자 인증의 인증 코드 저장 메서드
@@ -35,21 +35,41 @@ public class RedisUtil {
         redisTemplate.delete(PREFIX + ATTEMPT_PREFIX + phone);
     }
 
+
     // 인증 횟수 초과 확인 메서드
     public boolean hasExceededAttemptLimit(String phone) {
         String key = PREFIX + ATTEMPT_PREFIX + phone;
-        int attempts = redisTemplate.opsForValue().get(key) != null ? Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(key))) : 0;
-        return attempts >= MAX_ATTEMPTS;
+        String attemptsData = redisTemplate.opsForValue().get(key);
+        if (attemptsData != null) {
+            String[] parts = attemptsData.split(":");
+            int attempts = Integer.parseInt(parts[0]);
+            LocalDate date = LocalDate.parse(parts[1]);
+            if (date.isEqual(LocalDate.now())) {
+                return attempts >= MAX_ATTEMPTS;
+            }
+        }
+        return false;
     }
 
     // 문자 인증 횟수 기록 메서드
     public void recordAttempt(String phone) {
         String key = PREFIX + ATTEMPT_PREFIX + phone;
-        int attempts = redisTemplate.opsForValue().get(key) != null ? Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(key))) : 0;
-        attempts++;
+        String attemptsData = redisTemplate.opsForValue().get(key);
+        int attempts = 0;
+        LocalDate date = LocalDate.now();
+        if (attemptsData != null) {
+            String[] parts = attemptsData.split(":");
+            attempts = Integer.parseInt(parts[0]);
+            LocalDate storedDate = LocalDate.parse(parts[1]);
+            if (storedDate.isEqual(date)) {
+                attempts++;
+            } else {
+                attempts = 1;
+            }
+        } else {
+            attempts = 1;
+        }
         redisTemplate.opsForValue()
-            .set(key, String.valueOf(attempts), Duration.ofSeconds(ATTEMPT_EXPIRATION_TIME));
+            .set(key, attempts + ":" + date, Duration.ofSeconds(ATTEMPT_EXPIRATION_TIME));
     }
 }
