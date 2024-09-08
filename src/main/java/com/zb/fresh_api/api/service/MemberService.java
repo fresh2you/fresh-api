@@ -9,9 +9,9 @@ import com.zb.fresh_api.domain.entity.terms.Terms;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
-import com.zb.fresh_api.domain.repository.jpa.MemberTermsJpaRepository;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
+import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
 import com.zb.fresh_api.domain.repository.writer.MemberWriter;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +29,7 @@ public class MemberService {
 
     private final MemberReader memberReader;
     private final MemberWriter memberWriter;
-    private final MemberTermsJpaRepository memberTermsJpaRepository;
+    private final MemberTermsWriter memberTermsWriter;
     private final TermsReader termsReader;
     private final PasswordEncoder passwordEncoder;
 
@@ -111,7 +111,7 @@ public class MemberService {
 
             MemberTerms memberTerms = MemberTerms.create(member, terms,
                 termsAgreementDto.isAgreed(), LocalDateTime.now());
-            memberTermsJpaRepository.save(memberTerms);
+            memberTermsWriter.store(memberTerms);
         });
     }
 
