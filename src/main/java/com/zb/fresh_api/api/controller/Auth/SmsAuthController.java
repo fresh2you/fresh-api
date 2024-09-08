@@ -1,4 +1,4 @@
-package com.zb.fresh_api.api.controller;
+package com.zb.fresh_api.api.controller.Auth;
 
 import com.zb.fresh_api.api.service.SmsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
     description = "휴대전화 인증에 관련된 API"
 )
 @RestController
-@RequestMapping("/v1/api/sms")
+@RequestMapping("/v1/api/auth/sms")
 @RequiredArgsConstructor
-public class SmsController {
+public class SmsAuthController {
 
     private final SmsService smsService;
 
