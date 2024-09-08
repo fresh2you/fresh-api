@@ -9,9 +9,10 @@ import com.zb.fresh_api.domain.entity.terms.Terms;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
-import com.zb.fresh_api.domain.repository.jpa.MemberJpaRepository;
 import com.zb.fresh_api.domain.repository.jpa.MemberTermsJpaRepository;
-import com.zb.fresh_api.domain.repository.jpa.TermsJpaRepository;
+import com.zb.fresh_api.domain.repository.reader.MemberReader;
+import com.zb.fresh_api.domain.repository.reader.TermsReader;
+import com.zb.fresh_api.domain.repository.writer.MemberWriter;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -26,13 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberService {
 
-    private final MemberJpaRepository memberJpaRepository;
+    private final MemberReader memberReader;
+    private final MemberWriter memberWriter;
     private final MemberTermsJpaRepository memberTermsJpaRepository;
-    private final TermsJpaRepository termsJpaRepository;
+    private final TermsReader termsReader;
     private final PasswordEncoder passwordEncoder;
 
     public void nickNameValidate(String nickname) {
-        boolean existsByNicknameIgnoreCase = memberJpaRepository.existsByNicknameIgnoreCase(
+        boolean existsByNicknameIgnoreCase = memberReader.existActiveNickname(
             nickname);
         if (existsByNicknameIgnoreCase) {
             throw new CustomException(ResponseCode.NICKNAME_ALREADY_IN_USE);
@@ -43,7 +45,7 @@ public class MemberService {
         if (email == null || email.isEmpty()) {
             throw new CustomException(ResponseCode.PARAM_EMAIL_NOT_VALID);
         }
-        boolean existsByEmailAndProvider = memberJpaRepository.existsByEmailAndProvider(email,
+        boolean existsByEmailAndProvider = memberReader.existsByEmailAndProvider(email,
             provider);
         if (existsByEmailAndProvider) {
             throw new CustomException(ResponseCode.EMAIL_ALREADY_IN_USE);
@@ -64,7 +66,7 @@ public class MemberService {
         this.nickNameValidate(nickName);
         this.emailValidate(email, provider);
         validateMandatoryTermsIncluded(termsAgreementDtos);
-        Member member = memberJpaRepository.save(
+        Member member = memberWriter.store(
             Member.builder()
                 .nickname(nickName)
                 .email(email)
@@ -86,7 +88,7 @@ public class MemberService {
             .map(TermsAgreementDto::termsId)
             .collect(Collectors.toSet());
 
-        List<Terms> mandatoryTerms = termsJpaRepository.findAllByIsRequired(true);
+        List<Terms> mandatoryTerms = termsReader.findAllByIsRequired(true);
 
         for (Terms terms : mandatoryTerms) {
             if (!agreedTermsIds.contains(terms.getId())) {
@@ -114,7 +116,7 @@ public class MemberService {
     }
 
     private Terms findTermsById(Long termsId) {
-        return termsJpaRepository.findById(termsId).orElseThrow(
+        return termsReader.findById(termsId).orElseThrow(
             () -> new CustomException(ResponseCode.TERMS_NOT_FOUND)
         );
     }
