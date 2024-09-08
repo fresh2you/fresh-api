@@ -17,9 +17,10 @@ import com.zb.fresh_api.domain.entity.terms.Terms;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
-import com.zb.fresh_api.domain.repository.jpa.MemberJpaRepository;
-import com.zb.fresh_api.domain.repository.jpa.MemberTermsJpaRepository;
-import com.zb.fresh_api.domain.repository.jpa.TermsJpaRepository;
+import com.zb.fresh_api.domain.repository.reader.MemberReader;
+import com.zb.fresh_api.domain.repository.reader.TermsReader;
+import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
+import com.zb.fresh_api.domain.repository.writer.MemberWriter;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -34,13 +35,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class MemberServiceTest {
 
     @Mock
-    private MemberJpaRepository memberJpaRepository;
+    private MemberReader memberReader;
 
     @Mock
-    private MemberTermsJpaRepository memberTermsJpaRepository;
+    private MemberWriter memberWriter;
 
     @Mock
-    private TermsJpaRepository termsJpaRepository;
+    private MemberTermsWriter memberTermsWriter;
+
+    @Mock
+    private TermsReader termsReader;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -52,7 +56,7 @@ class MemberServiceTest {
     @DisplayName("닉네임 중복 검사 실패")
     void nickNameValidate_duplicateExists() {
         // given
-        when(memberJpaRepository.existsByNicknameIgnoreCase(anyString())).thenReturn(true);
+        when(memberReader.existActiveNickname(anyString())).thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> memberService.nickNameValidate("gin"))
@@ -64,7 +68,7 @@ class MemberServiceTest {
     @DisplayName("이메일 중복 검사 실패")
     void emailValidate_duplicateExists() {
         // given
-        when(memberJpaRepository.existsByEmailAndProvider(anyString(),
+        when(memberReader.existsByEmailAndProvider(anyString(),
             any(Provider.class))).thenReturn(true);
 
         // when & then
@@ -84,16 +88,16 @@ class MemberServiceTest {
         Terms terms1 = Terms.builder().id(1L).title("필수 약관1").isRequired(true).build();
         Terms terms2 = Terms.builder().id(2L).title("필수 약관2").isRequired(true).build();
 
-        when(memberJpaRepository.existsByNicknameIgnoreCase(anyString())).thenReturn(false);
-        when(memberJpaRepository.existsByEmailAndProvider(anyString(),
+        when(memberReader.existActiveNickname(anyString())).thenReturn(false);
+        when(memberReader.existsByEmailAndProvider(anyString(),
             any(Provider.class))).thenReturn(false);
-        when(termsJpaRepository.findAllByIsRequired(true)).thenReturn(List.of(
+        when(termsReader.findAllByIsRequired(true)).thenReturn(List.of(
             terms1, terms2
         ));
-        when(termsJpaRepository.findById(anyLong())).thenReturn(Optional.of(terms1));
+        when(termsReader.findById(anyLong())).thenReturn(Optional.of(terms1));
 
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(memberJpaRepository.save(any(Member.class))).thenReturn(
+        when(memberWriter.store(any(Member.class))).thenReturn(
             Member.builder()
                 .id(1L)
                 .nickname("gin")
@@ -110,8 +114,8 @@ class MemberServiceTest {
             Provider.EMAIL, "1");
 
         // then
-        verify(memberJpaRepository, times(1)).save(any(Member.class));
-        verify(memberTermsJpaRepository, times(2)).save(any(MemberTerms.class));
+        verify(memberWriter, times(1)).store(any(Member.class));
+        verify(memberTermsWriter, times(2)).store(any(MemberTerms.class));
     }
 
     @Test
@@ -127,11 +131,11 @@ class MemberServiceTest {
             terms
         );
 
-        when(memberJpaRepository.existsByNicknameIgnoreCase(anyString())).thenReturn(false);
-        when(memberJpaRepository.existsByEmailAndProvider(anyString(),
+        when(memberReader.existActiveNickname(anyString())).thenReturn(false);
+        when(memberReader.existsByEmailAndProvider(anyString(),
             any(Provider.class))).thenReturn(false);
-        when(termsJpaRepository.findAllByIsRequired(true)).thenReturn(termsList);
-        when(termsJpaRepository.findById(anyLong())).thenReturn(Optional.of(terms));
+        when(termsReader.findAllByIsRequired(true)).thenReturn(termsList);
+        when(termsReader.findById(anyLong())).thenReturn(Optional.of(terms));
         // then
         assertThatThrownBy(() -> memberService.signUp("test@test.com", "password", "gin",
             requestTermsAgreementDtos, Provider.EMAIL, "1"))
