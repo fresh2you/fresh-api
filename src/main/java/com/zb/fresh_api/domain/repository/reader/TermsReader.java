@@ -19,7 +19,13 @@ public class TermsReader {
         return termsQueryRepository.findAll();
     }
 
+    public List<Terms> findAllByIsRequired(boolean isRequired){
+        return termsJpaRepository.findAllByIsRequired(isRequired);
+    }
+
     public Optional<Terms> findById(Long id){
         return  termsJpaRepository.findById(id);
     }
+
+
 }
