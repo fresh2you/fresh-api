@@ -1,5 +1,7 @@
 package com.zb.fresh_api.api.service;
 
+import com.zb.fresh_api.api.enums.CertificationType;
+import com.zb.fresh_api.api.utils.CertificationCodeUtil;
 import com.zb.fresh_api.api.utils.RedisUtil;
 import com.zb.fresh_api.api.utils.SmsUtil;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -21,13 +23,13 @@ public class SmsService {
      * 4. 인증 문자 전송 횟수 기록
      */
     public void sendSms(String toNumber) {
-        if (redisUtil.hasExceededAttemptLimit(toNumber)) {
+        if (redisUtil.hasExceededAttemptLimit(toNumber, CertificationType.PHONE)) {
             throw new CustomException(ResponseCode.EXCEEDED_CERTIFICATION_ATTEMPS);
         }
-        String certificationCode = smsUtil.generateRandomString();
+        String certificationCode = CertificationCodeUtil.generateRandomString();
         smsUtil.sendCertificationCode(toNumber, certificationCode);
-        redisUtil.saveCertificationCode(toNumber, certificationCode);
-        redisUtil.recordAttempt(toNumber);
+        redisUtil.saveCertificationCode(toNumber, certificationCode, CertificationType.PHONE);
+        redisUtil.recordAttempt(toNumber,CertificationType.PHONE);
     }
 
     /**
@@ -37,7 +39,7 @@ public class SmsService {
      * 3. redis에서 휴대전화 관련 데이터 삭제
      */
     public void certificateCode(String phone, String certificationCode) {
-        String smsCertification = redisUtil.findSmsCertification(phone);
+        String smsCertification = redisUtil.findSmsCertification(phone, CertificationType.PHONE);
         if (smsCertification == null) {
             throw new CustomException(ResponseCode.CERTIFICATION_NOT_FOUND);
         }
@@ -47,6 +49,6 @@ public class SmsService {
         } else {
             throw new CustomException(ResponseCode.CERTIFICATION_CODE_NOT_CORRECT);
         }
-        redisUtil.removeSmsCertification(phone);
+        redisUtil.removeSmsCertification(phone,CertificationType.PHONE);
     }
 }
