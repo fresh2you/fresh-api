@@ -19,4 +19,8 @@ public class SecurityConstants {
             "/health",
     };
 
+    public static final String[] PERMIT_ALL_PATH = {
+            "/v1/api/members/signup", "/v1/api/members/login/**"
+    };
+
 }
