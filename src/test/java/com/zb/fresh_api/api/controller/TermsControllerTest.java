@@ -35,7 +35,7 @@ class TermsControllerTest {
     @Test
     @DisplayName("약관 조회 성공")
     void getAllTerms_success() throws Exception {
-        mockMvc.perform(get("/api/terms"))
+        mockMvc.perform(get("/v1/api/terms"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(ResponseCode.SUCCESS.getCode()));
         verify(termsService, times(1)).getTerms();
@@ -45,7 +45,7 @@ class TermsControllerTest {
     @Test
     @DisplayName("약관 상세 조회 성공")
     void getTermsById_success() throws Exception {
-        mockMvc.perform(get("/api/terms/{id}", 1))
+        mockMvc.perform(get("/v1/api/terms/{id}", 1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(ResponseCode.SUCCESS.getCode()));
         verify(termsService, times(1)).getTerm(1L);
@@ -58,7 +58,7 @@ class TermsControllerTest {
         given(termsService.getTerm(anyLong())).willThrow(
             new CustomException(ResponseCode.TERMS_NOT_FOUND));
 
-        mockMvc.perform(get("/api/terms/{id}", 5))
+        mockMvc.perform(get("/v1/api/terms/{id}", 5))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value(ResponseCode.TERMS_NOT_FOUND.getCode()));
         verify(termsService, times(1)).getTerm(5L);
