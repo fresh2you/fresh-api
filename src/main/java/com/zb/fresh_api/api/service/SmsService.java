@@ -43,7 +43,7 @@ public class SmsService {
         }
         if (certificationCode.equals(smsCertification)) {
             // TODO 문자 인증 성공 시 로직 구현
-             System.out.println("문자 인증 성공~");
+//             System.out.println("문자 인증 성공~");
         } else {
             throw new CustomException(ResponseCode.CERTIFICATION_CODE_NOT_CORRECT);
         }

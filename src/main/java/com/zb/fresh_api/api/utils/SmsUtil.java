@@ -1,8 +1,12 @@
 package com.zb.fresh_api.api.utils;
 
 
+import static com.zb.fresh_api.common.constants.SmsConstants.random;
+
+import com.zb.fresh_api.common.constants.SmsConstants;
+import com.zb.fresh_api.common.exception.CustomException;
+import com.zb.fresh_api.common.exception.ResponseCode;
 import jakarta.annotation.PostConstruct;
-import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
@@ -29,26 +33,18 @@ public class SmsUtil {
 
     DefaultMessageService messageService;
 
-    private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
-    private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
-    private static final String NUMBER = "0123456789";
-    private static final String DATA_FOR_RANDOM_STRING = CHAR_LOWER + CHAR_UPPER + NUMBER;
-    private static final SecureRandom random = new SecureRandom();
-    private static final int CODE_LENGTH = 6;
-
     @PostConstruct
     private void init() {
         this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, apiUrl);
     }
 
     public String generateRandomString() {
-        StringBuilder sb = new StringBuilder(CODE_LENGTH);
-        for (int i = 0; i < CODE_LENGTH; i++) {
-            int rndCharAt = random.nextInt(DATA_FOR_RANDOM_STRING.length());
-            char rndChar = DATA_FOR_RANDOM_STRING.charAt(rndCharAt);
+        StringBuilder sb = new StringBuilder(SmsConstants.CODE_LENGTH);
+        for (int i = 0; i < SmsConstants.CODE_LENGTH; i++) {
+            int rndCharAt = random.nextInt(SmsConstants.NUMBER.length());
+            char rndChar = SmsConstants.NUMBER.charAt(rndCharAt);
             sb.append(rndChar);
         }
-
         return sb.toString();
     }
 
@@ -58,7 +54,11 @@ public class SmsUtil {
         message.setFrom(fromNumber);
         message.setTo(toNumber);
         message.setText("[Fresh 2 you] \n" + "본인확인 인증번호는 " + certificationCode + "입니다.");
-        messageService.sendOne(new SingleMessageSendingRequest(message));
+        try {
+            messageService.sendOne(new SingleMessageSendingRequest(message));
+        }catch (Exception e) {
+            throw new CustomException(ResponseCode.NOT_ENOUGH_BALANCE);
+        }
     }
 
 }
