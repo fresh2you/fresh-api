@@ -1,7 +1,6 @@
 package com.zb.fresh_api.domain.entity.point;
 
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
-import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.enums.point.PointTransactionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,8 +36,8 @@ public class PointHistory extends BaseTimeEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '회원 고유 번호'")
-    private Member member;
+    @JoinColumn(name = "point_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '회원 포인트 번호'")
+    private Point point;
 
     //    Todo 오더 추가 후 작업
 //    @ManyToOne(fetch = FetchType.LAZY)
@@ -61,4 +60,15 @@ public class PointHistory extends BaseTimeEntity {
     @Column(name = "description", nullable = true, columnDefinition = "varchar(255) comment '거래 설명'")
     private String description;
 
+    public static PointHistory create(Point point, PointTransactionType transactionType, BigDecimal amount,
+        BigDecimal balanceBefore, BigDecimal balanceAfter, String description){
+        return PointHistory.builder()
+            .point(point)
+            .pointTransactionType(transactionType)
+            .amount(amount)
+            .balanceBefore(balanceBefore)
+            .balanceAfter(balanceAfter)
+            .description(description)
+            .build();
+    }
 }

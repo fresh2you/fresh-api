@@ -61,4 +61,16 @@ public class Member extends BaseTimeEntity {
     @Column(name = "deleted_at", columnDefinition = "datetime comment '탈퇴 일시'")
     private LocalDateTime deletedAt;
 
+    public static Member create(String nickname, String email, String password,
+        Provider provider, String providerId, MemberRole memberRole, MemberStatus memberStatus){
+        return Member.builder()
+            .nickname(nickname)
+            .email(email)
+            .password(password)
+            .provider(provider)
+            .providerId(providerId)
+            .role(memberRole)
+            .status(memberStatus)
+            .build();
+    }
 }

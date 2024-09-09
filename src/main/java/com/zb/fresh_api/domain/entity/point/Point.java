@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
     name = "point"
 )
 public class Point extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", columnDefinition = "BIGINT UNSIGNED comment '고유 번호'")
@@ -39,11 +40,18 @@ public class Point extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '회원 고유 번호'")
     private Member member;
 
-    @Column(name = "balance",nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) comment '잔액'")
+    @Column(name = "balance", nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) comment '잔액'")
     private BigDecimal balance;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "point_status", nullable = false, columnDefinition = "varchar(20) comment '상태'")
     private PointStatus pointStatus;
 
+    public static Point create(Member member, BigDecimal balance, PointStatus pointStatus) {
+        return Point.builder()
+            .member(member)
+            .balance(balance)
+            .pointStatus(pointStatus)
+            .build();
+    }
 }
