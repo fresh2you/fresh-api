@@ -37,11 +37,11 @@ public class SmsUtil {
 
 
     // 인증 문자 전송 메서드
-    public void sendCertificationCode(String toNumber, String certificationCode) {
+    public void sendVerificationCode(String toNumber, String verificationCode) {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(toNumber);
-        message.setText("[Fresh 2 you] \n" + "본인확인 인증번호는 " + certificationCode + "입니다.");
+        message.setText("[Fresh 2 you] \n" + "본인확인 인증번호는 " + verificationCode + "입니다.");
         try {
             messageService.sendOne(new SingleMessageSendingRequest(message));
         }catch (Exception e) {

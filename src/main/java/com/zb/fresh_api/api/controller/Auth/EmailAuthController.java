@@ -30,7 +30,7 @@ public class EmailAuthController {
         description = "입력한 이메일로 인증번호를 전송합니다"
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<Void>> sendSms(@Valid @Email @RequestParam String email) {
+    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@Valid @Email @RequestParam String email) {
         emailService.sendMail(email);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
@@ -39,10 +39,10 @@ public class EmailAuthController {
         summary = "인증 코드 인증",
         description = "이메일로 인증코드를 통해 인증합니다"
     )
-    @GetMapping("/certificate")
-    public ResponseEntity<ApiResponse<Void>> certificateSms(@Valid @Email @RequestParam String email,
-        @RequestParam String certificationCode) {
-        emailService.certificateCode(email, certificationCode);
+    @GetMapping("/verify")
+    public ResponseEntity<ApiResponse<Void>> verifyEmailCode(@Valid @Email @RequestParam String email,
+        @RequestParam String verificationCode) {
+        emailService.verifyCode(email, verificationCode);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 }

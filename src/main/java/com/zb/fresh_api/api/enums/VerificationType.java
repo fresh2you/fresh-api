@@ -3,12 +3,12 @@ package com.zb.fresh_api.api.enums;
 import lombok.Getter;
 
 @Getter
-public enum CertificationType {
+public enum VerificationType {
     PHONE("phone:"),
     EMAIL("email");
 
     private final String prefix;
-    CertificationType(String prefix) {
+    VerificationType(String prefix) {
         this.prefix = prefix;
     }
 }

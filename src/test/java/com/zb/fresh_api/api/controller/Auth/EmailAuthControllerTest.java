@@ -36,7 +36,7 @@ class EmailAuthControllerTest {
 
     @DisplayName("이메일 전송 API 성공")
     @Test
-    public void testSendSms_success() throws Exception {
+    public void testSendVerificationCode_success() throws Exception {
         String email = "test@example.com";
 
         doNothing().when(emailService).sendMail(email);
@@ -51,18 +51,18 @@ class EmailAuthControllerTest {
 
     @DisplayName("이메일 인증 코드 전송 성공")
     @Test
-    public void testCertificateSms_success() throws Exception {
+    public void testVerificationEmailCode_success() throws Exception {
         String email = "test@example.com";
-        String certificationCode = "123456";
+        String veritificationCode = "123456";
 
-        doNothing().when(emailService).certificateCode(email, certificationCode);
+        doNothing().when(emailService).verifyCode(email, veritificationCode);
 
-        mockMvc.perform(get("/v1/api/auth/email/certificate")
+        mockMvc.perform(get("/v1/api/auth/email/verify")
                 .param("email", email)
-                .param("certificationCode", certificationCode)
+                .param("verificationCode", veritificationCode)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(emailService).certificateCode(email, certificationCode);
+        verify(emailService).verifyCode(email, veritificationCode);
     }
 }

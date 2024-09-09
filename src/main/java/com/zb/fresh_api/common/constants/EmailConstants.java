@@ -1,7 +1,7 @@
 package com.zb.fresh_api.common.constants;
 
 public class EmailConstants {
-    public static String createCertificationCodeHtml(String certificationCode){
+    public static String createVerificationCodeHtml(String certificationCode){
         return "<!DOCTYPE html>" +
             "<html lang=\"ko\">" +
             "<head>" +

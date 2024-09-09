@@ -16,7 +16,7 @@ public class EmailUtil {
     private final JavaMailSender javaMailSender;
     private static final String senderEmail = "test@gmail.com";
 
-    public MimeMessage CreateMail(String mail, String certificationCode) {
+    public MimeMessage CreateMail(String mail, String verificationCode) {
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
@@ -24,7 +24,7 @@ public class EmailUtil {
             message.setRecipients(MimeMessage.RecipientType.TO, mail);
             message.setSubject("Fresh2You 이메일 인증");
 
-            String body = EmailConstants.createCertificationCodeHtml(certificationCode);
+            String body = EmailConstants.createVerificationCodeHtml(verificationCode);
             message.setText(body, "UTF-8", "html");
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -34,8 +34,8 @@ public class EmailUtil {
     }
 
     // 인증 전송 메서드
-    public void sendCertificationCode(String mail, String certificatinoCode) {
-        MimeMessage message = CreateMail(mail, certificatinoCode);
+    public void sendVerificationCode(String mail, String verificatinoCode) {
+        MimeMessage message = CreateMail(mail, verificatinoCode);
         javaMailSender.send(message);
     }
 }

@@ -7,8 +7,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.zb.fresh_api.api.enums.CertificationType;
-import com.zb.fresh_api.api.utils.CertificationCodeUtil;
+import com.zb.fresh_api.api.enums.VerificationType;
+import com.zb.fresh_api.api.utils.VerificationCodeUtil;
 import com.zb.fresh_api.api.utils.EmailUtil;
 import com.zb.fresh_api.api.utils.RedisUtil;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -35,10 +35,10 @@ class EmailServiceTest {
     @DisplayName("메일 전송 실패_횟수 초과")
     public void sendMail_fail_exceededAttemptLimit() {
         String email = "test@example.com";
-        when(redisUtil.hasExceededAttemptLimit(email, CertificationType.EMAIL)).thenReturn(true);
+        when(redisUtil.hasExceededAttemptLimit(email, VerificationType.EMAIL)).thenReturn(true);
 
         assertThrows(CustomException.class, () -> emailService.sendMail(email));
-        verify(redisUtil, times(1)).hasExceededAttemptLimit(email, CertificationType.EMAIL);
+        verify(redisUtil, times(1)).hasExceededAttemptLimit(email, VerificationType.EMAIL);
     }
 
     @Test
@@ -47,53 +47,54 @@ class EmailServiceTest {
         String email = "test@example.com";
         String certificationCode = "132446";
 
-        when(redisUtil.hasExceededAttemptLimit(email, CertificationType.EMAIL)).thenReturn(false);
-        doNothing().when(emailUtil).sendCertificationCode(email, certificationCode);
-        doNothing().when(redisUtil).saveCertificationCode(email, certificationCode, CertificationType.EMAIL);
-        doNothing().when(redisUtil).recordAttempt(email, CertificationType.EMAIL);
+        when(redisUtil.hasExceededAttemptLimit(email, VerificationType.EMAIL)).thenReturn(false);
+        doNothing().when(emailUtil).sendVerificationCode(email, certificationCode);
+        doNothing().when(redisUtil).saveVerificationCode(email, certificationCode, VerificationType.EMAIL);
+        doNothing().when(redisUtil).recordAttempt(email, VerificationType.EMAIL);
 
-        try (MockedStatic<CertificationCodeUtil> certificationCodeUtilMockedStatic = mockStatic(CertificationCodeUtil.class)) {
-            certificationCodeUtilMockedStatic.when(CertificationCodeUtil::generateRandomString).thenReturn(certificationCode);
+        try (MockedStatic<VerificationCodeUtil> certificationCodeUtilMockedStatic = mockStatic(
+            VerificationCodeUtil.class)) {
+            certificationCodeUtilMockedStatic.when(VerificationCodeUtil::generateRandomString).thenReturn(certificationCode);
 
             emailService.sendMail(email);
 
-            verify(redisUtil, times(1)).hasExceededAttemptLimit(email, CertificationType.EMAIL);
-            verify(emailUtil, times(1)).sendCertificationCode(email, certificationCode);
-            verify(redisUtil, times(1)).saveCertificationCode(email, certificationCode, CertificationType.EMAIL);
-            verify(redisUtil, times(1)).recordAttempt(email, CertificationType.EMAIL);
+            verify(redisUtil, times(1)).hasExceededAttemptLimit(email, VerificationType.EMAIL);
+            verify(emailUtil, times(1)).sendVerificationCode(email, certificationCode);
+            verify(redisUtil, times(1)).saveVerificationCode(email, certificationCode, VerificationType.EMAIL);
+            verify(redisUtil, times(1)).recordAttempt(email, VerificationType.EMAIL);
         }
     }
     @Test
     @DisplayName("이메일 인증 실패_인증이 존재하지 않거나 인증 유효시간을 초과")
-    public void certificateCode_fail_notFound() {
+    public void verifyCode_fail_notFound() {
         String email = "test@example.com";
         String certificationCode = "123456";
-        when(redisUtil.findSmsCertification(email, CertificationType.EMAIL)).thenReturn(null);
-        assertThrows(CustomException.class, () -> emailService.certificateCode(email, certificationCode));
-        verify(redisUtil, times(1)).findSmsCertification(email, CertificationType.EMAIL);
+        when(redisUtil.findSmsVerification(email, VerificationType.EMAIL)).thenReturn(null);
+        assertThrows(CustomException.class, () -> emailService.verifyCode(email, certificationCode));
+        verify(redisUtil, times(1)).findSmsVerification(email, VerificationType.EMAIL);
     }
 
     @Test
     @DisplayName("인증 코드가 일치하지 않습니다")
-    public void certificateCode_fail_notCorrect() {
+    public void verifyCode_fail_notCorrect() {
         String email = "test@example.com";
         String certificationCode = "123456";
-        when(redisUtil.findSmsCertification(email, CertificationType.EMAIL)).thenReturn("654321");
-        assertThrows(CustomException.class, () -> emailService.certificateCode(email, certificationCode));
-        verify(redisUtil, times(1)).findSmsCertification(email, CertificationType.EMAIL);
+        when(redisUtil.findSmsVerification(email, VerificationType.EMAIL)).thenReturn("654321");
+        assertThrows(CustomException.class, () -> emailService.verifyCode(email, certificationCode));
+        verify(redisUtil, times(1)).findSmsVerification(email, VerificationType.EMAIL);
     }
 
     @Test
     @DisplayName("인증 코드 인증 성공")
-    public void certificateCode_success() {
+    public void verifyCode_success() {
         String email = "test@example.com";
         String certificationCode = "123456";
-        when(redisUtil.findSmsCertification(email, CertificationType.EMAIL)).thenReturn(certificationCode);
-        doNothing().when(redisUtil).removeSmsCertification(email, CertificationType.EMAIL);
+        when(redisUtil.findSmsVerification(email, VerificationType.EMAIL)).thenReturn(certificationCode);
+        doNothing().when(redisUtil).removeSmsVerification(email, VerificationType.EMAIL);
 
-        emailService.certificateCode(email, certificationCode);
+        emailService.verifyCode(email, certificationCode);
 
-        verify(redisUtil, times(1)).findSmsCertification(email, CertificationType.EMAIL);
-        verify(redisUtil, times(1)).removeSmsCertification(email, CertificationType.EMAIL);
+        verify(redisUtil, times(1)).findSmsVerification(email, VerificationType.EMAIL);
+        verify(redisUtil, times(1)).removeSmsVerification(email, VerificationType.EMAIL);
     }
 }

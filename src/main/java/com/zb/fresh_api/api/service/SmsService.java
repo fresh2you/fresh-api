@@ -1,7 +1,7 @@
 package com.zb.fresh_api.api.service;
 
-import com.zb.fresh_api.api.enums.CertificationType;
-import com.zb.fresh_api.api.utils.CertificationCodeUtil;
+import com.zb.fresh_api.api.enums.VerificationType;
+import com.zb.fresh_api.api.utils.VerificationCodeUtil;
 import com.zb.fresh_api.api.utils.RedisUtil;
 import com.zb.fresh_api.api.utils.SmsUtil;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -23,13 +23,13 @@ public class SmsService {
      * 4. 인증 문자 전송 횟수 기록
      */
     public void sendSms(String toNumber) {
-        if (redisUtil.hasExceededAttemptLimit(toNumber, CertificationType.PHONE)) {
-            throw new CustomException(ResponseCode.EXCEEDED_CERTIFICATION_ATTEMPS);
+        if (redisUtil.hasExceededAttemptLimit(toNumber, VerificationType.PHONE)) {
+            throw new CustomException(ResponseCode.EXCEEDED_VERIFICATION_ATTEMPS);
         }
-        String certificationCode = CertificationCodeUtil.generateRandomString();
-        smsUtil.sendCertificationCode(toNumber, certificationCode);
-        redisUtil.saveCertificationCode(toNumber, certificationCode, CertificationType.PHONE);
-        redisUtil.recordAttempt(toNumber,CertificationType.PHONE);
+        String verificationCode = VerificationCodeUtil.generateRandomString();
+        smsUtil.sendVerificationCode(toNumber, verificationCode);
+        redisUtil.saveVerificationCode(toNumber, verificationCode, VerificationType.PHONE);
+        redisUtil.recordAttempt(toNumber, VerificationType.PHONE);
     }
 
     /**
@@ -38,17 +38,17 @@ public class SmsService {
      * 2. 인증 코드가 일치하면 성공 로직 구현(미정) 일치하지 않으면 에러 발생
      * 3. redis에서 휴대전화 관련 데이터 삭제
      */
-    public void certificateCode(String phone, String certificationCode) {
-        String smsCertification = redisUtil.findSmsCertification(phone, CertificationType.PHONE);
-        if (smsCertification == null) {
-            throw new CustomException(ResponseCode.CERTIFICATION_NOT_FOUND);
+    public void verifyCode(String phone, String verificationCode) {
+        String findVerification = redisUtil.findSmsVerification(phone, VerificationType.PHONE);
+        if (findVerification == null) {
+            throw new CustomException(ResponseCode.VERIFICATION_NOT_FOUND);
         }
-        if (certificationCode.equals(smsCertification)) {
+        if (verificationCode.equals(findVerification)) {
             // TODO 문자 인증 성공 시 로직 구현
 //             System.out.println("문자 인증 성공~");
         } else {
-            throw new CustomException(ResponseCode.CERTIFICATION_CODE_NOT_CORRECT);
+            throw new CustomException(ResponseCode.VERIFICATION_CODE_NOT_CORRECT);
         }
-        redisUtil.removeSmsCertification(phone,CertificationType.PHONE);
+        redisUtil.removeSmsVerification(phone, VerificationType.PHONE);
     }
 }

@@ -30,7 +30,7 @@ public class SmsAuthController {
         description = "입력한 휴대전화로 인증번호를 전송합니다"
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<Void>> sendSms(@Valid @Pattern(regexp="(^$|[0-9]{10})")
+    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@Valid @Pattern(regexp="(^$|[0-9]{10})")
     @RequestParam String phoneNumber) {
         smsService.sendSms(phoneNumber);
         return ApiResponse.success(ResponseCode.SUCCESS);
@@ -40,11 +40,11 @@ public class SmsAuthController {
         summary = "인증 코드 인증",
         description = "휴대전화로 온 인증코드를 통해 인증합니다"
     )
-    @GetMapping("/certificate")
-    public ResponseEntity<ApiResponse<Void>> certificateSms(@Valid @Pattern(regexp="(^$|[0-9]{10})")
+    @GetMapping("/verify")
+    public ResponseEntity<ApiResponse<Void>> verifySmsCode(@Valid @Pattern(regexp="(^$|[0-9]{10})")
     @RequestParam String phoneNumber,
-        @RequestParam String certificationCode) {
-        smsService.certificateCode(phoneNumber, certificationCode);
+        @RequestParam String verificationCode) {
+        smsService.verifyCode(phoneNumber, verificationCode);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 }

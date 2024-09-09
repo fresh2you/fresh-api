@@ -5,16 +5,16 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CertificationCodeUtil {
+public class VerificationCodeUtil {
     public static final String NUMBER = "0123456789";
     public static final SecureRandom random = new SecureRandom();
     public static final int CODE_LENGTH = 6;
 
     public static String generateRandomString() {
-        StringBuilder sb = new StringBuilder(CertificationCodeUtil.CODE_LENGTH);
-        for (int i = 0; i < CertificationCodeUtil.CODE_LENGTH; i++) {
-            int rndCharAt = random.nextInt(CertificationCodeUtil.NUMBER.length());
-            char rndChar = CertificationCodeUtil.NUMBER.charAt(rndCharAt);
+        StringBuilder sb = new StringBuilder(VerificationCodeUtil.CODE_LENGTH);
+        for (int i = 0; i < VerificationCodeUtil.CODE_LENGTH; i++) {
+            int rndCharAt = random.nextInt(VerificationCodeUtil.NUMBER.length());
+            char rndChar = VerificationCodeUtil.NUMBER.charAt(rndCharAt);
             sb.append(rndChar);
         }
         return sb.toString();
