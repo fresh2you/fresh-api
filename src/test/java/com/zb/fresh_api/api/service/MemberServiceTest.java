@@ -1,5 +1,14 @@
 package com.zb.fresh_api.api.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
@@ -20,6 +29,11 @@ import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
 import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
 import com.zb.fresh_api.domain.repository.writer.MemberWriter;
+import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
+import com.zb.fresh_api.domain.repository.writer.PointWriter;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import net.jqwik.api.Arbitraries;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -27,14 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @DisplayName("회원 비즈니스 테스트")
 class MemberServiceTest extends ServiceTest {
@@ -57,6 +63,11 @@ class MemberServiceTest extends ServiceTest {
     @Mock
     private OauthProviderFactory oauthProviderFactory;
 
+    @Mock
+    private PointWriter pointWriter;
+
+    @Mock
+    private PointHistoryWriter pointHistoryWriter;
     @InjectMocks
     private MemberService memberService;
 
