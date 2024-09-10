@@ -21,3 +21,17 @@ api:
     kauth: https://kauth.kakao.com
     kapi: https://kapi.kakao.com
 
+  websocket:
+    enabled: true
+    stomp:
+      enabled: true
+      endpoint: /ws
+      allowed-origins:
+        - http://localhost:3000
+        - http://localhost:8000
+    broker:
+      relay:
+        enabled: true
+        destination-prefixes:
+          - /app
+          - /topic
