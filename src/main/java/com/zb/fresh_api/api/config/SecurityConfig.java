@@ -58,6 +58,7 @@ public class SecurityConfig {
                         authorize
                                 .requestMatchers(OPTIONS, "**").permitAll()
                                 .requestMatchers(SecurityConstants.SWAGGER_PATH).permitAll()
+                                .requestMatchers(SecurityConstants.PERMIT_ALL_PATH).permitAll()
                 )
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

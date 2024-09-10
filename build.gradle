@@ -39,6 +39,12 @@ dependencies {
 	// jjwt
 	implementation 'io.jsonwebtoken:jjwt:0.12.6'
 
+	// oauth2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// feign
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.3'
+
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -63,8 +69,15 @@ dependencies {
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.3.3'
+
 	// sms
 	implementation 'net.nurigo:sdk:4.3.0'
+
+	// fixturemonkey (https://github.com/naver/fixture-monkey)
+	testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter:1.0.24")
+
+	// email - certificate
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 	// WebSocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
