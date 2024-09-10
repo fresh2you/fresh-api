@@ -5,6 +5,7 @@ import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.common.constants.AuthConstants;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.token.Token;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,12 @@ public class TokenProvider {
         byte[] keyBytes = Base64.getDecoder().decode(key);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.customUserDetailsService = customUserDetailsService;
+    }
+
+    public Token getTokenByEmail(String email) {
+        String accessToken = createAccessToken(email);
+        final Date accessExpiredAt = getExpirationByToken(accessToken);
+        return new Token(accessToken, accessExpiredAt);
     }
 
     public String createAccessToken(String email) {

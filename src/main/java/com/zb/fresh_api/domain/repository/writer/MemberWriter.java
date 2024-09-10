@@ -1,7 +1,5 @@
 package com.zb.fresh_api.domain.repository.writer;
 
-import com.zb.fresh_api.common.exception.CustomException;
-import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.annotation.Writer;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.repository.jpa.MemberJpaRepository;
@@ -17,11 +15,6 @@ public class MemberWriter {
 
     public Member store(Member member) {
         return memberJpaRepository.save(member);
-    }
-
-    public Member getByEmail(String email) {
-        return memberJpaRepository.findByEmail(email)
-            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_MEMBER));
     }
 
 }

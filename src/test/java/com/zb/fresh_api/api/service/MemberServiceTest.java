@@ -1,16 +1,15 @@
 package com.zb.fresh_api.api.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
+import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
+import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
+import com.zb.fresh_api.api.factory.OauthProviderFactory;
+import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.member.KakaoAccount;
+import com.zb.fresh_api.domain.dto.member.KakaoUser;
+import com.zb.fresh_api.domain.dto.token.Token;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.member.MemberTerms;
 import com.zb.fresh_api.domain.entity.terms.Terms;
@@ -21,18 +20,24 @@ import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
 import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
 import com.zb.fresh_api.domain.repository.writer.MemberWriter;
-import java.util.List;
-import java.util.Optional;
+import net.jqwik.api.Arbitraries;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@ExtendWith(MockitoExtension.class)
-class MemberServiceTest {
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@DisplayName("회원 비즈니스 테스트")
+class MemberServiceTest extends ServiceTest {
 
     @Mock
     private MemberReader memberReader;
@@ -49,8 +54,62 @@ class MemberServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private OauthProviderFactory oauthProviderFactory;
+
     @InjectMocks
     private MemberService memberService;
+
+    @Test
+    @DisplayName("회원 가입을 진행하지 않은 사용자가 소셜 로그인을 진행한다.")
+    void oauthLogin_sign_up_false() {
+        // given
+        Provider provider = Arbitraries.of(Provider.class).sample();
+        String accessToken = Arbitraries.strings().alpha().ofMinLength(40).ofMaxLength(60).sample();
+
+        OauthLoginRequest request = getConstructorMonkey().giveMeBuilder(OauthLoginRequest.class)
+                .set("code", Arbitraries.strings().alpha().ofMinLength(20).ofMaxLength(40))
+                .set("redirectUri", Arbitraries.strings().alpha().ofMinLength(20).ofMaxLength(40))
+                .set("provider", provider)
+                .sample();
+
+        KakaoAccount kakaoAccount = getConstructorMonkey().giveMeBuilder(KakaoAccount.class)
+                .set("emailNeedsAgreement", Arbitraries.of(true, false))
+                .set("isEmailValid", Arbitraries.of(true, false))
+                .set("isEmailVerified", Arbitraries.of(true, false))
+                .set("email", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(8).map(param -> param + "@gmail.com"))
+                .sample();
+
+        KakaoUser oauthUser = getConstructorMonkey().giveMeBuilder(KakaoUser.class)
+                .set("id", Arbitraries.strings().numeric().ofMinLength(1).ofMaxLength(4))
+                .set("hasSignedUp", Arbitraries.of(true, false))
+                .set("connectedAt", Arbitraries.of(LocalDateTime.now()).sample())
+                .set("synchedAt", Arbitraries.of(LocalDateTime.now()).sample())
+                .set("kakaoAccount", kakaoAccount)
+                .sample();
+
+        boolean isSignup = false;
+        Token token = Token.emptyToken();
+
+        doReturn(accessToken).when(oauthProviderFactory).getAccessToken(request.provider(), request.redirectUri(), request.code());
+        doReturn(oauthUser).when(oauthProviderFactory).getOAuthUser(request.provider(), accessToken);
+        doReturn(isSignup).when(memberReader).existsByEmailAndProvider(oauthUser.email(), request.provider());
+
+        // when
+        OauthLoginResponse response = memberService.oauthLogin(request);
+
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(response.isSignup(), isSignup);
+        Assertions.assertEquals(response.loginMember().email(), oauthUser.email());
+        Assertions.assertEquals(response.loginMember().provider(), request.provider());
+        Assertions.assertEquals(response.token(), token);
+
+        verify(oauthProviderFactory).getAccessToken(request.provider(), request.redirectUri(), request.code());
+        verify(oauthProviderFactory).getOAuthUser(request.provider(), accessToken);
+        verify(memberReader).existsByEmailAndProvider(oauthUser.email(), request.provider());
+
+    }
 
     @Test
     @DisplayName("닉네임 중복 검사 실패")
@@ -143,3 +202,4 @@ class MemberServiceTest {
             .hasMessage(ResponseCode.TERMS_MANDATORY_NOT_AGREED.getMessage());
     }
 }
+

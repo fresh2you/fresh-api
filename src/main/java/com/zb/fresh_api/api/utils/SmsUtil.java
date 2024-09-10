@@ -1,6 +1,7 @@
 package com.zb.fresh_api.api.utils;
 
 
+import com.zb.fresh_api.common.constants.SmsConstants;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import jakarta.annotation.PostConstruct;
@@ -11,6 +12,8 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import static com.zb.fresh_api.common.constants.SmsConstants.random;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +31,7 @@ public class SmsUtil {
     @Value("${spring.coolsms.apiUrl}")
     private String apiUrl;
 
-    DefaultMessageService messageService;
+    private DefaultMessageService messageService;
 
     @PostConstruct
     private void init() {
