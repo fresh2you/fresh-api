@@ -59,10 +59,18 @@ public class SecurityConfig {
                                 .requestMatchers(OPTIONS, "**").permitAll()
                                 .requestMatchers(SecurityConstants.SWAGGER_PATH).permitAll()
                                 .requestMatchers(SecurityConstants.PERMIT_ALL_PATH).permitAll()
+                                .requestMatchers("/chat/**").permitAll()
+                                .anyRequest().authenticated()
                 )
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
+
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("script-src 'self' 'unsafe-inline';")
+                        )
+                )
 
                 .build();
     }
