@@ -15,8 +15,8 @@ public class MemberWriter {
     private final MemberJpaRepository memberJpaRepository;
     private final MemberQueryRepository memberQueryRepository;
 
-    public void store(Member member) {
-        memberJpaRepository.save(member);
+    public Member store(Member member) {
+        return memberJpaRepository.save(member);
     }
 
     public Member getByEmail(String email) {
