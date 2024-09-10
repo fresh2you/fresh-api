@@ -1,22 +1,25 @@
 package com.zb.fresh_api.api.controller;
 
-import com.zb.fresh_api.common.response.ApiResponse;
-import com.zb.fresh_api.common.exception.CustomException;
-import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.SignUpRequest;
+import com.zb.fresh_api.api.dto.request.LoginRequest;
+import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
+import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
+import com.zb.fresh_api.api.dto.response.LoginResponse;
+import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.service.MemberService;
+import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.common.response.ApiResponse;
+import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(
     name = "사용자 API",
@@ -30,40 +33,63 @@ public class MemberController {
     private final MemberService memberService;
 
     @Operation(
-        summary = "닉네임 중복 검사",
-        description = "중복된 닉네임이 있는지 검사합니다"
+            summary = "회원 가입",
+            description = "이메일회원가입, Oauth2회원가입에 사용되는 API입니다"
+    )
+    @PostMapping("/signup")
+    public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid SignUpRequest request) {
+        memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements(), request.provider(), request.providerId());
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
+    @Operation(
+            summary = "로그인",
+            description = "이메일 가입 회원의 로그인을 진행한다."
+    )
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.success(ResponseCode.SUCCESS, memberService.login(request));
+    }
+
+    @Operation(
+            summary = "카카오 로그인",
+            description = "카카오 로그인을 진행한다."
+    )
+    @PostMapping("/login/kakao")
+    public ResponseEntity<ApiResponse<OauthLoginResponse>> login(@Valid @RequestBody OauthLoginRequest request) {
+        return ApiResponse.success(ResponseCode.SUCCESS, memberService.oauthLogin(request));
+    }
+
+    @Operation(
+            summary = "닉네임 중복 검사",
+            description = "중복된 닉네임이 있는지 검사합니다"
     )
     @GetMapping("/check-nickname")
-    public ResponseEntity<ApiResponse<Void>> checkNicknameAvailability(
-        @RequestParam(name = "nickname") String nickname) {
-        if (nickname == null || nickname.isEmpty()) {
-            throw new CustomException(ResponseCode.PARAM_NICKNAME_NOT_VALID);
-        }
+    public ResponseEntity<ApiResponse<Void>> checkNicknameAvailability(@RequestParam(name = "nickname") String nickname) {
         memberService.nickNameValidate(nickname);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
     @Operation(
-        summary = "이메일 중복 검사",
-        description = "이메일로 회원가입한 사용자 중 중복된 이메일이 있는지 검사합니다"
+            summary = "이메일 중복 검사",
+            description = "이메일로 회원가입한 사용자 중 중복된 이메일이 있는지 검사합니다"
     )
     @GetMapping("/check-email")
-    public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
-        @RequestParam String email
-    ) {
+    public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(@RequestParam String email) {
         memberService.emailValidate(email, Provider.EMAIL);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
-    
     @Operation(
-        summary = "회원 가입",
-        description = "이메일회원가입, Oauth2회원가입에 사용되는 API입니다"
+            summary = "프로필 변경",
+            description = "회원의 이미지 또는 닉네임을 변경한다."
     )
-    @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid SignUpRequest request) {
-        memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements()
-        ,request.provider(), request.providerId());
+    @PatchMapping("/profile")
+    public ResponseEntity<ApiResponse<Void>> updateProfile(
+            @Parameter(hidden = true) @LoginMember Member loginMember,
+            @Valid @RequestBody UpdateProfileRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        memberService.updateProfile(loginMember, request, image);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 

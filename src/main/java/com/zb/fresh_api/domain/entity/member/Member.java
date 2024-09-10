@@ -27,9 +27,6 @@ public class Member extends BaseTimeEntity {
     @Column(name = "email", nullable = false, columnDefinition = "varchar(255) comment '이메일'")
     private String email;
 
-    @Column(name = "name", columnDefinition = "varchar(20) comment '회원 이름'")
-    private String name;
-
     @Column(name = "nickname", nullable = false, columnDefinition = "varchar(20) comment '닉네임'")
     private String nickname;
 
@@ -73,4 +70,24 @@ public class Member extends BaseTimeEntity {
             .status(memberStatus)
             .build();
     }
+    public void updateProfile(final String nickname,
+                              final String profileImage) {
+        updateNickname(nickname);
+        updateProfileImage(profileImage);
+    }
+
+    private void updateNickname(final String nickname) {
+        if (Objects.isNull(nickname) || this.nickname.equals(nickname)) {
+            return;
+        }
+        this.nickname = nickname;
+    }
+
+    private void updateProfileImage(final String profileImage) {
+        if (Objects.isNull(profileImage)) {
+            return;
+        }
+        this.profileImage = profileImage;
+    }
+
 }

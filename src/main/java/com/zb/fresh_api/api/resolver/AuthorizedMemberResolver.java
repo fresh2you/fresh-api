@@ -2,6 +2,8 @@ package com.zb.fresh_api.api.resolver;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.principal.CustomUserDetails;
+import com.zb.fresh_api.common.exception.CustomException;
+import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.entity.member.Member;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +27,11 @@ public class AuthorizedMemberResolver implements HandlerMethodArgumentResolver {
                                   NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) throws Exception {
         final CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return Objects.isNull(userDetails) ? null : userDetails.member();
+        if (Objects.isNull(userDetails)) {
+            throw new CustomException(ResponseCode.COMMON_INVALID_PARAM);
+        }
+
+        return userDetails.member();
     }
 
 }
