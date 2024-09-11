@@ -46,6 +46,7 @@ public enum ResponseCode {
     NON_LOCKED_ACCOUNT("1203", "사용자 계정이 정지되었습니다."),
     DISABLE_ACCOUNT("1204", "사용자 계정은 비활성화 상태입니다."),
     EXPIRED_CREDENTIAL("1205", "사용자 인증 정보가 만료되었습니다."),
+    UNAUTHORIZED_ACCESS_EXCEPTION("1206", "사용자가 판매자가 아닙니다."),
 
     /**
      * Json Web Token (1300 ~ 1400)
@@ -63,7 +64,13 @@ public enum ResponseCode {
     VERIFICATION_NOT_FOUND("1401", "인증이 존재하지 않거나 인증 유효시간을 초과했습니다"),
     VERIFICATION_CODE_NOT_CORRECT("1402", "인증 코드가 일치하지 않습니다"),
     NOT_ENOUGH_BALANCE("1403", "서버 관리자에게 문의하세요"),
-    GOOGLE_SMTP_ERROR("1404", "서버 관리자에게 문의하세요")
+    GOOGLE_SMTP_ERROR("1404", "서버 관리자에게 문의하세요"),
+
+    /**
+     * Category (1500 ~ 1600)
+     */
+    CATEGORY_NOT_VALID("1002", "카테고리를 찾을 수 없습니다."),
+
     ;
 
     private final String code;
