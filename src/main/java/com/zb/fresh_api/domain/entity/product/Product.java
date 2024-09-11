@@ -1,6 +1,8 @@
 package com.zb.fresh_api.domain.entity.product;
 
+import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
+import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,9 +40,9 @@ public class Product extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '회원 고유 번호'")
     private Member member;
 
-//    @OneToMany(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "category_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '카테고리 고유 번호'")
-//    private Category category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '카테고리 고유 번호'")
+    private Category category;
 
     @JoinColumn(name = "name", nullable = false, columnDefinition = "varchar(20)  comment '상품명'")
     private String name;
@@ -58,4 +60,14 @@ public class Product extends BaseTimeEntity {
     @Column(name = "deleted_at", columnDefinition = "datetime comment '삭제일'")
     private LocalDateTime deleted_at;
 
+    public static Product create(AddProductRequest request,Category category, Member member){
+        return Product.builder()
+            .member(member)
+            .category(category)
+            .name(request.name())
+            .description(request.description())
+            .quantity(request.quantity())
+            .price(request.price())
+            .build();
+    }
 }
