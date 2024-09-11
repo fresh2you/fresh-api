@@ -5,6 +5,7 @@ import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.repository.jpa.CategoryJpaRepository;
 import com.zb.fresh_api.domain.repository.query.CategoryQueryRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 @Reader
@@ -16,4 +17,6 @@ public class CategoryReader {
     public List<Category> findAll(){
         return categoryQueryRepository.findAll();
     }
+
+    public Optional<Category> findById(Long id){return categoryJpaRepository.findById(id);}
 }
