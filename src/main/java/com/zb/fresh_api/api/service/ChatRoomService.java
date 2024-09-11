@@ -20,7 +20,9 @@ public class ChatRoomService {
     }
 
     private Long generateChatRoomId(Long sellerId, Long buyerId) {
-        return sellerId + buyerId;
+        Long minId = Math.min(sellerId, buyerId);
+        Long maxId = Math.max(sellerId, buyerId);
+        return minId * 1000000L + maxId;
     }
 
     public ChatRoom getChatRoom(Long chatRoomId) {
