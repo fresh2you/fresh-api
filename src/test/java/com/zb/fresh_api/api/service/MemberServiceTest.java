@@ -4,8 +4,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,7 +20,8 @@ import com.zb.fresh_api.domain.dto.member.KakaoAccount;
 import com.zb.fresh_api.domain.dto.member.KakaoUser;
 import com.zb.fresh_api.domain.dto.token.Token;
 import com.zb.fresh_api.domain.entity.member.Member;
-import com.zb.fresh_api.domain.entity.member.MemberTerms;
+import com.zb.fresh_api.domain.entity.point.Point;
+import com.zb.fresh_api.domain.entity.point.PointHistory;
 import com.zb.fresh_api.domain.entity.terms.Terms;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
@@ -32,12 +33,14 @@ import com.zb.fresh_api.domain.repository.writer.MemberWriter;
 import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
 import com.zb.fresh_api.domain.repository.writer.PointWriter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.jqwik.api.Arbitraries;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -148,44 +151,74 @@ class MemberServiceTest extends ServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 성공")
-    void signUp_success() {
+    @DisplayName("이메일 회원가입 성공")
+    void  signUp_success() {
         // given
-        List<TermsAgreementDto> termsAgreementDtos = List.of(
-            new TermsAgreementDto(1L, true),
-            new TermsAgreementDto(2L, true)
-        );
-        Terms terms1 = Terms.builder().id(1L).title("필수 약관1").isRequired(true).build();
-        Terms terms2 = Terms.builder().id(2L).title("필수 약관2").isRequired(true).build();
-
-        when(memberReader.existActiveNickname(anyString())).thenReturn(false);
-        when(memberReader.existsByEmailAndProvider(anyString(),
-            any(Provider.class))).thenReturn(false);
-        when(termsReader.findAllByIsRequired(true)).thenReturn(List.of(
-            terms1, terms2
+        String email = Arbitraries.strings().withCharRange('a', 'z').ofMinLength(5).ofMaxLength(5)
+            .map(x -> x + "@example.com").sample();
+        String password = Arbitraries.strings().all().sample();
+        String nickname = Arbitraries.strings().ofMinLength(2).ofMaxLength(20).sample();
+        Provider provider = Provider.EMAIL;
+        String providerId = null;
+        Long firstTermsId = Arbitraries.longs().between(1L, 999999L).sample();
+        Long secondTermsId = Arbitraries.longs().between(1L, 999999L).sample();
+        Long thirdTermsId = Arbitraries.longs().between(1L, 999999L).sample();
+        boolean isNicknameDuplicated = false;
+        List<TermsAgreementDto> termsAgreementDtos = new ArrayList<>(List.of(
+            getConstructorMonkey().giveMeBuilder(TermsAgreementDto.class)
+                .set("termsId", firstTermsId).set("isAgreed", true)
+                .sample(),
+            getConstructorMonkey().giveMeBuilder(TermsAgreementDto.class)
+                .set("termsId", secondTermsId).set("isAgreed", true)
+                .sample(),
+            getConstructorMonkey().giveMeBuilder(TermsAgreementDto.class)
+                .set("termsId", thirdTermsId).set("isAgreed", true)
+                .sample()
+            ));
+        List<Terms> terms = new ArrayList<>(List.of(
+            getConstructorMonkey().giveMeBuilder(Terms.class)
+                .set("id", firstTermsId).set("isAgreed", true)
+                .set("title", Arbitraries.strings().all().ofMinLength(1))
+                .sample(),
+            getConstructorMonkey().giveMeBuilder(Terms.class)
+                .set("id", secondTermsId).set("isAgreed", true)
+                .set("title", Arbitraries.strings().all().ofMinLength(1))
+                .sample(),
+            getConstructorMonkey().giveMeBuilder(Terms.class)
+                .set("id", thirdTermsId).set("isAgreed", true)
+                .set("title", Arbitraries.strings().all().ofMinLength(1))
+                .sample()
         ));
-        when(termsReader.findById(anyLong())).thenReturn(Optional.of(terms1));
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class).set("nickname", nickname)
+            .set("email", email).set("password", passwordEncoder.encode(password))
+            .set("provider", provider).set("providerId", providerId)
+            .set("role", MemberRole.ROLE_USER).set("status", MemberStatus.ACTIVE).sample();
 
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(memberWriter.store(any(Member.class))).thenReturn(
-            Member.builder()
-                .id(1L)
-                .nickname("gin")
-                .email("test@test.com")
-                .password("encodedPassword")
-                .provider(Provider.EMAIL)
-                .role(MemberRole.ROLE_USER)
-                .status(MemberStatus.ACTIVE)
-                .build()
-        );
+        doReturn(isNicknameDuplicated).when(memberReader).existActiveNickname(nickname);
+        doReturn(false).when(memberReader).existsByEmailAndProvider(email, provider);
+        doReturn(terms).when(termsReader).findAllByIsRequired(true);
 
+        doReturn(member).when(memberWriter).store(argThat(m ->
+            m.getNickname().equals(member.getNickname()) &&
+                m.getEmail().equals(member.getEmail())
+        ));
+        doReturn(Optional.ofNullable(terms.getFirst())).when(termsReader).findById(firstTermsId);
+        doReturn(Optional.ofNullable(terms.get(1))).when(termsReader).findById(secondTermsId);
+        doReturn(Optional.ofNullable(terms.get(2))).when(termsReader).findById(thirdTermsId);
+
+        ArgumentCaptor<Member> memberCaptor = ArgumentCaptor.forClass(Member.class);
         // when
-        memberService.signUp("test@test.com", "password", "gin", termsAgreementDtos,
-            Provider.EMAIL, "1");
+        memberService.signUp(email,password,nickname,termsAgreementDtos,provider,providerId);
 
         // then
-        verify(memberWriter, times(1)).store(any(Member.class));
-        verify(memberTermsWriter, times(2)).store(any(MemberTerms.class));
+        verify(memberWriter).store(memberCaptor.capture());
+        Member capturedMember = memberCaptor.getValue();
+        Assertions.assertEquals(member.getEmail(), capturedMember.getEmail());
+        verify(memberReader).existActiveNickname(nickname);
+        verify(memberReader).existsByEmailAndProvider(email, provider);
+        verify(termsReader).findAllByIsRequired(true);
+        verify(pointWriter).store(any(Point.class));
+        verify(pointHistoryWriter).store(any(PointHistory.class));
     }
 
     @Test
