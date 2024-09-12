@@ -10,7 +10,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
+import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -19,6 +21,7 @@ import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
+import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -37,6 +40,9 @@ class ProductServiceTest extends ServiceTest {
 
     @Mock
     private CategoryReader categoryReader;
+
+    @Mock
+    private  ProductReader productReader;
 
     @InjectMocks
     private ProductService productService;
@@ -152,5 +158,59 @@ class ProductServiceTest extends ServiceTest {
 
         // then
         assertEquals(ResponseCode.CATEGORY_NOT_VALID, exception.getResponseCode());
+    }
+
+    @Test
+    @DisplayName("상품 상세 조회 실패 - 상품 id가 유효하지않음")
+    void getProduct_fail_PRODUCTID_NOT_FOUND() {
+        // given
+        Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        GetProductDetailRequest request = getConstructorMonkey().giveMeBuilder(
+                GetProductDetailRequest.class).set("productId", productId)
+            .sample();
+
+        doReturn(Optional.empty()).when(productReader).findById(request.productId());
+
+        // when
+        CustomException customException = assertThrows(CustomException.class,
+            () -> productService.getProductDetail(request));
+
+        // then
+        assertEquals(customException.getResponseCode(), ResponseCode.PRODUCT_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("상품 상세 조회 성공")
+    void getProductDetail_success(){
+        // given
+        Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        GetProductDetailRequest request = getConstructorMonkey().giveMeBuilder(
+                GetProductDetailRequest.class).set("productId", productId)
+            .sample();
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+            .set("name" , Arbitraries.strings())
+            .sample();
+        Product product = getConstructorMonkey().giveMeBuilder(Product.class)
+            .set("id", productId)
+            .set("name" , Arbitraries.strings().withCharRange('a', 'z'))
+            .set("member", member)
+            .set("price" , Arbitraries.bigDecimals())
+            .set("quantity", Arbitraries.integers().greaterOrEqual(1))
+            .set("description" , Arbitraries.strings().ofMinLength(1))
+            .set("productImage", Arbitraries.strings().ofMinLength(1))
+            .sample();
+
+        doReturn(Optional.of(product)).when(productReader).findById(request.productId());
+
+        // when
+        GetProductDetailResponse productDetail = productService.getProductDetail(request);
+
+        // then
+        assertEquals(product.getName(), productDetail.productName());
+        assertEquals(product.getId(), productDetail.productId());
+        assertEquals(product.getPrice(), productDetail.price());
+        assertEquals(product.getQuantity(), productDetail.quantity());
+        assertEquals(product.getDescription(), productDetail.description());
+        assertEquals(product.getProductImage(), productDetail.imageUrl());
     }
 }
