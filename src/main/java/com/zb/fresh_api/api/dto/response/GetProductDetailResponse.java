@@ -6,6 +6,9 @@ import java.math.BigDecimal;
 
 @Schema(description = "제품 상세 조회 응답")
 public record GetProductDetailResponse (
+    @Schema(description = "상품 ID")
+    Long productId,
+
     @Schema(description = "상품명")
     String productName,
 
@@ -26,7 +29,7 @@ public record GetProductDetailResponse (
 ){
 
     public static GetProductDetailResponse fromEntity(Product product) {
-        return new GetProductDetailResponse(
+        return new GetProductDetailResponse(product.getId(),
             product.getName(), product.getMember().getNickname(),
             product.getPrice(), product.getQuantity(), product.getDescription(),
             product.getProductImage()
