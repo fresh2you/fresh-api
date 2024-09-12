@@ -55,12 +55,15 @@ public class Product extends BaseTimeEntity {
 
     @Column(name = "price", nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) comment '가격'")
     private BigDecimal price;
-
+    
+    @Column(name = "product_image", columnDefinition = "varchar(255) comment '상품 이미지'")
+    private String productImage;
+    
     @LastModifiedDate
     @Column(name = "deleted_at", columnDefinition = "datetime comment '삭제일'")
     private LocalDateTime deleted_at;
 
-    public static Product create(AddProductRequest request,Category category, Member member){
+    public static Product create(AddProductRequest request,Category category, Member member, String productImage){
         return Product.builder()
             .member(member)
             .category(category)
@@ -68,6 +71,7 @@ public class Product extends BaseTimeEntity {
             .description(request.description())
             .quantity(request.quantity())
             .price(request.price())
+            .productImage(productImage)
             .build();
     }
 }

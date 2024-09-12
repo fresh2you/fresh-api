@@ -15,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(
     name = "상품 API",
@@ -34,8 +36,9 @@ public class ProductController {
     )
     @PostMapping
     public ResponseEntity<ApiResponse<AddProductResponse>> addProduct(@Valid @RequestBody
-        AddProductRequest request, @LoginMember Member member) {
-        AddProductResponse storedProductId = productService.addProduct(request, member);
+        AddProductRequest request, @LoginMember Member member,
+        @RequestPart(value = "image", required = false) MultipartFile image) {
+        AddProductResponse storedProductId = productService.addProduct(request, member, image);
         return ApiResponse.success(ResponseCode.SUCCESS, storedProductId );
     }
 }

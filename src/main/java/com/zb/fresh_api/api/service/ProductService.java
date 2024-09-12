@@ -12,6 +12,7 @@ import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,8 @@ public class ProductService {
     private final ProductWriter productWriter;
     private final CategoryReader categoryReader;
     @Transactional
-    public AddProductResponse addProduct(AddProductRequest request, Member member) {
+    public AddProductResponse addProduct(AddProductRequest request, Member member,
+        MultipartFile image) {
         if (!member.isSeller()) {
             throw new CustomException(ResponseCode.UNAUTHORIZED_ACCESS_EXCEPTION);
         }
@@ -28,7 +30,10 @@ public class ProductService {
             () -> new CustomException(ResponseCode.CATEGORY_NOT_VALID)
         );
 
-        Product storedProduct = productWriter.store(Product.create(request, category, member));
+        // TODO 1. 이미지 변환 (S3)
+        final String profileImage = null;
+
+        Product storedProduct = productWriter.store(Product.create(request, category, member, profileImage));
         return new AddProductResponse(storedProduct.getId(), storedProduct.getName(), storedProduct.getCreatedAt());
     }
 }
