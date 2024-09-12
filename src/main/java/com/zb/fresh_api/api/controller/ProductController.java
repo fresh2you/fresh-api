@@ -2,7 +2,9 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
+import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.service.ProductService;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.common.response.ApiResponse;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,4 +44,16 @@ public class ProductController {
         AddProductResponse storedProductId = productService.addProduct(request, member, image);
         return ApiResponse.success(ResponseCode.SUCCESS, storedProductId );
     }
+
+
+    @Operation(
+        summary = "상품 상세 조회",
+        description = "상품 ID를 통해 상품을 상세 조회합니다."
+    )
+    @GetMapping()
+    public ResponseEntity<ApiResponse<GetProductDetailResponse>> getProduct(GetProductDetailRequest request) {
+        GetProductDetailResponse productDetail = productService.getProductDetail(request);
+        return ApiResponse.success(ResponseCode.SUCCESS, productDetail);
+    }
+
 }
