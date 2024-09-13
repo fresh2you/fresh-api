@@ -15,7 +15,6 @@ import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
-import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.ProductSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
@@ -32,7 +31,6 @@ public class ProductService {
     private final ProductWriter productWriter;
     private final ProductReader productReader;
     private final CategoryReader categoryReader;
-    private final MemberReader memberReader;
     private final ProductSnapshotWriter productSnapshotWriter;
 
     @Transactional
@@ -70,10 +68,6 @@ public class ProductService {
             throw  new CustomException(ResponseCode.NOT_PRODUCT_OWNER);
         }
 
-        if(memberReader.existActiveNickname(request.name())){
-            throw new CustomException(ResponseCode.NICKNAME_ALREADY_IN_USE);
-        }
-
         productSnapshotWriter.store(ProductSnapshot.create(product));
 
         final String newProfileImage = convertImage(imageRequest);
@@ -106,7 +100,7 @@ public class ProductService {
         Product product = productReader.findById(request.productId()).orElseThrow(
             () -> new CustomException(ResponseCode.PRODUCT_NOT_FOUND));
 
-        if(member.getId() != product.getMember().getId()){
+        if(!Objects.equals(member.getId(), product.getMember().getId())){
             throw new CustomException(ResponseCode.UNAUTHORIZED_ACCESS_EXCEPTION);
         }
 
