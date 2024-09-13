@@ -11,9 +11,11 @@ import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
+import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
+import com.zb.fresh_api.domain.repository.writer.ProductSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class ProductService {
     private final ProductReader productReader;
     private final CategoryReader categoryReader;
     private final MemberReader memberReader;
+    private final ProductSnapshotWriter productSnapshotWriter;
 
     @Transactional
     public AddProductResponse addProduct(AddProductRequest request, Member member,
@@ -69,9 +72,12 @@ public class ProductService {
             throw new CustomException(ResponseCode.NICKNAME_ALREADY_IN_USE);
         }
 
+        productSnapshotWriter.store(ProductSnapshot.create(product));
+
         final String newProfileImage = convertImage(imageRequest);
         Category newCategory = findCategory(request.categoryId());
         product.update(request, newProfileImage, newCategory);
+
 
         return new UpdateProductResponse(product.getId());
     }
