@@ -43,9 +43,10 @@ public class ProductController {
         summary = "상품 등록",
         description = "상품을 등록합니다."
     )
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<AddProductResponse>> addProduct(@Valid @RequestBody
-        AddProductRequest request, @LoginMember Member member,
+        @Parameter @RequestPart(value = "request", required = true) AddProductRequest request,
+        @Parameter(hidden = true)@LoginMember Member member,
         @RequestPart(value = "image", required = false) MultipartFile image) {
         AddProductResponse storedProductId = productService.addProduct(request, member, image);
         return ApiResponse.success(ResponseCode.SUCCESS, storedProductId );
