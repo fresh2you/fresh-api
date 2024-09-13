@@ -21,7 +21,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.LastModifiedDate;
 
 @Getter
 @Builder
@@ -60,7 +59,6 @@ public class Product extends BaseTimeEntity {
     @Column(name = "product_image", columnDefinition = "varchar(255) comment '상품 이미지'")
     private String productImage;
     
-    @LastModifiedDate
     @Column(name = "deleted_at", columnDefinition = "datetime comment '삭제일'")
     private LocalDateTime deleted_at;
 
@@ -83,5 +81,9 @@ public class Product extends BaseTimeEntity {
         if(request.quantity() != null) this.quantity = request.quantity();
         if(request.price() != null) this.price = request.price();
         if(productImageUrl != null) this.productImage = productImageUrl;
+    }
+
+    public static void delete(Product product){
+        product.deleted_at = LocalDateTime.now();
     }
 }

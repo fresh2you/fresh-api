@@ -1,9 +1,11 @@
 package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
+import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
 import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -97,5 +99,20 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(ResponseCode.CATEGORY_NOT_FOUND));
         }
         return null;
+    }
+
+//    @Transactional
+    public DeleteProductResponse deleteProduct(DeleteProductRequest request, Member member) {
+        Product product = productReader.findById(request.productId()).orElseThrow(
+            () -> new CustomException(ResponseCode.PRODUCT_NOT_FOUND));
+
+        if(member.getId() != product.getMember().getId()){
+            throw new CustomException(ResponseCode.UNAUTHORIZED_ACCESS_EXCEPTION);
+        }
+
+        Product.delete(product);
+        productWriter.store(product);
+        return new DeleteProductResponse(product.getId());
+
     }
 }

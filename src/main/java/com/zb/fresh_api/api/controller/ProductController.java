@@ -2,9 +2,11 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
+import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
 import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
 import com.zb.fresh_api.api.service.ProductService;
@@ -14,15 +16,14 @@ import com.zb.fresh_api.domain.entity.member.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,10 +45,10 @@ public class ProductController {
         description = "상품을 등록합니다."
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<AddProductResponse>> addProduct(@Valid @RequestBody
-        @Parameter @RequestPart(value = "request", required = true) AddProductRequest request,
+    public ResponseEntity<ApiResponse<AddProductResponse>> addProduct(
         @Parameter(hidden = true)@LoginMember Member member,
-        @RequestPart(value = "image", required = false) MultipartFile image) {
+        @Parameter @RequestPart(value = "request", required = true) AddProductRequest request,
+        @Parameter @RequestPart(value = "image", required = false) MultipartFile image) {
         AddProductResponse storedProductId = productService.addProduct(request, member, image);
         return ApiResponse.success(ResponseCode.SUCCESS, storedProductId );
     }
@@ -78,5 +79,17 @@ public class ProductController {
         return ApiResponse.success(ResponseCode.SUCCESS,updateProductResponse);
     }
 
+
+    @Operation(
+        summary = "상품 삭제",
+        description = "상품 삭제를 위한 API입니다."
+    )
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<DeleteProductResponse>> deleteProduct(DeleteProductRequest request,
+        @Parameter(hidden = true) @LoginMember Member member) {
+        DeleteProductResponse deleteProductId = productService.deleteProduct(request, member);
+        return ApiResponse.success(ResponseCode.SUCCESS,deleteProductId);
+
+    }
 
 }
