@@ -65,7 +65,7 @@ public enum ResponseCode {
     VERIFICATION_CODE_NOT_CORRECT("1402", "인증 코드가 일치하지 않습니다"),
     NOT_ENOUGH_BALANCE("1403", "서버 관리자에게 문의하세요"),
     GOOGLE_SMTP_ERROR("1404", "서버 관리자에게 문의하세요"),
-
+    PHONE_ALREADY_IN_USE("1405", "이미 사용중인 휴대전화 입니다"),
     /**
      * Category (1500 ~ 1600)
      */

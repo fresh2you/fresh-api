@@ -60,7 +60,7 @@ public class Member extends BaseTimeEntity {
     private LocalDateTime deletedAt;
 
     @Column(name = "is_seller", columnDefinition = "boolean comment '판매자 인증 여부'")
-    private boolean isSeller;
+    private boolean isSeller = false;
 
     @Column(name = "seller_verified_at", columnDefinition = "datetime comment '판매자 인증 일시'")
     private LocalDateTime sellerVerifiedAt;
@@ -83,6 +83,12 @@ public class Member extends BaseTimeEntity {
             return;
         }
         this.profileImage = profileImage;
+    }
+
+    public void setMemberSeller(String phone) {
+        this.phone = phone;
+        this.isSeller = true;
+        this.sellerVerifiedAt = LocalDateTime.now();
     }
 
 }
