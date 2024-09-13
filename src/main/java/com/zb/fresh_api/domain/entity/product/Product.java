@@ -1,6 +1,7 @@
 package com.zb.fresh_api.domain.entity.product;
 
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
+import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
 import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
@@ -73,5 +74,14 @@ public class Product extends BaseTimeEntity {
             .price(request.price())
             .productImage(productImage)
             .build();
+    }
+
+    public void update(UpdateProductRequest request, String productImageUrl, Category category){
+        if(category != null) this.category = category;
+        if(request.name() != null) this.name = request.name();
+        if(request.description() != null) this.description = request.description();
+        if(request.quantity() != null) this.quantity = request.quantity();
+        if(request.price() != null) this.price = request.price();
+        if(productImageUrl != null) this.productImage = productImageUrl;
     }
 }

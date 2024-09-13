@@ -69,12 +69,13 @@ public enum ResponseCode {
     /**
      * Category (1500 ~ 1600)
      */
-    CATEGORY_NOT_VALID("1500", "카테고리를 찾을 수 없습니다."),
+    CATEGORY_NOT_FOUND("1500", "카테고리를 찾을 수 없습니다."),
 
     /**
      * Product (1600 ~ 1700)
      */
     PRODUCT_NOT_FOUND("1600", "상품을 찾을 수 없습니다"),
+    NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다.")
     ;
 
     private final String code;

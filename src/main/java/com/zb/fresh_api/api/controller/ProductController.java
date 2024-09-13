@@ -3,18 +3,24 @@ package com.zb.fresh_api.api.controller;
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
+import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
+import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
 import com.zb.fresh_api.api.service.ProductService;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.common.response.ApiResponse;
 import com.zb.fresh_api.domain.entity.member.Member;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,5 +61,21 @@ public class ProductController {
         GetProductDetailResponse productDetail = productService.getProductDetail(request);
         return ApiResponse.success(ResponseCode.SUCCESS, productDetail);
     }
+
+    @Operation(
+        summary = "상품 수정",
+        description = "상품 수정을 위한 API입니다."
+    )
+    @PatchMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<UpdateProductResponse>> updateProduct(
+        @PathVariable(name = "productId") Long productId,
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @Parameter @RequestPart(value = "request", required = false) UpdateProductRequest request,
+        @Parameter @RequestPart(value = "image",required = false) MultipartFile image) {
+        UpdateProductResponse updateProductResponse = productService.updateProduct(productId,
+            request, image, loginMember);
+        return ApiResponse.success(ResponseCode.SUCCESS,updateProductResponse);
+    }
+
 
 }
