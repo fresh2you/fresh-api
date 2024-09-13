@@ -157,7 +157,7 @@ class ProductServiceTest extends ServiceTest {
             multipartFile));
 
         // then
-        assertEquals(ResponseCode.CATEGORY_NOT_VALID, exception.getResponseCode());
+        assertEquals(ResponseCode.CATEGORY_NOT_FOUND, exception.getResponseCode());
     }
 
     @Test
