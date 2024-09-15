@@ -18,14 +18,25 @@ import com.zb.fresh_api.domain.dto.member.OauthUser;
 import com.zb.fresh_api.domain.dto.token.Token;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.member.MemberTerms;
+import com.zb.fresh_api.domain.entity.point.Point;
+import com.zb.fresh_api.domain.entity.point.PointHistory;
 import com.zb.fresh_api.domain.entity.terms.Terms;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
+import com.zb.fresh_api.domain.enums.point.PointStatus;
+import com.zb.fresh_api.domain.enums.point.PointTransactionType;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
 import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
 import com.zb.fresh_api.domain.repository.writer.MemberWriter;
+import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
+import com.zb.fresh_api.domain.repository.writer.PointWriter;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,6 +50,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberReader memberReader;
@@ -48,6 +60,8 @@ public class MemberService {
     private final TermsReader termsReader;
 
     private final PasswordEncoder passwordEncoder;
+    private final PointWriter pointWriter;
+    private final PointHistoryWriter pointHistoryWriter;
 
     private final TokenProvider tokenProvider;
     private final OauthProviderFactory oauthProviderFactory;
@@ -90,7 +104,8 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public void nickNameValidate(String nickname) {
-        boolean existsByNicknameIgnoreCase = memberReader.existActiveNickname(nickname);
+        boolean existsByNicknameIgnoreCase = memberReader.existActiveNickname(
+            nickname);
         if (existsByNicknameIgnoreCase) {
             throw new CustomException(ResponseCode.NICKNAME_ALREADY_IN_USE);
         }
@@ -114,6 +129,8 @@ public class MemberService {
      * 3. 약관동의관련 리스트에서 필수인 약관들이 포함되었는지 확인합니다
      * 4. 사용자를 저장합니다
      * 5. 멤버 약관을 저장합니다
+     * 6. 포인트를 생성합니다.
+     * 7. 이벤트로 받은 500원을 추가합니다
      */
     @Transactional
     public void signUp(String email, String password, String nickName,
@@ -122,17 +139,16 @@ public class MemberService {
         emailValidate(email, provider);
         validateMandatoryTermsIncluded(termsAgreementDtos);
         Member member = memberWriter.store(
-            Member.builder()
-                .nickname(nickName)
-                .email(email)
-                .password(passwordEncoder.encode(password))
-                .provider(provider)
-                .providerId(providerId)
-                .role(MemberRole.ROLE_USER)
-                .status(MemberStatus.ACTIVE)
-                .build()
-        );
+            Member.create(nickName, email, passwordEncoder.encode(password), provider, providerId,
+                MemberRole.ROLE_USER, MemberStatus.ACTIVE));
         processTermsAgreements(termsAgreementDtos, member);
+        Point point = pointWriter.store(
+            Point.create(member, BigDecimal.valueOf(500), PointStatus.ACTIVE)
+        );
+        pointHistoryWriter.store(
+            PointHistory.create(point, PointTransactionType.CHARGE, BigDecimal.valueOf(500),
+                BigDecimal.valueOf(0), BigDecimal.valueOf(500),
+                "회원가입 기념 500원 충전"));
     }
 
     /**
