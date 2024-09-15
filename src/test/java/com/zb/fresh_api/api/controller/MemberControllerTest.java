@@ -3,7 +3,6 @@ package com.zb.fresh_api.api.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,6 +26,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = MemberController.class,
@@ -43,6 +43,9 @@ class MemberControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SecurityFilterChain securityFilterChain;
 
     @Test
     @DisplayName("닉네임 중복 검사 성공")
@@ -62,12 +65,15 @@ class MemberControllerTest {
     void checkEmailAvailability_fail_nicknameInvalid() throws Exception {
         String nickname = "";
 
+        doThrow(new CustomException(ResponseCode.PARAM_EMAIL_NOT_VALID))
+            .when(memberService).nickNameValidate(nickname);
+
         mockMvc.perform(get("/v1/api/members/check-nickname")
                 .param("nickname", nickname))
-            .andExpect(status().isBadRequest());
+            .andExpect(jsonPath("$.message").value(ResponseCode.PARAM_EMAIL_NOT_VALID.getMessage()));
 
 
-        verify(memberService, never()).nickNameValidate(nickname);
+        verify(memberService, times(1)).nickNameValidate(nickname);
     }
 
     @Test

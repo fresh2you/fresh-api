@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.zb.fresh_api.api.dto.TermsDto;
 import com.zb.fresh_api.api.provider.TokenProvider;
 import com.zb.fresh_api.api.service.TermsService;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = TermsController.class,
@@ -31,11 +33,12 @@ class TermsControllerTest {
     private TermsService termsService;
     @Autowired
     private MockMvc mockMvc;
-
+    @MockBean
+    private SecurityFilterChain securityFilterChain;
     @Test
     @DisplayName("약관 조회 성공")
     void getAllTerms_success() throws Exception {
-        mockMvc.perform(get("/api/terms"))
+        mockMvc.perform(get("/v1/api/terms"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(ResponseCode.SUCCESS.getCode()));
         verify(termsService, times(1)).getTerms();
@@ -45,7 +48,10 @@ class TermsControllerTest {
     @Test
     @DisplayName("약관 상세 조회 성공")
     void getTermsById_success() throws Exception {
-        mockMvc.perform(get("/api/terms/{id}", 1))
+        TermsDto termsDto = TermsDto.builder().build();
+        given(termsService.getTerm(1L)).willReturn(termsDto);
+
+        mockMvc.perform(get("/v1/api/terms/{id}", 1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(ResponseCode.SUCCESS.getCode()));
         verify(termsService, times(1)).getTerm(1L);
@@ -58,7 +64,7 @@ class TermsControllerTest {
         given(termsService.getTerm(anyLong())).willThrow(
             new CustomException(ResponseCode.TERMS_NOT_FOUND));
 
-        mockMvc.perform(get("/api/terms/{id}", 5))
+        mockMvc.perform(get("/v1/api/terms/{id}", 5))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value(ResponseCode.TERMS_NOT_FOUND.getCode()));
         verify(termsService, times(1)).getTerm(5L);
