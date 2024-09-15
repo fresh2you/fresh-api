@@ -1,44 +1,96 @@
 package com.zb.fresh_api.api.service;
 
-import lombok.Getter;
+import com.zb.fresh_api.domain.entity.chat.ChatRoom;
+import com.zb.fresh_api.domain.entity.chat.ChatRoomMember;
+import com.zb.fresh_api.domain.repository.jpa.ChatRoomRepository;
+import com.zb.fresh_api.domain.repository.jpa.ChatRoomMemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ChatRoomService {
 
-    // 채팅방 정보를 저장할 Map (채팅방 ID -> 참여자 정보)
-    private final Map<Long, ChatRoom> chatRooms = new ConcurrentHashMap<>();
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
 
-    public ChatRoom createChatRoom(Long sellerId, Long buyerId) {
-        Long chatRoomId = generateChatRoomId(sellerId, buyerId);
-        ChatRoom chatRoom = new ChatRoom(chatRoomId, sellerId, buyerId);
-        chatRooms.put(chatRoomId, chatRoom);
+    private static final int MAX_PARTICIPANTS = 10;  // 채팅방 최대 인원
+
+    // 1:1 채팅방 생성
+    public ChatRoom createOneToOneChatRoom(Long productId, Long buyerId, Long sellerId) {
+        // 1:1 채팅방이 이미 있는지 확인
+        Optional<ChatRoom> existingRoom = chatRoomRepository.findBySellerIdAndBuyerIdAndProductId(sellerId, buyerId, productId);
+        if (existingRoom.isPresent()) {
+            return existingRoom.get();
+        }
+
+        // 새 채팅방 생성
+        ChatRoom chatRoom = new ChatRoom(productId, null, sellerId, buyerId);
+        chatRoom = chatRoomRepository.save(chatRoom);
+
+        // 채팅방에 판매자와 구매자 자동 추가 (자동 승인)
+        addParticipant(chatRoom.getId(), sellerId, true, true);
+        addParticipant(chatRoom.getId(), buyerId, false, true);
+
         return chatRoom;
     }
 
-    private Long generateChatRoomId(Long sellerId, Long buyerId) {
-        Long minId = Math.min(sellerId, buyerId);
-        Long maxId = Math.max(sellerId, buyerId);
-        return minId * 1000000L + maxId;
+    // 1:10 채팅방 생성
+    public ChatRoom createOneToManyChatRoom(Long productId, Long sellerId) {
+        // 판매자가 1:10 채팅방을 엶
+        ChatRoom chatRoom = new ChatRoom(productId, null, sellerId, null);
+        return chatRoomRepository.save(chatRoom);
     }
 
+    // 채팅방 조회
     public ChatRoom getChatRoom(Long chatRoomId) {
-        return chatRooms.get(chatRoomId);
+        return chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + chatRoomId));
     }
 
-    @Getter
-    class ChatRoom {
-        private final Long chatRoomId;
-        private final Long sellerId;
-        private final Long buyerId;
+    // 마지막 메시지 업데이트
+    public void updateLastMessage(Long chatRoomId, String lastMessage) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + chatRoomId));
 
-        public ChatRoom(Long chatRoomId, Long sellerId, Long buyerId) {
-            this.chatRoomId = chatRoomId;
-            this.sellerId = sellerId;
-            this.buyerId = buyerId;
+        chatRoom.setLastMessage(lastMessage);
+        chatRoom.setLastMessageSentAt(LocalDateTime.now());
+        chatRoomRepository.save(chatRoom);
+    }
+
+    // 참여자 추가
+    public void addParticipant(Long chatRoomId, Long memberId, boolean isSeller, boolean isApproved) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + chatRoomId));
+
+        long participantCount = chatRoomMemberRepository.countByChatRoomId(chatRoomId);
+
+        if (participantCount >= MAX_PARTICIPANTS) {
+            throw new IllegalStateException("채팅방의 최대 인원 수를 초과할 수 없습니다.");
         }
+
+        // 판매자 또는 승인된 참여자 추가
+        chatRoomMemberRepository.save(new ChatRoomMember(chatRoomId, memberId, isSeller, isApproved));
+    }
+
+    // 구매자의 채팅방 참여 요청 승인
+    public void approveParticipant(Long chatRoomId, Long memberId) {
+        ChatRoomMember chatRoomMember = chatRoomMemberRepository.findByChatRoomIdAndMemberId(chatRoomId, memberId);
+        if (chatRoomMember == null || chatRoomMember.isApproved()) {
+            throw new IllegalArgumentException("해당 참여자가 없거나 이미 승인되었습니다.");
+        }
+        chatRoomMember.setApproved(true);
+        chatRoomMemberRepository.save(chatRoomMember);
+    }
+
+    // 채팅방 참여 요청 목록 조회 (1:10)
+    public List<ChatRoomMember> getPendingRequests(Long chatRoomId) {
+        return chatRoomMemberRepository.findByChatRoomId(chatRoomId).stream()
+                .filter(member -> !member.isApproved() && !member.isSeller())
+                .toList();
     }
 }

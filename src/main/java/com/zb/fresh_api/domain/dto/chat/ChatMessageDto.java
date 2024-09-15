@@ -1,4 +1,4 @@
-package com.zb.fresh_api.domain.dto.chat;
+package com.zb.fresh_api.domain.chat;
 
 public record ChatMessageDto(
         Long chatRoomId,

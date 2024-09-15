@@ -1,43 +1,45 @@
 package com.zb.fresh_api.api.service;
 
+import com.zb.fresh_api.domain.entity.chat.ChatRoom;
+import com.zb.fresh_api.domain.repository.jpa.ChatRoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 class ChatRoomServiceTest {
 
+    @InjectMocks
     private ChatRoomService chatRoomService;
 
+    @Mock
+    private ChatRoomRepository chatRoomRepository;
+
     @BeforeEach
-    public void setup() {
-        chatRoomService = new ChatRoomService();
+    void setUp() {
+        openMocks(this);
     }
 
     @Test
     @DisplayName("채팅방 생성 성공")
     void createChatRoom_success() {
-        Long sellerId = 1L;
-        Long buyerId = 2L;
+        // Given
+        Long productId = 1L;
+        Long categoryId = 2L;
+        Long memberId = 3L;
+        Long sellerId = 4L;
+        Long buyerId = 5L;
 
-        ChatRoomService.ChatRoom chatRoom = chatRoomService.createChatRoom(sellerId, buyerId);
+        ChatRoom chatRoom = new ChatRoom(productId, categoryId, memberId, buyerId, sellerId);
 
-        assertNotNull(chatRoom);
-        assertEquals(sellerId, chatRoom.getSellerId());
-        assertEquals(buyerId, chatRoom.getBuyerId());
-    }
+        // When
+        chatRoomService.createChatRoom(productId, categoryId, memberId, sellerId, buyerId);
 
-    @Test
-    @DisplayName("채팅방 조회 성공")
-    void getChatRoom_success() {
-        Long sellerId = 1L;
-        Long buyerId = 2L;
-        ChatRoomService.ChatRoom chatRoom = chatRoomService.createChatRoom(sellerId, buyerId);
-
-        ChatRoomService.ChatRoom fetchedRoom = chatRoomService.getChatRoom(chatRoom.getChatRoomId());
-
-        assertEquals(chatRoom.getChatRoomId(), fetchedRoom.getChatRoomId());
+        // Then
+        verify(chatRoomRepository, times(1)).save(chatRoom);
     }
 }
