@@ -25,7 +25,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String errorResponse = objectMapper.writeValueAsString(ApiResponse.error(ResponseCode.UNAUTHORIZED, authException));
+        String errorResponse = objectMapper.writeValueAsString(ApiResponse.error(ResponseCode.UNAUTHORIZED, authException).getBody());
         response.getWriter().write(errorResponse);
 
     }
