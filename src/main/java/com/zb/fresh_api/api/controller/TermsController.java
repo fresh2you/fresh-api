@@ -23,7 +23,7 @@ import java.util.List;
     description = "회원가입 시 필요한 약관 관련 API"
 )
 @RestController
-@RequestMapping("/api/terms")
+@RequestMapping("/v1/api/terms")
 @RequiredArgsConstructor
 public class TermsController {
 
@@ -37,7 +37,7 @@ public class TermsController {
     @GetMapping
     public ResponseEntity<ApiResponse<GetAllTermsResponse>> getAllTerms() {
         List<TermsDto> terms = termsService.getTerms();
-        return ApiResponse.success(ResponseCode.SUCCESS);
+        return ApiResponse.success(ResponseCode.SUCCESS, new GetAllTermsResponse(terms));
     }
 
 
@@ -48,6 +48,6 @@ public class TermsController {
     @GetMapping("/{termsId}")
     public ResponseEntity<ApiResponse<GetTermsByIdResponse>> getTermsById(@PathVariable("termsId") Long termsId){
         TermsDto term = termsService.getTerm(termsId);
-        return ApiResponse.success(ResponseCode.SUCCESS);
+        return ApiResponse.success(ResponseCode.SUCCESS, GetTermsByIdResponse.fromDto(term));
     }
 }
