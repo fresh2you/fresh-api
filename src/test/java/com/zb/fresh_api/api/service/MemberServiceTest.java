@@ -106,7 +106,7 @@ class MemberServiceTest extends ServiceTest {
         Token token = Token.emptyToken();
 
         doReturn(accessToken).when(oauthProviderFactory).getAccessToken(request.provider(), request.redirectUri(), request.code());
-        doReturn(oauthUser).when(oauthProviderFactory).getOAuthUser(request.provider(), accessToken);
+        doReturn(oauthUser).when(oauthProviderFactory).getOauthUser(request.provider(), accessToken);
         doReturn(isSignup).when(memberReader).existsByEmailAndProvider(oauthUser.email(), request.provider());
 
         // when
@@ -120,7 +120,7 @@ class MemberServiceTest extends ServiceTest {
         Assertions.assertEquals(response.token(), token);
 
         verify(oauthProviderFactory).getAccessToken(request.provider(), request.redirectUri(), request.code());
-        verify(oauthProviderFactory).getOAuthUser(request.provider(), accessToken);
+        verify(oauthProviderFactory).getOauthUser(request.provider(), accessToken);
         verify(memberReader).existsByEmailAndProvider(oauthUser.email(), request.provider());
 
     }

@@ -1,6 +1,6 @@
 package com.zb.fresh_api.api.dto.response;
 
-import com.zb.fresh_api.api.dto.LoginMember;
+import com.zb.fresh_api.domain.dto.member.LoginMember;
 import com.zb.fresh_api.domain.dto.token.Token;
 import io.swagger.v3.oas.annotations.media.Schema;
 
