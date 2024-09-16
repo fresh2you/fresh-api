@@ -27,7 +27,7 @@ public class KakaoProvider implements OauthProvider {
 
     @Override
     public OauthToken getOauthToken(String redirectUri, String code) {
-        return kakaoAuthClient.generateOAuthToken(
+        return kakaoAuthClient.generateOauthToken(
                 grantType,
                 clientId,
                 redirectUri,

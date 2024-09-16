@@ -1,4 +1,4 @@
-package com.zb.fresh_api.api.dto.response;
+package com.zb.fresh_api.domain.dto.member;
 
 import com.zb.fresh_api.domain.enums.member.Provider;
 import io.swagger.v3.oas.annotations.media.Schema;
