@@ -3,10 +3,11 @@ package com.zb.fresh_api.api.controller;
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
-import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
+import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
+import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
 import com.zb.fresh_api.api.service.ProductService;
@@ -58,9 +59,9 @@ public class ProductController {
         summary = "상품 상세 조회",
         description = "상품 ID를 통해 상품을 상세 조회합니다."
     )
-    @GetMapping()
-    public ResponseEntity<ApiResponse<GetProductDetailResponse>> getProduct(GetProductDetailRequest request) {
-        GetProductDetailResponse productDetail = productService.getProductDetail(request);
+    @GetMapping("/{productId}")
+    public ResponseEntity<ApiResponse<GetProductDetailResponse>> getProduct(@PathVariable(value = "productId") Long productId) {
+        GetProductDetailResponse productDetail = productService.getProductDetail(productId);
         return ApiResponse.success(ResponseCode.SUCCESS, productDetail);
     }
 
