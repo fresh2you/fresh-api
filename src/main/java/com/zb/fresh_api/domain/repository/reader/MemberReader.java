@@ -38,4 +38,8 @@ public class MemberReader {
         return memberQueryRepository.existActiveNickname(nickname);
     }
 
+    public boolean existsByPhone(String phone){
+        return memberQueryRepository.existsByPhone(phone);
+    }
+
 }

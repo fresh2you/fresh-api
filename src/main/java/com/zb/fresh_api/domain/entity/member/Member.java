@@ -69,6 +69,12 @@ public class Member extends BaseTimeEntity {
     @Column(name = "deleted_at", columnDefinition = "datetime comment '탈퇴 일시'")
     private LocalDateTime deletedAt;
 
+    @Column(name = "is_seller", columnDefinition = "boolean comment '판매자 인증 여부'")
+    private boolean isSeller = false;
+
+    @Column(name = "seller_verified_at", columnDefinition = "datetime comment '판매자 인증 일시'")
+    private LocalDateTime sellerVerifiedAt;
+  
     public static Member create(String nickname, String email, String password,
         Provider provider, String providerId, MemberRole memberRole, MemberStatus memberStatus){
         return Member.builder()
@@ -81,6 +87,7 @@ public class Member extends BaseTimeEntity {
             .status(memberStatus)
             .build();
     }
+
     public void updateProfile(final String nickname,
                               final String profileImage) {
         updateNickname(nickname);
@@ -99,6 +106,12 @@ public class Member extends BaseTimeEntity {
             return;
         }
         this.profileImage = profileImage;
+    }
+
+    public void setMemberSeller(String phone) {
+        this.phone = phone;
+        this.isSeller = true;
+        this.sellerVerifiedAt = LocalDateTime.now();
     }
 
 }
