@@ -6,6 +6,7 @@ import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.common.response.ApiResponse;
 import com.zb.fresh_api.domain.entity.member.Member;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class SmsAuthController {
     )
     @GetMapping("/verify")
     public ResponseEntity<ApiResponse<Void>> verifySmsCode(@RequestParam String phoneNumber,
-        @RequestParam String verificationCode, @LoginMember Member member) {
+        @RequestParam String verificationCode, @Parameter(hidden = true) @LoginMember Member member) {
         smsService.verifyCode(phoneNumber, verificationCode, member);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
