@@ -1,8 +1,8 @@
 package com.zb.fresh_api.api.service;
 
+import com.zb.fresh_api.common.exception.UnauthorizedException;
 import com.zb.fresh_api.domain.entity.chat.ChatRoom;
 import com.zb.fresh_api.domain.repository.jpa.ChatRoomRepository;
-import com.zb.fresh_api.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -2,8 +2,8 @@ package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.domain.entity.chat.ChatRoom;
 import com.zb.fresh_api.domain.entity.chat.ChatRoomMember;
-import com.zb.fresh_api.domain.repository.jpa.ChatRoomRepository;
 import com.zb.fresh_api.domain.repository.jpa.ChatRoomMemberRepository;
+import com.zb.fresh_api.domain.repository.jpa.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +19,17 @@ public class ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     private static final int MAX_PARTICIPANTS = 10;  // 채팅방 최대 인원
+
+    // 채팅방 생성 (1:1 또는 1:10)
+    public ChatRoom createChatRoom(Long productId, Long buyerId, Long sellerId, boolean isOneToOne) {
+        if (isOneToOne) {
+            // 1:1 채팅방 생성
+            return createOneToOneChatRoom(productId, buyerId, sellerId);
+        } else {
+            // 1:10 채팅방 생성
+            return createOneToManyChatRoom(productId, sellerId);
+        }
+    }
 
     // 1:1 채팅방 생성
     public ChatRoom createOneToOneChatRoom(Long productId, Long buyerId, Long sellerId) {
