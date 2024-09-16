@@ -93,4 +93,15 @@ public class ProductController {
 
     }
 
+    @Operation(
+        summary = "상품 목록 조회",
+        description = "키워드 또는 카테고리 타입 등을 통해 상품을 상세 조회합니다."
+    )
+    @GetMapping()
+    public ResponseEntity<ApiResponse<GetAllProductByConditionsResponse>> getAllProductByConditions(
+        GetAllProductByConditionsRequest request) {
+        GetAllProductByConditionsResponse products = productService.findProducts(request);
+        return ApiResponse.success(ResponseCode.SUCCESS, products);
+    }
+
 }
