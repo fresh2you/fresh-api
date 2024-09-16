@@ -1,0 +1,81 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+#    import: aws-parameterstore:/param/fresh2you_dev/
+
+  security:
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorizationUri: https://kauth.kakao.com/oauth/authorize
+            tokenUri: https://kauth.kakao.com/oauth/token
+            userInfoUri: https://kapi.kakao.com/v2/user/me
+            userNameAttribute: id
+
+        registration:
+          kakao:
+            clientId: ${kakao.client.id}
+            clientSecret: ${kakao.client.secret}
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            client-name: kakao
+            redirectUri: ${kakao.client.redirect.uri}
+            scope:
+              #            - profile_nickname
+              #            - profile_image
+              - account_email
+
+  mail:
+    host: smtp.gmail.com
+    port: ${mail.port}
+    username: ${mail.username}
+    password: ${mail.password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
+  coolsms:
+    apiKey: ${coolsms.key}
+    apiSecret: ${coolsms.secret}
+    fromNumber: ${coolsms.number}
+    apiUrl: https://api.coolsms.co.kr
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jwt:
+    secret: ${jwt.secret}
+
+  datasource:
+    driver-class-name: ${datasource.driver}
+    url: ${datasource.url}
+    username: ${datasource.username}
+    password: ${datasource.password}
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true      # 쿼리 로그 포맷 (정렬)
+        show_sql: false        # 쿼리 로그 출력
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
