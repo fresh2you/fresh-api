@@ -10,8 +10,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
-import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
+import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -24,12 +25,18 @@ import com.zb.fresh_api.domain.repository.reader.CategoryReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import net.jqwik.api.Arbitraries;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 @DisplayName("제품 관련 비즈니스 테스트")
@@ -165,15 +172,13 @@ class ProductServiceTest extends ServiceTest {
     void getProduct_fail_PRODUCTID_NOT_FOUND() {
         // given
         Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
-        GetProductDetailRequest request = getConstructorMonkey().giveMeBuilder(
-                GetProductDetailRequest.class).set("productId", productId)
-            .sample();
 
-        doReturn(Optional.empty()).when(productReader).findById(request.productId());
+
+        doReturn(Optional.empty()).when(productReader).findById(productId);
 
         // when
         CustomException customException = assertThrows(CustomException.class,
-            () -> productService.getProductDetail(request));
+            () -> productService.getProductDetail(productId));
 
         // then
         assertEquals(customException.getResponseCode(), ResponseCode.PRODUCT_NOT_FOUND);
@@ -184,9 +189,6 @@ class ProductServiceTest extends ServiceTest {
     void getProductDetail_success(){
         // given
         Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
-        GetProductDetailRequest request = getConstructorMonkey().giveMeBuilder(
-                GetProductDetailRequest.class).set("productId", productId)
-            .sample();
         Member member = getConstructorMonkey().giveMeBuilder(Member.class)
             .set("name" , Arbitraries.strings())
             .sample();
@@ -200,10 +202,10 @@ class ProductServiceTest extends ServiceTest {
             .set("productImage", Arbitraries.strings().ofMinLength(1))
             .sample();
 
-        doReturn(Optional.of(product)).when(productReader).findById(request.productId());
+        doReturn(Optional.of(product)).when(productReader).findById(productId);
 
         // when
-        GetProductDetailResponse productDetail = productService.getProductDetail(request);
+        GetProductDetailResponse productDetail = productService.getProductDetail(productId);
 
         // then
         assertEquals(product.getName(), productDetail.productName());
@@ -212,5 +214,41 @@ class ProductServiceTest extends ServiceTest {
         assertEquals(product.getQuantity(), productDetail.quantity());
         assertEquals(product.getDescription(), productDetail.description());
         assertEquals(product.getProductImage(), productDetail.imageUrl());
+    }
+
+    @Test
+    @DisplayName("상품 목록 조회 성공")
+    void findProducts_success(){
+        // given
+        GetAllProductByConditionsRequest request =
+            getConstructorMonkey().giveMeBuilder(GetAllProductByConditionsRequest.class)
+                .set("categoryId", Arbitraries.longs().greaterOrEqual(1L))
+                .set("keyword", Arbitraries.strings().ofMaxLength(10))
+                .set("page",Arbitraries.integers().greaterOrEqual(1).lessOrEqual(3))
+                .set("size",Arbitraries.integers().greaterOrEqual(1).lessOrEqual(3))
+                .sample();
+        List<Member> memberList = getReflectionMonkey().giveMe(Member.class, 3);
+        Product product1 = getReflectionMonkey().giveMeBuilder(Product.class)
+            .set("member", memberList.get(0))
+            .sample();
+        Product product2 = getReflectionMonkey().giveMeBuilder(Product.class)
+            .set("member", memberList.get(1))
+            .sample();
+        Product product3 = getReflectionMonkey().giveMeBuilder(Product.class)
+            .set("member", memberList.get(2))
+            .sample();
+        List<Product> productList = new ArrayList<>(List.of(product1,product2,product3));
+
+
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Product> productPage = new PageImpl<>(productList, pageable, productList.size());
+
+        doReturn(productPage).when(productReader).findAll(request);
+
+        // when
+        GetAllProductByConditionsResponse products = productService.findProducts(request);
+
+        assertNotNull(products);
+        assertEquals(3, products.productList().size());
     }
 }
