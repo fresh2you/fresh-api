@@ -25,7 +25,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String errorResponse = objectMapper.writeValueAsString(ApiResponse.error(ResponseCode.FORBIDDEN, accessDeniedException));
+        String errorResponse = objectMapper.writeValueAsString(ApiResponse.error(ResponseCode.FORBIDDEN, accessDeniedException).getBody());
         response.getWriter().write(errorResponse);
     }
 }
