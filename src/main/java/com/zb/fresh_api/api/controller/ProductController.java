@@ -7,6 +7,7 @@ import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
+import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
@@ -104,4 +105,15 @@ public class ProductController {
         return ApiResponse.success(ResponseCode.SUCCESS, products);
     }
 
+    @Operation(
+        summary = "좋아요 상품 목록 조회",
+        description = "키워드 또는 카테고리 타입 등을 통해 상품을 상세 조회합니다."
+    )
+    @GetMapping("/like")
+    public ResponseEntity<ApiResponse<FindAllProductLikeResponse>> getAllProductByLike(
+        @Parameter(hidden = true) @LoginMember Member loginMember) {
+        FindAllProductLikeResponse productList = productService.findAllProductLike(
+            loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS, productList);
+    }
 }

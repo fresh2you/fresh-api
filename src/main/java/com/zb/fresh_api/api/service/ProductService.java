@@ -6,6 +6,7 @@ import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
+import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
@@ -16,9 +17,12 @@ import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
+import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.ProductSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,6 +38,7 @@ public class ProductService {
     private final ProductReader productReader;
     private final CategoryReader categoryReader;
     private final ProductSnapshotWriter productSnapshotWriter;
+    private final ProductLikeReader productLikeReader;
 
     @Transactional
     public AddProductResponse addProduct(AddProductRequest request, Member member,
@@ -117,5 +122,19 @@ public class ProductService {
         Page<Product> products = productReader.findAll(request);
 
         return GetAllProductByConditionsResponse.fromEntities(products);
+    }
+
+    public FindAllProductLikeResponse findAllProductLike(Long memberId){
+        List<Long> productLikes = productLikeReader.findProductIdByMemberId(memberId);
+
+        List<Product> productList = new ArrayList<>();
+        for(Long productId : productLikes){
+            Product product = productReader.findById(productId).orElseThrow(
+                () -> new CustomException(ResponseCode.PRODUCT_NOT_FOUND)
+            );
+            productList.add(product);
+        }
+
+        return FindAllProductLikeResponse.fromEntities(productList);
     }
 }
