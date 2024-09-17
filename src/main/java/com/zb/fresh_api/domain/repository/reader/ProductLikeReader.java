@@ -5,6 +5,7 @@ import com.zb.fresh_api.domain.entity.product.ProductLike;
 import com.zb.fresh_api.domain.repository.jpa.ProductLikeJpaRepository;
 import com.zb.fresh_api.domain.repository.query.ProductLikeQueryRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 @Reader
@@ -12,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductLikeReader {
     private final ProductLikeJpaRepository productLikeJpaRepository;
     private final ProductLikeQueryRepository productLikeQueryRepository;
-    public boolean existsByProductIdAndMemberId(Long productId,  Long memberId){
+    public boolean isExist(Long productId,  Long memberId){
         return productLikeJpaRepository.existsByProductIdAndMemberId(productId, memberId);
     }
 
@@ -26,5 +27,9 @@ public class ProductLikeReader {
 
     public ProductLike store(ProductLike productLike){
         return productLikeJpaRepository.save(productLike);
+    }
+
+    public Optional<ProductLike> findByProductIdAndMemberId(Long productId,Long memberId){
+        return productLikeJpaRepository.findByProductIdAndMemberId(productId,memberId);
     }
 }
