@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
@@ -15,16 +16,20 @@ import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
+import com.zb.fresh_api.api.dto.response.LikeProductResponse;
 import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
+import com.zb.fresh_api.domain.entity.product.ProductLike;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
+import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
+import com.zb.fresh_api.domain.repository.writer.ProductLikeWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -56,6 +61,11 @@ class ProductServiceTest extends ServiceTest {
     @Mock
     private ProductLikeReader productLikeReader;
 
+    @Mock
+    private  MemberReader memberReader;
+
+    @Mock
+    private  ProductLikeWriter productLikeWriter;
     @InjectMocks
     private ProductService productService;
 
@@ -194,10 +204,10 @@ class ProductServiceTest extends ServiceTest {
     void getProductDetail_success(){
         // given
         Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
-        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+        Member member = getReflectionMonkey().giveMeBuilder(Member.class)
             .set("name" , Arbitraries.strings())
             .sample();
-        Product product = getConstructorMonkey().giveMeBuilder(Product.class)
+        Product product = getReflectionMonkey().giveMeBuilder(Product.class)
             .set("id", productId)
             .set("name" , Arbitraries.strings().withCharRange('a', 'z'))
             .set("member", member)
@@ -287,4 +297,56 @@ class ProductServiceTest extends ServiceTest {
         assertEquals(response.productList().size(), productLikeIds.size());
         assertNotNull(response);
     }
+
+    @Test
+    @DisplayName("상품 좋아요 성공")
+    void likeProduct_success() {
+        // given
+        Long memberId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Product product = getReflectionMonkey().giveMeBuilder(Product.class)
+            .set("id", productId).sample();
+        Member member = getReflectionMonkey().giveMeBuilder(Member.class)
+            .set("id", memberId).sample();
+        ProductLike productLike = ProductLike.create(member, product);
+
+        doReturn(Optional.of(product)).when(productReader).findById(productId);
+        doReturn(member).when(memberReader).getById(memberId);
+        doReturn(false).when(productLikeReader).isExist(productId, memberId);
+        doReturn(productLike).when(productLikeWriter).store(argThat(
+            m -> m.getProduct().equals(product) &&
+                m.getMember().equals(member)
+        ));
+
+        // when
+        LikeProductResponse response = productService.like(productId, memberId);
+
+        // then
+        assertNotNull(response);
+        assertEquals(response.productId(), productId);
+    }
+
+    @Test
+    @DisplayName("상품 좋아요 취소 성공")
+    void unLikeProduct_success() {
+        // given
+        Long memberId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Product product = getReflectionMonkey().giveMeBuilder(Product.class)
+            .set("id", productId).sample();
+        Member member = getReflectionMonkey().giveMeBuilder(Member.class)
+            .set("id", memberId).sample();
+        ProductLike productLike = ProductLike.create(member, product);
+
+        doReturn(Optional.of(product)).when(productReader).findById(productId);
+        doReturn(member).when(memberReader).getById(memberId);
+        doReturn(Optional.of(productLike)).when(productLikeReader).findByProductIdAndMemberId(productId, memberId);
+
+        // when
+        productService.unLike(productId, memberId);
+
+        // then
+        verify(productLikeWriter, times(1)).delete(productLike);
+    }
+
 }
