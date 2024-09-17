@@ -89,6 +89,12 @@ public enum ResponseCode {
      */
     NOT_FOUND_DELIVERY_ADDRESS("1700", "등록된 배송지 정보를 찾을 수 없습니다."),
     EXCEEDED_DELIVERY_ADDRESS_COUNT("1701", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
+
+    /**
+     * ProductLike (1800 ~ 1900)
+     */
+    PRODUCT_LIKE_NOT_FOUND("1800", "상품에 대한 좋아요가 존재하지 않습니다"),
+    PRODUCT_ALREADY_LIKED("1801", "이미 좋아요한 상품입니다")
     ;
 
     private final String code;

@@ -10,6 +10,7 @@ import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
 import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
+import com.zb.fresh_api.api.dto.response.LikeProductResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
 import com.zb.fresh_api.api.service.ProductService;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -115,5 +116,29 @@ public class ProductController {
         FindAllProductLikeResponse productList = productService.findAllProductLike(
             loginMember.getId());
         return ApiResponse.success(ResponseCode.SUCCESS, productList);
+    }
+
+    @Operation(
+        summary = "상품 좋아요",
+        description = "상품 좋아요 추가 "
+    )
+    @PostMapping("/{productId}/like")
+    public ResponseEntity<ApiResponse<LikeProductResponse>> setProductLike(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @PathVariable(name = "productId") Long productId) {
+        LikeProductResponse likeProductResponse = productService.like(productId, loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS,likeProductResponse);
+    }
+
+    @Operation(
+        summary = "상품 좋아요 취소",
+        description = "상품의 좋아요 삭제"
+    )
+    @DeleteMapping("/{productId}/like")
+    public ResponseEntity<ApiResponse<Void>> setProductUnLike(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @PathVariable(name = "productId") Long productId) {
+        productService.unLike(productId, loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS);
     }
 }
