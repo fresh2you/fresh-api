@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.common.base.ServiceTest;
@@ -22,6 +23,7 @@ import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
+import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import java.math.BigDecimal;
@@ -50,6 +52,9 @@ class ProductServiceTest extends ServiceTest {
 
     @Mock
     private  ProductReader productReader;
+
+    @Mock
+    private ProductLikeReader productLikeReader;
 
     @InjectMocks
     private ProductService productService;
@@ -250,5 +255,36 @@ class ProductServiceTest extends ServiceTest {
 
         assertNotNull(products);
         assertEquals(3, products.productList().size());
+    }
+
+    @Test
+    @DisplayName("좋아요한 상품 목록 조회 성공")
+    void findAllProductLike_success(){
+        // given
+        Long memberId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long product1Id = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long product2Id = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long product3Id = Arbitraries.longs().greaterOrEqual(1L).sample();
+        List<Long> productLikeIds = new ArrayList<>(List.of(product1Id,product2Id,product3Id));
+        List<Product> products = new ArrayList<>(List.of(
+            getReflectionMonkey().giveMeBuilder(Product.class)
+                .set("id", product1Id).sample(),
+            getReflectionMonkey().giveMeBuilder(Product.class)
+                .set("id", product2Id).sample(),
+            getReflectionMonkey().giveMeBuilder(Product.class)
+                .set("id", product3Id).sample()));
+
+        doReturn(productLikeIds).when(productLikeReader).findProductIdByMemberId(memberId);
+        doReturn(Optional.of(products.get(0))).when(productReader).findById(product1Id);
+        doReturn(Optional.of(products.get(1))).when(productReader).findById(product2Id);
+        doReturn(Optional.of(products.get(2))).when(productReader).findById(product3Id);
+
+
+        // when
+        FindAllProductLikeResponse response = productService.findAllProductLike(memberId);
+
+        // then
+        assertEquals(response.productList().size(), productLikeIds.size());
+        assertNotNull(response);
     }
 }
