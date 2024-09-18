@@ -1,11 +1,10 @@
 package com.zb.fresh_api.api.config;
 
+import com.zb.fresh_api.api.exception.CustomAccessDeniedHandler;
 import com.zb.fresh_api.api.exception.CustomAuthenticationEntryPoint;
 import com.zb.fresh_api.api.filter.JwtAuthenticationFilter;
 import com.zb.fresh_api.api.filter.JwtExceptionFilter;
-import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.common.constants.SecurityConstants;
-import com.zb.fresh_api.api.exception.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +50,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomUserDetailsService customUserDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
@@ -65,6 +64,7 @@ public class SecurityConfig {
                                 .requestMatchers(OPTIONS, "**").permitAll()
                                 .requestMatchers(SecurityConstants.SWAGGER_PATH).permitAll()
                                 .requestMatchers(SecurityConstants.PERMIT_ALL_PATH).permitAll()
+                                .anyRequest().authenticated()
                 )
 
                 .exceptionHandling(e ->

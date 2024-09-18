@@ -15,11 +15,13 @@ public enum ResponseCode {
     /**
      * Common (0600 ~ 0800)
      */
-    NOT_FOUND_ENUM_CONSTANT("0600", "열거형 상수값을 찾을 수 없습니다."),
+    INTERNAL_SERVER_ERROR("0600", "내부 서버 오류가 발생하였습니다."),
     IS_NULL("0601", "NULL 값이 들어왔습니다."),
     COMMON_INVALID_PARAM("0602", "요청한 값이 올바르지 않습니다."),
     INVALID_AUTHENTICATION("0603", "인증이 올바르지 않습니다."),
     NO_SUCH_METHOD("0604", "메소드를 찾을 수 없습니다."),
+    NOT_FOUND_ENUM_CONSTANT("0605", "열거형 상수값을 찾을 수 없습니다."),
+    S3_UPLOADER_ERROR("0606", "S3 업로드 중 오류가 발생하였습니다."),
 
     FORBIDDEN("0700", "접근 권한이 없습니다."),
     UNAUTHORIZED("0701", "유효한 인증 자격이 없습니다."),
