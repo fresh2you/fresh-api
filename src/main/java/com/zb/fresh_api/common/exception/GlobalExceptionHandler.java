@@ -17,4 +17,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ApiResponse.fail(e.getResponseCode());
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<String>> handle(RuntimeException e) {
+        log.error("RuntimeException : {}", e.getMessage());
+        return ApiResponse.fail(ResponseCode.COMMON_INVALID_PARAM, e.getMessage());
+    }
+
 }

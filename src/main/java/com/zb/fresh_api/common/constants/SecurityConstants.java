@@ -10,6 +10,7 @@ public class SecurityConstants {
     public static final String[] ALLOW_ORIGINS = {
             "http://localhost:8080",
             "https://api.jihun-dev.kr",
+            "https://jihun-dev.kr",
     };
 
     public static final String[] SWAGGER_PATH = {
@@ -23,9 +24,16 @@ public class SecurityConstants {
 
     public static final String[] PERMIT_ALL_PATH = {
             /**
+             * Health
+            */
+            "/health",
+
+            /**
              * Member
             */
-            "/v1/api/members/auth/**",
+            "/v1/api/members/signup",
+            "/v1/api/members/login",
+            "/v1/api/members/login/**",
             "/v1/api/members/check-nickname",
             "/v1/api/members/check-email",
 
