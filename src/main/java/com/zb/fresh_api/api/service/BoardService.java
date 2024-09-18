@@ -50,7 +50,7 @@ public class BoardService {
         }
 
         board.update(request.title());
-        boardWriter.store(board);
+        Board storedBoard = boardWriter.store(board);
 
         return new UpdateBoardResponse(board.getId(),board.getTitle(),board.getUpdatedAt());
 

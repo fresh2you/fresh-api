@@ -1,10 +1,13 @@
 package com.zb.fresh_api.api.service;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 
+import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
+import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.domain.entity.board.Board;
 import com.zb.fresh_api.domain.entity.member.Member;
@@ -13,6 +16,7 @@ import com.zb.fresh_api.domain.repository.reader.BoardReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.BoardWriter;
+import java.util.Objects;
 import java.util.Optional;
 import net.jqwik.api.Arbitraries;
 import org.junit.jupiter.api.DisplayName;
@@ -62,5 +66,44 @@ class BoardServiceTest extends ServiceTest {
         // then
         assertNotNull(response);
 
+    }
+
+    @Test
+    @DisplayName("게시판 수정 성공")
+    void updateBoard_success(){
+        UpdateBoardRequest request = getConstructorMonkey().giveMeBuilder(UpdateBoardRequest.class)
+            .set("title" , Arbitraries.strings().ofMaxLength(20))
+            .sample();
+        Long memberId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long boardId = Arbitraries.longs().greaterOrEqual(1L).sample();
+
+        Member member = getReflectionMonkey().giveMeBuilder(Member.class)
+            .set("id" ,memberId)
+            .sample();
+        Product product = getProduct(member);
+        Board board = getBoard(member,product);
+        Board updatedBoard = getReflectionMonkey().giveMeBuilder(Board.class)
+            .set("member", member)
+            .set("product", product)
+            .set("title", request.title())
+            .sample();
+
+        Board board1 = Board.create(member,product, request.title());
+        doReturn(member).when(memberReader).getById(memberId);
+        doReturn(board).when(boardReader).getById(boardId);
+        doReturn(updatedBoard).when(boardWriter).store(
+            argThat(x -> Objects.equals(x.getMember().getId(), board1.getMember().getId())
+            && Objects.equals(x.getProduct().getId(), board1.getProduct().getId())
+            && Objects.equals(x.getTitle(), board1.getTitle()))
+        );
+
+        // when
+        UpdateBoardResponse response = boardService.updateBoard(memberId, request, boardId);
+
+        // then
+        assertNotNull(response);
+        assertEquals(response.boardId(),board.getId());
+        assertEquals(response.title(), request.title());
+        assertNotNull(board.getUpdatedAt());
     }
 }

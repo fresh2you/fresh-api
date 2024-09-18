@@ -6,6 +6,7 @@ import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitra
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
 import com.navercorp.fixturemonkey.jakarta.validation.plugin.JakartaValidationPlugin;
 import com.zb.fresh_api.domain.config.JpaAuditingConfig;
+import com.zb.fresh_api.domain.entity.board.Board;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.enums.member.Provider;
@@ -42,6 +43,15 @@ public abstract class ServiceTest {
             .set("quantity", Arbitraries.integers().greaterOrEqual(1))
             .set("price", Arbitraries.bigDecimals().greaterOrEqual(BigDecimal.valueOf(1)))
             .set("productImage", Arbitraries.strings().ofMaxLength(255))
+            .sample();
+    }
+
+    protected Board getBoard(Member member, Product product){
+        return getReflectionMonkey().giveMeBuilder(Board.class)
+            .set("id", Arbitraries.longs().greaterOrEqual(1L))
+            .set("member", member)
+            .set("product", product)
+            .set("title" , Arbitraries.strings().ofMaxLength(20))
             .sample();
     }
 
