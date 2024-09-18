@@ -26,7 +26,7 @@ public class BoardService {
     private final MemberReader memberReader;
     private final ProductReader productReader;
 
-    public AddBoardResponse addBoard(Long memberId, Long productId, String title ) {
+    public AddBoardResponse addBoard(final Long memberId, final Long productId, final String title ) {
         Member member = memberReader.getById(memberId);
         Product product = productReader.findById(productId).orElseThrow(
             () -> new CustomException(ResponseCode.PRODUCT_NOT_FOUND)
@@ -44,7 +44,7 @@ public class BoardService {
         return new AddBoardResponse(board.getId(), board.getTitle(), board.getCreatedAt());
     }
 
-    public UpdateBoardResponse updateBoard(Long memberId, UpdateBoardRequest request, Long boardId) {
+    public UpdateBoardResponse updateBoard(final Long memberId, final UpdateBoardRequest request, final Long boardId) {
         Member member = memberReader.getById(memberId);
         Board board = boardReader.getById(boardId);
         if(!Objects.equals(board.getMember().getId(), memberId)){
@@ -59,7 +59,7 @@ public class BoardService {
     }
 
     @Transactional
-    public DeleteBoardResponse deleteBoard(Long memberId, Long boardId) {
+    public DeleteBoardResponse deleteBoard(final Long memberId, final Long boardId) {
         Member member = memberReader.getById(memberId);
         Board board = boardReader.getById(boardId);
         if(!Objects.equals(board.getMember().getId(), memberId)){
@@ -69,5 +69,12 @@ public class BoardService {
         board.delete();
 
         return new DeleteBoardResponse(board.getId(),board.getDeletedAt());
+    }
+
+    public void getAllBoard(final Long memberId) {
+        Member member = memberReader.getById(memberId);
+        
+        // TODO order가 생성된 이후 로직 작성
+        // Member의 OrderID검색 후 productId들의 게시판 기록 조회
     }
 }
