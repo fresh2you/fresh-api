@@ -72,4 +72,15 @@ public class BoardController {
             boardId);
         return ApiResponse.success(ResponseCode.SUCCESS,response);
     }
+
+//    @Operation(
+//        summary = "게시판 목록 조회",
+//        description = "게시판 목록 조회를 위한 API입니다"
+//    )
+//    @PostMapping
+//    public ResponseEntity<ApiResponse<Void>> getAllBoard(
+//        @Parameter(hidden = true) @LoginMember Member loginMember) {
+//            boardService.getAllBoard(loginMember.getId());
+//        return ApiResponse.success(ResponseCode.SUCCESS);
+//    }
 }
