@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 
 import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
+import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.domain.entity.board.Board;
@@ -105,5 +106,28 @@ class BoardServiceTest extends ServiceTest {
         assertEquals(response.boardId(),board.getId());
         assertEquals(response.title(), request.title());
         assertNotNull(board.getUpdatedAt());
+    }
+
+    @Test
+    @DisplayName("게시판 삭제 성공")
+    void deleteBoard_success(){
+        // given
+        Member member = getMember();
+        Long boardId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Board board = getReflectionMonkey().giveMeBuilder(Board.class)
+                .set("id" ,boardId)
+            .set("member", member)
+                    .sample();
+
+        doReturn(member).when(memberReader).getById(member.getId());
+        doReturn(board).when(boardReader).getById(boardId);
+
+        // when
+        DeleteBoardResponse response = boardService.deleteBoard(member.getId(), boardId);
+
+        // then
+        assertNotNull(response);
+        assertEquals(boardId, response.boardId());
+        assertNotNull(response.deletedAt());
     }
 }
