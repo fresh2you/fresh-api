@@ -1,12 +1,12 @@
 package com.zb.fresh_api.api.controller.Auth;
 
+import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.service.SmsService;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.common.response.ApiResponse;
+import com.zb.fresh_api.domain.entity.member.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,25 +26,23 @@ public class SmsAuthController {
     private final SmsService smsService;
 
     @Operation(
-        summary = "인증 문자 전송",
+        summary = "판매자 인증 문자 전송",
         description = "입력한 휴대전화로 인증번호를 전송합니다"
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@Valid @Pattern(regexp="(^$|[0-9]{10})")
-    @RequestParam String phoneNumber) {
+    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestParam String phoneNumber) {
         smsService.sendSms(phoneNumber);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
     @Operation(
-        summary = "인증 코드 인증",
+        summary = "판매자 인증 코드 인증",
         description = "휴대전화로 온 인증코드를 통해 인증합니다"
     )
     @GetMapping("/verify")
-    public ResponseEntity<ApiResponse<Void>> verifySmsCode(@Valid @Pattern(regexp="(^$|[0-9]{10})")
-    @RequestParam String phoneNumber,
-        @RequestParam String verificationCode) {
-        smsService.verifyCode(phoneNumber, verificationCode);
+    public ResponseEntity<ApiResponse<Void>> verifySmsCode(@RequestParam String phoneNumber,
+        @RequestParam String verificationCode, @LoginMember Member member) {
+        smsService.verifyCode(phoneNumber, verificationCode, member);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 }

@@ -12,7 +12,8 @@ import org.springframework.context.annotation.Profile;
 @Profile("!prod")
 @OpenAPIDefinition(
         servers = {
-                @Server(url = "http://localhost:8080", description = "Local")
+                @Server(url = "http://localhost:8080", description = "Local"),
+                @Server(url = "https://api.jihun-dev.kr", description = "Dev")
         }
 )
 @io.swagger.v3.oas.annotations.security.SecurityScheme(

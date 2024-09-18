@@ -41,14 +41,14 @@ public class OauthProviderFactory {
     }
 
     public String getAccessToken(Provider provider, String redirectUri, String code) {
-        return getOAuthToken(provider, redirectUri, code).accessToken();
+        return getOauthToken(provider, redirectUri, code).accessToken();
     }
 
-    private OauthToken getOAuthToken(Provider provider, String redirectUri, String code) {
+    private OauthToken getOauthToken(Provider provider, String redirectUri, String code) {
         return getOauthProvider(provider).getOauthToken(redirectUri, code);
     }
 
-    public OauthUser getOAuthUser(Provider provider, String accessToken) {
+    public OauthUser getOauthUser(Provider provider, String accessToken) {
         return getOauthProvider(provider).getOauthUser(accessToken);
     }
 

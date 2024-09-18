@@ -36,6 +36,17 @@ public class MemberQueryRepository {
             .fetchFirst() != null;
     }
 
+    public boolean existsByPhone(String phone) {
+        QMember member = QMember.member;
+
+        Long count = jpaQueryFactory
+            .select(member.count())
+            .from(member)
+            .where(member.phone.eq(phone))
+            .fetchOne();
+
+        return count != null && count > 0;
+    }
     private BooleanExpression eqEmail(QMember member, String email) {
         return member.email.eq(email);
     }

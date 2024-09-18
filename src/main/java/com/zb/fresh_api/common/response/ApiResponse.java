@@ -34,7 +34,7 @@ public record ApiResponse<T>(
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, responseCode.getCode(), responseCode.getMessage(), data));
     }
 
-    public static <T> ResponseEntity<ApiResponse<String>> error(ResponseCode responseCode, RuntimeException exception) {
+    public static ResponseEntity<ApiResponse<String>> error(ResponseCode responseCode, RuntimeException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, responseCode.getCode(), responseCode.getMessage(), exception.getMessage()));
     }
 

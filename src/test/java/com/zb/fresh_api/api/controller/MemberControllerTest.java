@@ -105,7 +105,7 @@ class MemberControllerTest {
 
     @Test
     @DisplayName("회원가입 성공")
-    void signUp_success() throws Exception {
+    void signup_success() throws Exception {
         TermsAgreementDto termsAgreementDto = new TermsAgreementDto(1L, true);
         SignUpRequest request = new SignUpRequest("test@example.com", "password",
             "password", "nickname", List.of(termsAgreementDto), Provider.EMAIL,

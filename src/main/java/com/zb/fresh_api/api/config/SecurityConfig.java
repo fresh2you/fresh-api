@@ -1,5 +1,7 @@
 package com.zb.fresh_api.api.config;
 
+import com.zb.fresh_api.api.exception.CustomAccessDeniedHandler;
+import com.zb.fresh_api.api.exception.CustomAuthenticationEntryPoint;
 import com.zb.fresh_api.api.filter.JwtAuthenticationFilter;
 import com.zb.fresh_api.api.filter.JwtExceptionFilter;
 import com.zb.fresh_api.common.constants.SecurityConstants;
@@ -34,6 +36,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
 
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -61,6 +66,12 @@ public class SecurityConfig {
                                 .requestMatchers(SecurityConstants.PERMIT_ALL_PATH).permitAll()
                                 .requestMatchers("/chat/**").permitAll()
                                 .anyRequest().authenticated()
+                )
+
+                .exceptionHandling(e ->
+                        e
+                                .authenticationEntryPoint(authenticationEntryPoint)
+                                .accessDeniedHandler(accessDeniedHandler)
                 )
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

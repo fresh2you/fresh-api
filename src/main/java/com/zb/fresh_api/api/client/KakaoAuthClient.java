@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface KakaoAuthClient {
 
     @PostMapping(value = "/oauth/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    KakaoToken generateOAuthToken(@RequestParam(name = "grant_type") String grantType,
+    KakaoToken generateOauthToken(@RequestParam(name = "grant_type") String grantType,
                                   @RequestParam(name = "client_id") String clientId,
                                   @RequestParam(name = "redirect_uri") String redirectUri,
                                   @RequestParam(name = "code") String code,
