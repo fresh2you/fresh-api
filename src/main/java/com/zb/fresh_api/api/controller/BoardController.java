@@ -2,7 +2,9 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.request.AddBoardRequest;
+import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
+import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.api.service.BoardService;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.common.response.ApiResponse;
@@ -13,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,4 +43,18 @@ public class BoardController {
         return ApiResponse.success(ResponseCode.SUCCESS, response);
     }
 
+
+    @Operation(
+        summary = "게시판 수정",
+        description = "게시판 수정을 위한 API입니다."
+    )
+    @PatchMapping(value = "/{boardId}")
+    public ResponseEntity<ApiResponse<UpdateBoardResponse>> updateBoard(
+        @PathVariable(name = "boardId") Long boardId,
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @Parameter @RequestBody @Valid UpdateBoardRequest request) {
+        UpdateBoardResponse response = boardService.updateBoard(loginMember.getId(),
+            request, boardId);
+        return ApiResponse.success(ResponseCode.SUCCESS,response);
+    }
 }
