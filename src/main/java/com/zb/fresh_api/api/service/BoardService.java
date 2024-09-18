@@ -2,6 +2,7 @@ package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
+import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -15,6 +16,7 @@ import com.zb.fresh_api.domain.repository.writer.BoardWriter;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,5 +56,18 @@ public class BoardService {
 
         return new UpdateBoardResponse(board.getId(),board.getTitle(),board.getUpdatedAt());
 
+    }
+
+    @Transactional
+    public DeleteBoardResponse deleteBoard(Long memberId, Long boardId) {
+        Member member = memberReader.getById(memberId);
+        Board board = boardReader.getById(boardId);
+        if(!Objects.equals(board.getMember().getId(), memberId)){
+            throw new CustomException(ResponseCode.NOT_PRODUCT_OWNER);
+        }
+
+        board.delete();
+
+        return new DeleteBoardResponse(board.getId(),board.getDeletedAt());
     }
 }

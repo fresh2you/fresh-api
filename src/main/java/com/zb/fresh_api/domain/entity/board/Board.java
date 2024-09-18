@@ -63,4 +63,7 @@ public class Board extends BaseTimeEntity {
         this.title = title;
     }
 
+    public void delete(){
+        this.deletedAt = LocalDateTime.now();
+    }
 }
