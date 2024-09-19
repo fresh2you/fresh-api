@@ -1,8 +1,10 @@
 package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
+import com.zb.fresh_api.api.dto.request.AddBoardMessageRequest;
 import com.zb.fresh_api.api.dto.request.AddBoardRequest;
 import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
+import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
@@ -83,4 +85,20 @@ public class BoardController {
 //            boardService.getAllBoard(loginMember.getId());
 //        return ApiResponse.success(ResponseCode.SUCCESS);
 //    }
+
+    @Operation(
+        summary = "게시글 추가",
+        description = "게시판에 게시글을 추가하기 위한 API입니다"
+    )
+    @PostMapping("/{boardId}/messages")
+    public ResponseEntity<ApiResponse<AddBoardMessageResponse>> addBoardMessage(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @PathVariable(name = "boardId") Long boardId,
+        @RequestBody @Valid AddBoardMessageRequest request
+    ){
+        AddBoardMessageResponse response = boardService.addBoardMessage(
+            loginMember.getId(), boardId, request);
+        return ApiResponse.success(ResponseCode.SUCCESS,response);
+
+    }
 }

@@ -47,4 +47,12 @@ public class BoardMessage extends BaseTimeEntity {
 
     @Column(name = "deleted_at", columnDefinition = "datetime comment '게시글 삭제 시간'")
     private LocalDateTime deletedAt;
+
+    public static BoardMessage create(Board board, MessageType messageType, String content){
+        return BoardMessage.builder()
+            .board(board)
+            .messageType(messageType)
+            .content(content)
+            .build();
+    }
 }

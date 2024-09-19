@@ -1,17 +1,21 @@
 package com.zb.fresh_api.api.service;
 
+import com.zb.fresh_api.api.dto.request.AddBoardMessageRequest;
 import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
+import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.entity.board.Board;
+import com.zb.fresh_api.domain.entity.board.BoardMessage;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.repository.reader.BoardReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
+import com.zb.fresh_api.domain.repository.writer.BoardMessageWriter;
 import com.zb.fresh_api.domain.repository.writer.BoardWriter;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,7 @@ public class BoardService {
     private final BoardReader boardReader;
     private final MemberReader memberReader;
     private final ProductReader productReader;
+    private final BoardMessageWriter boardMessageWriter;
 
     public AddBoardResponse addBoard(final Long memberId, final Long productId, final String title ) {
         Member member = memberReader.getById(memberId);
@@ -48,7 +53,7 @@ public class BoardService {
         Member member = memberReader.getById(memberId);
         Board board = boardReader.getById(boardId);
         if(!Objects.equals(board.getMember().getId(), memberId)){
-            throw new CustomException(ResponseCode.NOT_PRODUCT_OWNER);
+            throw new CustomException(ResponseCode.NOT_BOARD_OWNER);
         }
 
         board.update(request.title());
@@ -63,7 +68,7 @@ public class BoardService {
         Member member = memberReader.getById(memberId);
         Board board = boardReader.getById(boardId);
         if(!Objects.equals(board.getMember().getId(), memberId)){
-            throw new CustomException(ResponseCode.NOT_PRODUCT_OWNER);
+            throw new CustomException(ResponseCode.NOT_BOARD_OWNER);
         }
 
         board.delete();
@@ -76,5 +81,20 @@ public class BoardService {
         
         // TODO order가 생성된 이후 로직 작성
         // Member의 OrderID검색 후 productId들의 게시판 기록 조회
+    }
+
+    @Transactional
+    public AddBoardMessageResponse addBoardMessage(Long memberId, Long boardId, AddBoardMessageRequest request) {
+        Member member = memberReader.getById(memberId);
+        Board board = boardReader.getById(boardId);
+        if(!Objects.equals(board.getMember().getId(), memberId)){
+            throw new CustomException(ResponseCode.NOT_BOARD_OWNER);
+        }
+
+        BoardMessage boardMessage = BoardMessage.create(board,request.messageType(),request.content());
+        BoardMessage storeBoardMessage = boardMessageWriter.store(boardMessage);
+        board.updateLastMessagedAt(storeBoardMessage.getCreatedAt());
+
+        return new AddBoardMessageResponse(storeBoardMessage);
     }
 }
