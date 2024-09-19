@@ -4,18 +4,26 @@ import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.zb.fresh_api.api.dto.request.AddBoardMessageRequest;
 import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
+import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.domain.entity.board.Board;
+import com.zb.fresh_api.domain.entity.board.BoardMessage;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
+import com.zb.fresh_api.domain.enums.board.MessageType;
 import com.zb.fresh_api.domain.repository.reader.BoardReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
+import com.zb.fresh_api.domain.repository.writer.BoardMessageWriter;
 import com.zb.fresh_api.domain.repository.writer.BoardWriter;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,19 +38,22 @@ class BoardServiceTest extends ServiceTest {
 
     @Mock
     private BoardWriter boardWriter;
-    
+
     @Mock
     private BoardReader boardReader;
-    
+
     @Mock
     private MemberReader memberReader;
-    
+
     @Mock
     private ProductReader productReader;
-    
+
+    @Mock
+    private BoardMessageWriter boardMessageWriter;
+
     @InjectMocks
     private BoardService boardService;
-    
+
     @Test
     @DisplayName("게시판 생성 성공")
     void adddBoard_success(){
@@ -129,5 +140,45 @@ class BoardServiceTest extends ServiceTest {
         assertNotNull(response);
         assertEquals(boardId, response.boardId());
         assertNotNull(response.deletedAt());
+    }
+
+    @Test
+    @DisplayName("게시글 생성 성공")
+    void addBoardMessage_success(){
+        // given
+        Long memberId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long boardId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        AddBoardMessageRequest request = getConstructorMonkey().giveMeBuilder(AddBoardMessageRequest.class)
+            .set("messageType", Arbitraries.of(MessageType.class))
+            .set("content", Arbitraries.strings().withCharRange('a','z'))
+            .sample();
+
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+            .set("id", memberId)
+            .sample();
+        Board board = mock(Board.class); // Board 객체를 목 객체로 만듭니다.
+        when(board.getId()).thenReturn(boardId);
+        when(board.getMember()).thenReturn(member);
+        BoardMessage boardMessage = getReflectionMonkey().giveMeBuilder(BoardMessage.class)
+            .set("board", board)
+            .set("messageType", request.messageType())
+            .set("content", request.content())
+            .sample();
+        doReturn(member).when(memberReader).getById(memberId);
+        doReturn(board).when(boardReader).getById(boardId);
+        doReturn(boardMessage).when(boardMessageWriter).store(argThat(
+            x -> Objects.equals(x.getBoard().getId(), board.getId()) &&
+                x.getContent().equals(request.content())
+        ));
+
+        // when
+        AddBoardMessageResponse response = boardService.addBoardMessage(memberId, boardId, request);
+
+        // then
+        assertNotNull(response);
+        assertNotNull(response.createdAt());
+        assertEquals(response.messageType(), request.messageType());
+        assertEquals(response.content(), request.content());
+        verify(board).updateLastMessagedAt(boardMessage.getCreatedAt());
     }
 }
