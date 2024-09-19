@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -84,11 +85,12 @@ public class MemberController {
             summary = "프로필 변경",
             description = "회원의 이미지 또는 닉네임을 변경한다."
     )
-    @PatchMapping("/profile")
+    @PatchMapping(value = "/profile", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+//    @PatchMapping(value = "/profile")
     public ResponseEntity<ApiResponse<Void>> updateProfile(
             @Parameter(hidden = true) @LoginMember Member loginMember,
-            @Valid @RequestBody UpdateProfileRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @Parameter @RequestPart(value = "request", required = false) @Valid UpdateProfileRequest request,
+            @Parameter @RequestPart(value = "image", required = false) MultipartFile image) {
         memberService.updateProfile(loginMember, request, image);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
