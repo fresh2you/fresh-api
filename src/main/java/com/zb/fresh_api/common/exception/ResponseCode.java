@@ -22,6 +22,8 @@ public enum ResponseCode {
     NO_SUCH_METHOD("0604", "메소드를 찾을 수 없습니다."),
     NOT_FOUND_ENUM_CONSTANT("0605", "열거형 상수값을 찾을 수 없습니다."),
     S3_UPLOADER_ERROR("0606", "S3 업로드 중 오류가 발생하였습니다."),
+    METHOD_ARG_NOT_VALID("0607", "유효성 오류가 발생했습니다."),
+    INVALID_FILE_NAME_OR_EXTENSIONS("0608", "파일 이름 또는 확장자가 잘못되었습니다."),
 
     FORBIDDEN("0700", "접근 권한이 없습니다."),
     UNAUTHORIZED("0701", "유효한 인증 자격이 없습니다."),

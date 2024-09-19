@@ -4,10 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class FileConstants {
+public class AppConstants {
 
-    public static final String LINE_SEPARATOR = System.lineSeparator();
-
-    public static final String FILE_DOT = ".";
-
+    public static final String DATE_FORMAT_YYYYMMDD = "yyyy/MM/dd";
 }
