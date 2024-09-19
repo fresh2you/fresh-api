@@ -65,4 +65,8 @@ public class Board extends BaseTimeEntity {
     public void delete(){
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void updateLastMessagedAt(LocalDateTime lastMessagedAt){
+        this.lastMessagedAt = lastMessagedAt;
+    }
 }
