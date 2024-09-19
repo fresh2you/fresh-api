@@ -10,8 +10,10 @@ import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.api.principal.CustomUserDetails;
 import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
+import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.file.UploadedFile;
 import com.zb.fresh_api.domain.dto.member.LoginMember;
 import com.zb.fresh_api.domain.dto.member.OauthLoginMember;
 import com.zb.fresh_api.domain.dto.member.OauthUser;
@@ -21,6 +23,7 @@ import com.zb.fresh_api.domain.entity.member.MemberTerms;
 import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.entity.point.PointHistory;
 import com.zb.fresh_api.domain.entity.terms.Terms;
+import com.zb.fresh_api.domain.enums.category.CategoryType;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
@@ -65,6 +68,8 @@ public class MemberService {
     private final OauthProviderFactory oauthProviderFactory;
     private final CustomUserDetailsService customUserDetailsService;
 
+    private final S3Uploader s3Uploader;
+
     @Transactional
     public LoginResponse login(final LoginRequest request) {
         final CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(request.email());
@@ -93,11 +98,9 @@ public class MemberService {
     public void updateProfile(final Member member,
                               final UpdateProfileRequest request,
                               final MultipartFile image) {
-        // TODO 1. 이미지 변환 (S3)
-        final String profileImage = null;
-
-        // 2. 프로필 변경
-        member.updateProfile(request.nickname(), profileImage);
+        final UploadedFile file = s3Uploader.upload(CategoryType.MEMBER, image);
+        member.updateProfile(request.nickname(), file.url());
+        memberWriter.store(member);
     }
 
     @Transactional(readOnly = true)
