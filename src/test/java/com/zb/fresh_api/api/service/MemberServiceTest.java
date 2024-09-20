@@ -2,6 +2,7 @@ package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
+import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
@@ -81,8 +82,69 @@ class MemberServiceTest extends ServiceTest {
     private MemberService memberService;
 
     @Test
+    @DisplayName("배송지 수정 - 성공")
+    void 배송지_정보수정_성공() {
+        // given
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+                .set("id", Arbitraries.longs().greaterOrEqual(1))
+                .set("email", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(8).map(param -> param + "@gmail.com"))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("provider", Arbitraries.of(Provider.class).sample())
+                .set("role", MemberRole.ROLE_USER)
+                .sample();
+
+        ModifyDeliveryAddressRequest request = getConstructorMonkey().giveMeBuilder(ModifyDeliveryAddressRequest.class)
+                .set("recipientName", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(10))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("address", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("detailedAddress", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("postalCode", Arbitraries.strings().numeric().ofLength(5))
+                .set("isDefault", Arbitraries.of(true, false))
+                .sample();
+
+        Long deliveryAddressId = Arbitraries.longs().between(1, 10).sample();
+
+        DeliveryAddress deliveryAddress = getConstructorMonkey().giveMeBuilder(DeliveryAddress.class)
+                .set("id", deliveryAddressId)
+                .set("member", member)
+                .set("isDefault", false)
+                .sample();
+
+        List<DeliveryAddress> deliveryAddresses = new ArrayList<>();
+        deliveryAddresses.add(deliveryAddress);
+        int repeat = Arbitraries.integers().between(0, 2).sample();
+        for (int i = 0; i < repeat; i++) {
+            DeliveryAddress newDeliveryAddress = getConstructorMonkey().giveMeBuilder(DeliveryAddress.class)
+                    .set("id", Arbitraries.longs().greaterOrEqual(10).sample())
+                    .sample();
+            deliveryAddresses.add(newDeliveryAddress);
+        }
+
+        // when
+        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMemberId(member.getId());
+
+        // then
+        memberService.modifyDeliveryAddress(member, deliveryAddressId, request);
+
+        assertEquals(deliveryAddress.getRecipientName(), request.recipientName());
+        assertEquals(deliveryAddress.getPhone(), request.phone());
+        assertEquals(deliveryAddress.getAddress(), request.address());
+        assertEquals(deliveryAddress.getDetailedAddress(), request.detailedAddress());
+        assertEquals(deliveryAddress.getPostalCode(), request.postalCode());
+
+        verify(deliveryAddressReader, times(1)).findActiveDeliveryAddressesByMemberId(member.getId());
+
+    }
+
+    @Test
+    @DisplayName("기본 배송지 변경 및 배송지 수정 - 성공")
+    void 배송지_정보수정_기본배송지변경_성공() {
+
+    }
+
+    @Test
     @DisplayName("배송지 추가 3개 이상 등록 시도 - 실패")
-    void addDeliveryAddressExceededCount_fail() {
+    void 배송지_초과등록시도_실패() {
         // given
         Member member = getConstructorMonkey().giveMeBuilder(Member.class)
                 .set("id", Arbitraries.longs().greaterOrEqual(1))
@@ -108,13 +170,15 @@ class MemberServiceTest extends ServiceTest {
         }
 
         // when, then
-        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMember(member.getId());
+        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMemberId(member.getId());
         assertThrows(CustomException.class, () -> memberService.addDeliveryAddress(member, request));
+
+        verify(deliveryAddressReader, times(1)).findActiveDeliveryAddressesByMemberId(member.getId());
     }
 
     @Test
     @DisplayName("배송지 추가 - 성공")
-    void addDeliveryAddress_success() {
+    void 배송지추가_성공() {
         // given
         Member member = getConstructorMonkey().giveMeBuilder(Member.class)
                 .set("id", Arbitraries.longs().greaterOrEqual(1))
@@ -141,13 +205,15 @@ class MemberServiceTest extends ServiceTest {
         }
 
         // when
-        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMember(member.getId());
+        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMemberId(member.getId());
 
         // then
         AddDeliveryAddressResponse response = memberService.addDeliveryAddress(member, request);
 
         assertNotNull(response);
         assertEquals(deliveryAddresses.size() + 1, response.addressCount());
+
+        verify(deliveryAddressReader, times(1)).findActiveDeliveryAddressesByMemberId(member.getId());
         verify(deliveryAddressWriter, times(1)).store(any(DeliveryAddress.class));
     }
 
