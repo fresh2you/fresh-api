@@ -36,7 +36,6 @@ public enum ResponseCode {
     PARAM_EMAIL_NOT_VALID("1002", "입력한 이메일이 잘못되었습니다"),
     PARAM_NICKNAME_NOT_VALID("1003", "입력한 닉네임이 잘못되었습니다"),
     NOT_FOUND_MEMBER("1004", "회원 정보를 찾을 수 없습니다."),
-    EXCEEDED_DELIVERY_ADDRESS_COUNT("1005", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
 
     /**
      * Terms (1100 ~ 1200)
@@ -83,7 +82,13 @@ public enum ResponseCode {
      * Product (1600 ~ 1700)
      */
     PRODUCT_NOT_FOUND("1600", "상품을 찾을 수 없습니다"),
-    NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다.")
+    NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다."),
+
+    /**
+     * Delivery (1700 ~ 1800)
+     */
+    NOT_FOUND_DELIVERY_ADDRESS("1700", "등록된 배송지 정보를 찾을 수 없습니다."),
+    EXCEEDED_DELIVERY_ADDRESS_COUNT("1701", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
     ;
 
     private final String code;

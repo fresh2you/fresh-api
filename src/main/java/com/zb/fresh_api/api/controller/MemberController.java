@@ -2,10 +2,7 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.SignUpRequest;
-import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
-import com.zb.fresh_api.api.dto.request.LoginRequest;
-import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
-import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
+import com.zb.fresh_api.api.dto.request.*;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
@@ -100,11 +97,24 @@ public class MemberController {
             summary = "배송지 추가",
             description = "배송지 정보를 추가합니다. (최대3개, 대표1개)"
     )
-    @PostMapping("delivery-addresses")
+    @PostMapping("/delivery-addresses")
     public ResponseEntity<ApiResponse<AddDeliveryAddressResponse>> addDeliveryAddress(
             @Parameter(hidden = true) @LoginMember Member loginMember,
             @RequestBody @Valid AddDeliveryAddressRequest request) {
         return ApiResponse.success(ResponseCode.SUCCESS, memberService.addDeliveryAddress(loginMember, request));
+    }
+
+    @Operation(
+            summary = "배송지 수정",
+            description = "배송지 정보를 수정합니다."
+    )
+    @PatchMapping("/delivery-addresses/{deliveryAddressId}")
+    public ResponseEntity<ApiResponse<Void>> modifyDeliveryAddress(
+            @Parameter(hidden = true) @LoginMember Member loginMember,
+            @PathVariable Long deliveryAddressId,
+            @RequestBody @Valid ModifyDeliveryAddressRequest request) {
+        memberService.modifyDeliveryAddress(loginMember, deliveryAddressId, request);
+        return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
 }
