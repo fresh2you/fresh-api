@@ -1,15 +1,7 @@
 package com.zb.fresh_api.api.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
+import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
@@ -19,6 +11,7 @@ import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.dto.member.KakaoAccount;
 import com.zb.fresh_api.domain.dto.member.KakaoUser;
 import com.zb.fresh_api.domain.dto.token.Token;
+import com.zb.fresh_api.domain.entity.address.DeliveryAddress;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.entity.point.PointHistory;
@@ -26,16 +19,10 @@ import com.zb.fresh_api.domain.entity.terms.Terms;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
+import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
-import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
-import com.zb.fresh_api.domain.repository.writer.MemberWriter;
-import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
-import com.zb.fresh_api.domain.repository.writer.PointWriter;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.zb.fresh_api.domain.repository.writer.*;
 import net.jqwik.api.Arbitraries;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -45,6 +32,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 @DisplayName("회원 비즈니스 테스트")
 class MemberServiceTest extends ServiceTest {
 
@@ -53,6 +50,12 @@ class MemberServiceTest extends ServiceTest {
 
     @Mock
     private MemberWriter memberWriter;
+
+    @Mock
+    private DeliveryAddressReader deliveryAddressReader;
+
+    @Mock
+    private DeliveryAddressWriter deliveryAddressWriter;
 
     @Mock
     private MemberTermsWriter memberTermsWriter;
@@ -73,6 +76,38 @@ class MemberServiceTest extends ServiceTest {
     private PointHistoryWriter pointHistoryWriter;
     @InjectMocks
     private MemberService memberService;
+
+    @Test
+    @DisplayName("배송지 추가 3개 이상 등록 시도 - 실패")
+    void addDeliveryAddressExceededCount_fail() {
+        // given
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+                .set("id", Arbitraries.longs().greaterOrEqual(1))
+                .set("email", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(8).map(param -> param + "@gmail.com"))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("provider", Arbitraries.of(Provider.class).sample())
+                .set("role", MemberRole.ROLE_USER)
+                .sample();
+
+        AddDeliveryAddressRequest request = getConstructorMonkey().giveMeBuilder(AddDeliveryAddressRequest.class)
+                .set("recipientName", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(10))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("address", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("detailedAddress", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("postalCode", Arbitraries.strings().numeric().ofLength(5))
+                .set("isDefault", Arbitraries.of(true, false))
+                .sample();
+
+        List<DeliveryAddress> deliveryAddresses = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            DeliveryAddress deliveryAddress = getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).sample();
+            deliveryAddresses.add(deliveryAddress);
+        }
+
+        // when, then
+        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMember(member.getId());
+        assertThrows(CustomException.class, () -> memberService.addDeliveryAddress(member, request));
+    }
 
     @Test
     @DisplayName("회원 가입을 진행하지 않은 사용자가 소셜 로그인을 진행한다.")
