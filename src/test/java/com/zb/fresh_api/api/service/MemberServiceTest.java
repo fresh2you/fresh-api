@@ -3,6 +3,7 @@ package com.zb.fresh_api.api.service;
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
+import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.common.base.ServiceTest;
@@ -38,6 +39,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -110,6 +113,45 @@ class MemberServiceTest extends ServiceTest {
     }
 
     @Test
+    @DisplayName("배송지 추가 - 성공")
+    void addDeliveryAddress_success() {
+        // given
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+                .set("id", Arbitraries.longs().greaterOrEqual(1))
+                .set("email", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(8).map(param -> param + "@gmail.com"))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("provider", Arbitraries.of(Provider.class).sample())
+                .set("role", MemberRole.ROLE_USER)
+                .sample();
+
+        AddDeliveryAddressRequest request = getConstructorMonkey().giveMeBuilder(AddDeliveryAddressRequest.class)
+                .set("recipientName", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(10))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("address", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("detailedAddress", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("postalCode", Arbitraries.strings().numeric().ofLength(5))
+                .set("isDefault", Arbitraries.of(true, false))
+                .sample();
+
+        List<DeliveryAddress> deliveryAddresses = new ArrayList<>();
+        int repeat = Arbitraries.integers().between(0, 2).sample();
+        for (int i = 0; i < repeat; i++) {
+            DeliveryAddress deliveryAddress = getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).sample();
+            deliveryAddresses.add(deliveryAddress);
+        }
+
+        // when
+        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMember(member.getId());
+
+        // then
+        AddDeliveryAddressResponse response = memberService.addDeliveryAddress(member, request);
+
+        assertNotNull(response);
+        assertEquals(deliveryAddresses.size() + 1, response.addressCount());
+        verify(deliveryAddressWriter, times(1)).store(any(DeliveryAddress.class));
+    }
+
+    @Test
     @DisplayName("회원 가입을 진행하지 않은 사용자가 소셜 로그인을 진행한다.")
     void oauthLogin_sign_up_false() {
         // given
@@ -149,10 +191,10 @@ class MemberServiceTest extends ServiceTest {
 
         // then
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(response.isSignup(), isSignup);
-        Assertions.assertEquals(response.loginMember().email(), oauthUser.email());
-        Assertions.assertEquals(response.loginMember().provider(), request.provider());
-        Assertions.assertEquals(response.token(), token);
+        assertEquals(response.isSignup(), isSignup);
+        assertEquals(response.loginMember().email(), oauthUser.email());
+        assertEquals(response.loginMember().provider(), request.provider());
+        assertEquals(response.token(), token);
 
         verify(oauthProviderFactory).getAccessToken(request.provider(), request.redirectUri(), request.code());
         verify(oauthProviderFactory).getOauthUser(request.provider(), accessToken);
@@ -248,7 +290,7 @@ class MemberServiceTest extends ServiceTest {
         // then
         verify(memberWriter).store(memberCaptor.capture());
         Member capturedMember = memberCaptor.getValue();
-        Assertions.assertEquals(member.getEmail(), capturedMember.getEmail());
+        assertEquals(member.getEmail(), capturedMember.getEmail());
         verify(memberReader).existActiveNickname(nickname);
         verify(memberReader).existsByEmailAndProvider(email, provider);
         verify(termsReader).findAllByIsRequired(true);
