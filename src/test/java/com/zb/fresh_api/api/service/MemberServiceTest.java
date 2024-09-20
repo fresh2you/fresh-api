@@ -41,8 +41,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -122,6 +121,7 @@ class MemberServiceTest extends ServiceTest {
 
         // when
         doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMemberId(member.getId());
+        doNothing().when(deliveryAddressWriter).store(any(DeliveryAddress.class));
 
         // then
         memberService.modifyDeliveryAddress(member, deliveryAddressId, request);
@@ -139,6 +139,59 @@ class MemberServiceTest extends ServiceTest {
     @Test
     @DisplayName("기본 배송지 변경 및 배송지 수정 - 성공")
     void 배송지_정보수정_기본배송지변경_성공() {
+        // given
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+                .set("id", Arbitraries.longs().greaterOrEqual(1))
+                .set("email", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(8).map(param -> param + "@gmail.com"))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("provider", Arbitraries.of(Provider.class).sample())
+                .set("role", MemberRole.ROLE_USER)
+                .sample();
+
+        ModifyDeliveryAddressRequest request = getConstructorMonkey().giveMeBuilder(ModifyDeliveryAddressRequest.class)
+                .set("recipientName", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(10))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("address", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("detailedAddress", Arbitraries.strings().alpha().ofMinLength(10).ofMaxLength(20))
+                .set("postalCode", Arbitraries.strings().numeric().ofLength(5))
+                .set("isDefault", Arbitraries.of(true, false))
+                .sample();
+
+        Long deliveryAddressId = Arbitraries.longs().between(1, 10).sample();
+
+        DeliveryAddress deliveryAddress = getConstructorMonkey().giveMeBuilder(DeliveryAddress.class)
+                .set("id", deliveryAddressId)
+                .set("member", member)
+                .set("isDefault", true)
+                .sample();
+
+        List<DeliveryAddress> deliveryAddresses = new ArrayList<>();
+        deliveryAddresses.add(deliveryAddress);
+        int repeat = Arbitraries.integers().between(0, 2).sample();
+        for (int i = 0; i < repeat; i++) {
+            DeliveryAddress newDeliveryAddress = getConstructorMonkey().giveMeBuilder(DeliveryAddress.class)
+                    .set("id", Arbitraries.longs().greaterOrEqual(10).sample())
+                    .sample();
+            deliveryAddresses.add(newDeliveryAddress);
+        }
+
+        // when
+        doReturn(deliveryAddresses).when(deliveryAddressReader).findActiveDeliveryAddressesByMemberId(member.getId());
+
+        // then
+        memberService.modifyDeliveryAddress(member, deliveryAddressId, request);
+
+        deliveryAddresses.stream()
+                .filter(address -> !address.getId().equals(deliveryAddressId))
+                .forEach(address -> assertFalse(address.isDefault()));
+
+        assertEquals(deliveryAddress.getRecipientName(), request.recipientName());
+        assertEquals(deliveryAddress.getPhone(), request.phone());
+        assertEquals(deliveryAddress.getAddress(), request.address());
+        assertEquals(deliveryAddress.getDetailedAddress(), request.detailedAddress());
+        assertEquals(deliveryAddress.getPostalCode(), request.postalCode());
+
+        verify(deliveryAddressReader, times(1)).findActiveDeliveryAddressesByMemberId(member.getId());
 
     }
 
