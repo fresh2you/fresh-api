@@ -1,10 +1,7 @@
 package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
-import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
-import com.zb.fresh_api.api.dto.request.LoginRequest;
-import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
-import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
+import com.zb.fresh_api.api.dto.request.*;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
@@ -158,7 +155,7 @@ public class MemberService {
 
     @Transactional
     public AddDeliveryAddressResponse addDeliveryAddress(final Member member, final AddDeliveryAddressRequest request) {
-        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.findActiveDeliveryAddressesByMember(member.getId());
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.findActiveDeliveryAddressesByMemberId(member.getId());
         final int addressCount = deliveryAddresses.size();
 
         validateAddressCount(addressCount);
@@ -171,6 +168,23 @@ public class MemberService {
         deliveryAddressWriter.store(newDeliveryAddress);
 
         return new AddDeliveryAddressResponse(addressCount + 1L);
+    }
+
+    @Transactional
+    public void modifyDeliveryAddress(final Member member, final Long deliveryAddressId, final ModifyDeliveryAddressRequest request) {
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.findActiveDeliveryAddressesByMemberId(member.getId());
+        final DeliveryAddress deliveryAddress = deliveryAddresses.stream()
+                .filter(address -> address.getId().equals(deliveryAddressId))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_DELIVERY_ADDRESS));
+
+        if (request.isDefault()) {
+            deliveryAddresses.stream()
+                    .filter(address -> !address.getId().equals(deliveryAddressId))
+                    .forEach(DeliveryAddress::cancelDefault);
+        }
+
+        deliveryAddress.modify(request);
     }
 
     /**

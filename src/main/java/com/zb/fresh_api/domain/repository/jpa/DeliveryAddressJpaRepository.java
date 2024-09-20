@@ -8,4 +8,5 @@ import java.util.List;
 public interface DeliveryAddressJpaRepository extends JpaRepository<DeliveryAddress, Long> {
 
     List<DeliveryAddress> findAllByMemberIdAndDeletedAtIsNull(Long memberId);
+
 }

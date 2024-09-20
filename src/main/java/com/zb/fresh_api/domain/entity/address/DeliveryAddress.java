@@ -1,6 +1,7 @@
 package com.zb.fresh_api.domain.entity.address;
 
 import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
+import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
 import com.zb.fresh_api.domain.entity.member.Member;
 import jakarta.persistence.*;
@@ -64,5 +65,19 @@ public class DeliveryAddress extends BaseTimeEntity {
     public void cancelDefault() {
         this.isDefault = false;
     }
+
+    public void modify(final ModifyDeliveryAddressRequest dto) {
+        this.recipientName = dto.recipientName();
+        this.phone = dto.phone();
+        this.address = dto.address();
+        this.detailedAddress = dto.detailedAddress();
+        this.postalCode = dto.postalCode();
+        this.isDefault = dto.isDefault();
+    }
+
+    public void activateDefault() {
+        this.isDefault = true;
+    }
+
 
 }
