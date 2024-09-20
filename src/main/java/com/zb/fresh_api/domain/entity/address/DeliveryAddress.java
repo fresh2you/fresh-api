@@ -1,9 +1,12 @@
 package com.zb.fresh_api.domain.entity.address;
 
+import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
 import com.zb.fresh_api.domain.entity.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -40,6 +43,26 @@ public class DeliveryAddress extends BaseTimeEntity {
     private String postalCode;
 
     @Column(name = "is_default", columnDefinition = "TINYINT(1) comment '기본 배송지 여부'")
-    private Boolean isDefault;
+    private boolean isDefault;
+
+    @Column(name = "deleted_at", columnDefinition = "datetime comment '삭제 일시'")
+    private LocalDateTime deletedAt;
+
+    public static DeliveryAddress create(final Member member,
+                                         final AddDeliveryAddressRequest dto) {
+        return DeliveryAddress.builder()
+                .member(member)
+                .recipientName(dto.recipientName())
+                .phone(dto.phone())
+                .address(dto.address())
+                .detailedAddress(dto.detailedAddress())
+                .postalCode(dto.postalCode())
+                .isDefault(dto.isDefault())
+                .build();
+    }
+
+    public void cancelDefault() {
+        this.isDefault = false;
+    }
 
 }
