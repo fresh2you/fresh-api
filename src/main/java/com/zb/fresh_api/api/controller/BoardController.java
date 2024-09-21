@@ -118,4 +118,20 @@ public class BoardController {
         return ApiResponse.success(ResponseCode.SUCCESS,response);
 
     }
+
+    @Operation(
+        summary = "게시글 삭제",
+        description = "게시판의 게시글을 삭제하기 위한 API입니다"
+    )
+    @DeleteMapping("/{boardId}/messages/{messageId}")
+    public ResponseEntity<ApiResponse<DeleteBoardMessageResponse>> deleteBoardMessage(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @PathVariable(name = "boardId") Long boardId,
+        @PathVariable(name = "messageId") Long messageId
+    ){
+        DeleteBoardMessageResponse response = boardService.deleteBoardMessage(
+            boardId, messageId, loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS,response);
+
+    }
 }
