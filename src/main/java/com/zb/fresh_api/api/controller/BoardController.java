@@ -7,6 +7,7 @@ import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
+import com.zb.fresh_api.api.dto.response.GetBoardMessagesResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.api.service.BoardService;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,6 +90,17 @@ public class BoardController {
 //        return ApiResponse.success(ResponseCode.SUCCESS, boardList);
 //    }
 
+    @Operation(
+        summary = "게시판 상세 조회",
+        description = "게시판 안 게시글 목록 조회를 위한 API입니다"
+    )
+    @GetMapping("/{boardId}/message")
+    public ResponseEntity<ApiResponse<GetBoardMessagesResponse>> getAllBoard(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @PathVariable(name = "boardId") Long boardId) {
+        GetBoardMessagesResponse boardMessageList = boardService.getBoardMessageList(boardId);
+        return ApiResponse.success(ResponseCode.SUCCESS, boardMessageList);
+    }
     @Operation(
         summary = "게시글 추가",
         description = "게시판에 게시글을 추가하기 위한 API입니다"

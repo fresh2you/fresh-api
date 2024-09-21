@@ -95,6 +95,10 @@ public class ProductController {
 
     }
 
+    // TODO 키워드
+    //  제목
+    //  상품 설명
+    //  판매자 이름
     @Operation(
         summary = "상품 목록 조회",
         description = "키워드 또는 카테고리 타입 등을 통해 상품을 상세 조회합니다."
