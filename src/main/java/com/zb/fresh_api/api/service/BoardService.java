@@ -5,6 +5,7 @@ import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
+import com.zb.fresh_api.api.dto.response.GetAllBoardResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -22,7 +23,10 @@ import com.zb.fresh_api.domain.repository.reader.OrderReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.BoardMessageWriter;
 import com.zb.fresh_api.domain.repository.writer.BoardWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,11 +88,18 @@ public class BoardService {
         return new DeleteBoardResponse(board.getId(),board.getDeletedAt());
     }
 
-    public void getAllBoard(final Long memberId) {
+    public GetAllBoardResponse getAllBoard(final Long memberId) {
         Member member = memberReader.getById(memberId);
         
-        // TODO order가 생성된 이후 로직 작성
-        // Member의 OrderID검색 후 productId들의 게시판 기록 조회
+        List<Long> productIds = orderReader.findProductIdsByMemberId(memberId);
+
+        List<Board> boardResponse = new ArrayList<>();
+        for(Long productId : productIds){
+            Optional<Board> product = boardReader.findByProductId(productId);
+            product.ifPresent(boardResponse::add);
+        }
+
+        return GetAllBoardResponse.fromEntities(boardResponse);
     }
 
     @Transactional
