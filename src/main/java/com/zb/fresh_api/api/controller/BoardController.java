@@ -6,6 +6,7 @@ import com.zb.fresh_api.api.dto.request.AddBoardRequest;
 import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
+import com.zb.fresh_api.api.dto.response.DeleteBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.GetBoardMessagesResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;

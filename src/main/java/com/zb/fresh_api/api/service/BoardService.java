@@ -4,6 +4,7 @@ import com.zb.fresh_api.api.dto.request.AddBoardMessageRequest;
 import com.zb.fresh_api.api.dto.request.UpdateBoardRequest;
 import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
+import com.zb.fresh_api.api.dto.response.DeleteBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.GetAllBoardResponse;
 import com.zb.fresh_api.api.dto.response.GetBoardMessagesResponse;
@@ -122,7 +123,7 @@ public class BoardService {
         if(request.messageType() == MessageType.IMAGE && image != null){
              file = s3Uploader.upload(CategoryType.CHAT, image);
         }
-        BoardMessage boardMessage = BoardMessage.create(board,request.messageType(),file == null  ? request.content() : file.url());
+        BoardMessage boardMessage = BoardMessage.create(board,request.messageType(),file == null  ? request.content() : file.url(),member);
         BoardMessage storeBoardMessage = boardMessageWriter.store(boardMessage);
         board.updateLastMessagedAt(storeBoardMessage.getCreatedAt());
 
@@ -140,7 +141,7 @@ public class BoardService {
 
         List<BoardMessage> boardMessageList = boardMessageReader.findByBoardId(boardId);
 
-        return GetBoardMessagesResponse.fromEntities(boardMessageList);
+        return GetBoardMessagesResponse.fromEntities(boardMessageList, memberId);
     }
 
     @Transactional
