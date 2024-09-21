@@ -32,6 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.web.multipart.MultipartFile;
 
 @DisplayName("게시판 비즈니스 테스트")
 class BoardServiceTest extends ServiceTest {
@@ -170,9 +171,10 @@ class BoardServiceTest extends ServiceTest {
             x -> Objects.equals(x.getBoard().getId(), board.getId()) &&
                 x.getContent().equals(request.content())
         ));
-
+        MultipartFile image = null;
         // when
-        AddBoardMessageResponse response = boardService.addBoardMessage(memberId, boardId, request);
+        AddBoardMessageResponse response = boardService.addBoardMessage(memberId, boardId, request,
+            image);
 
         // then
         assertNotNull(response);
