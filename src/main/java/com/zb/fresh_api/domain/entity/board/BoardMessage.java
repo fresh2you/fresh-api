@@ -1,6 +1,7 @@
 package com.zb.fresh_api.domain.entity.board;
 
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
+import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.enums.board.MessageType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,6 +39,11 @@ public class BoardMessage extends BaseTimeEntity {
     @JoinColumn(name = "board_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '게시판 고유 번호'")
     private Board board;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '회원 고유 번호'")
+    private Member member;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type", columnDefinition = "varchar(255) comment '메시지 타입'")
     private MessageType messageType;
@@ -48,11 +54,16 @@ public class BoardMessage extends BaseTimeEntity {
     @Column(name = "deleted_at", columnDefinition = "datetime comment '게시글 삭제 시간'")
     private LocalDateTime deletedAt;
 
-    public static BoardMessage create(Board board, MessageType messageType, String content){
+    public static BoardMessage create(Board board, MessageType messageType, String content,Member member){
         return BoardMessage.builder()
             .board(board)
+            .member(member)
             .messageType(messageType)
             .content(content)
             .build();
+    }
+
+    public void delete(){
+        this.deletedAt = LocalDateTime.now();
     }
 }
