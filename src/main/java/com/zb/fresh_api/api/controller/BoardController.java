@@ -81,11 +81,11 @@ public class BoardController {
 //        summary = "게시판 목록 조회",
 //        description = "게시판 목록 조회를 위한 API입니다"
 //    )
-//    @PostMapping
-//    public ResponseEntity<ApiResponse<Void>> getAllBoard(
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<GetAllBoardResponse>> getAllBoard(
 //        @Parameter(hidden = true) @LoginMember Member loginMember) {
-//            boardService.getAllBoard(loginMember.getId());
-//        return ApiResponse.success(ResponseCode.SUCCESS);
+//        GetAllBoardResponse boardList = boardService.getAllBoard(loginMember.getId());
+//        return ApiResponse.success(ResponseCode.SUCCESS, boardList);
 //    }
 
     @Operation(
