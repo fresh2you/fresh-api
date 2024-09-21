@@ -1,23 +1,21 @@
 package com.zb.fresh_api.api.controller;
 
-import com.zb.fresh_api.api.dto.request.ChatMessageRequest;
-import com.zb.fresh_api.api.dto.response.ChatMessageResponse;
-import com.zb.fresh_api.api.service.ChatMessageService;
-import com.zb.fresh_api.api.service.ChatRoomService;
+import com.zb.fresh_api.domain.dto.chat.ChatMessageDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
 
 @Tag(
         name = "채팅 API",
@@ -29,47 +27,34 @@ import java.util.UUID;
 public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final ChatMessageService chatMessageService;
-    private final ChatRoomService chatRoomService;
 
     @Operation(
-            summary = "채팅 메시지 전송",
-            description = "클라이언트가 /app/chat/sendMessage로 메시지를 보내면 채팅방에 메시지를 전송"
+            summary = "채팅 메시지 리스트 반환",
+            description = "지정된 채팅방 ID에 따른 메시지 리스트를 반환"
     )
-    @MessageMapping("/chat/sendMessage")
-    public void sendMessage(
-            @Valid @Parameter(description = "전송할 채팅 메시지 요청") ChatMessageRequest messageRequest,
+    @GetMapping("/chat/{id}")
+    public ResponseEntity<List<ChatMessageDto>> getChatMessages(
+            @Parameter(description = "채팅방 ID") @PathVariable Long id) {
+        // 임시로 리스트 형식으로 구현, 실제론 DB 접근 필요
+        ChatMessageDto test = new ChatMessageDto(1L, "test", "test");
+        return ResponseEntity.ok().body(List.of(test));
+    }
+
+    @Operation(
+            summary = "메시지 송신 및 수신",
+            description = "클라이언트에서 /app/message로 메시지를 전송하면 채팅방 구독자들에게 메시지를 전달"
+    )
+    @MessageMapping("/message")
+    public void receiveMessage(
+            @Parameter(description = "전송할 메시지") ChatMessageDto chatMessage,
             SimpMessageHeaderAccessor headerAccessor) {
 
-        log.info("Broadcasting message to topic: /topic/chatroom/" + messageRequest.chatRoomId());
+        log.info("Sending message to topic: /sub/chatroom/1");
 
-        String senderId = messageRequest.senderId();
-        String receiverId = messageRequest.receiverId();  // 수신자 ID (1:1 채팅의 경우)
+        // 메시지 인코딩
+        String encodedMessage = new String(chatMessage.message().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
 
-        String encodedMessage = new String(messageRequest.message().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-
-        // ChatMessageResponse 생성
-        ChatMessageResponse chatMessageResponse = new ChatMessageResponse(
-                UUID.randomUUID().toString(),
-                senderId,
-                encodedMessage,
-                LocalDateTime.now().toString()
-        );
-
-        // 1:1 채팅의 경우 특정 사용자에게 전송
-        if (receiverId != null && !receiverId.isEmpty()) {
-            messagingTemplate.convertAndSendToUser(receiverId, "/queue/private", chatMessageResponse);
-        } else {
-            // 1:10 채팅방의 모든 참여자에게 전송
-            messagingTemplate.convertAndSend("/topic/chatroom/" + messageRequest.chatRoomId(), chatMessageResponse);
-        }
-
-        // 메시지 저장
-        chatMessageService.saveMessage(
-                Long.parseLong(messageRequest.chatRoomId().toString()),
-                Long.parseLong(senderId),
-                "text",
-                encodedMessage
-        );
+        // 메시지를 해당 채팅방 구독자들에게 전송
+        messagingTemplate.convertAndSend("/sub/chatroom/1", encodedMessage);
     }
 }
