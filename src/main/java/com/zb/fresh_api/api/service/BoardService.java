@@ -142,4 +142,19 @@ public class BoardService {
 
         return GetBoardMessagesResponse.fromEntities(boardMessageList);
     }
+
+    @Transactional
+    public DeleteBoardMessageResponse deleteBoardMessage(Long boardId, Long messageId, Long memberId) {
+        Board board = boardReader.getById(boardId);
+        Member member = memberReader.getById(memberId);
+        if(!Objects.equals(board.getMember().getId(), memberId) &&
+            !orderReader.existsByProductIdAndMemberId(board.getProduct().getId(), memberId)
+        ){
+            throw new CustomException(ResponseCode.NOT_BOARD_OWNER);
+        }
+        BoardMessage boardMessage = boardMessageReader.getById(messageId);
+        boardMessage.delete();
+
+        return new DeleteBoardMessageResponse(boardMessage.getId(),boardMessage.getDeletedAt());
+    }
 }
