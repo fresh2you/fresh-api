@@ -62,6 +62,10 @@ public class DeliveryAddress extends BaseTimeEntity {
                 .build();
     }
 
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
     public void cancelDefault() {
         this.isDefault = false;
     }

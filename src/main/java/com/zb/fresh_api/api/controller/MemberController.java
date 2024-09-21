@@ -117,4 +117,27 @@ public class MemberController {
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
+    @Operation(
+            summary = "배송지 삭제",
+            description = "배송지 정보를 삭제합니다."
+    )
+    @DeleteMapping("/delivery-addresses/{deliveryAddressId}")
+    public ResponseEntity<ApiResponse<Void>> deleteDeliveryAddress(
+            @Parameter(hidden = true) @LoginMember Member loginMember,
+            @PathVariable Long deliveryAddressId) {
+        memberService.deleteDeliveryAddress(loginMember, deliveryAddressId);
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
+    @Operation(
+            summary = "배송지 전체 삭제",
+            description = "배송지 정보를 전체 삭제합니다."
+    )
+    @DeleteMapping("/delivery-addresses")
+    public ResponseEntity<ApiResponse<Void>> deleteDeliveryAddress(
+            @Parameter(hidden = true) @LoginMember Member loginMember) {
+        memberService.deleteAllDeliveryAddress(loginMember);
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
 }
