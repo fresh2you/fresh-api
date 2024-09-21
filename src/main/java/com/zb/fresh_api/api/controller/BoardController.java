@@ -94,13 +94,14 @@ public class BoardController {
         summary = "게시판 상세 조회",
         description = "게시판 안 게시글 목록 조회를 위한 API입니다"
     )
-    @GetMapping("/{boardId}/message")
+    @GetMapping("/{boardId}/messages")
     public ResponseEntity<ApiResponse<GetBoardMessagesResponse>> getAllBoard(
         @Parameter(hidden = true) @LoginMember Member loginMember,
         @PathVariable(name = "boardId") Long boardId) {
-        GetBoardMessagesResponse boardMessageList = boardService.getBoardMessageList(boardId);
+        GetBoardMessagesResponse boardMessageList = boardService.getBoardMessageList(boardId, loginMember.getId());
         return ApiResponse.success(ResponseCode.SUCCESS, boardMessageList);
     }
+
     @Operation(
         summary = "게시글 추가",
         description = "게시판에 게시글을 추가하기 위한 API입니다"
