@@ -129,8 +129,15 @@ public class BoardService {
         return new AddBoardMessageResponse(storeBoardMessage);
     }
 
-    public GetBoardMessagesResponse getBoardMessageList(Long boardId) {
+    public GetBoardMessagesResponse getBoardMessageList(Long boardId, Long memberId) {
         Board board = boardReader.getById(boardId);
+        Member member = memberReader.getById(memberId);
+        if(!Objects.equals(board.getMember().getId(), memberId) &&
+            !orderReader.existsByProductIdAndMemberId(board.getProduct().getId(), memberId)
+        ){
+            throw new CustomException(ResponseCode.NOT_BOARD_OWNER);
+        }
+
         List<BoardMessage> boardMessageList = boardMessageReader.findByBoardId(boardId);
 
         return GetBoardMessagesResponse.fromEntities(boardMessageList);
