@@ -83,7 +83,31 @@ class MemberServiceTest extends ServiceTest {
     @Test
     @DisplayName("배송지 삭제 - 성공")
     void 배송지_삭제_성공() {
+        // given
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+                .set("id", Arbitraries.longs().greaterOrEqual(1))
+                .set("email", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(8).map(param -> param + "@gmail.com"))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("provider", Arbitraries.of(Provider.class).sample())
+                .set("role", MemberRole.ROLE_USER)
+                .sample();
 
+        Long deliveryAddressId = Arbitraries.longs().between(1, 10).sample();
+
+        DeliveryAddress deliveryAddress = getBuilderMonkey().giveMeBuilder(DeliveryAddress.class)
+                .set("id", deliveryAddressId)
+                .set("member", member)
+                .set("isDefault", false)
+                .sample();
+
+        // when
+        doReturn(deliveryAddress).when(deliveryAddressReader).getActiveDeliveryAddressByIdAndMemberId(deliveryAddressId, member.getId());
+
+        // then
+        memberService.deleteDeliveryAddress(member, deliveryAddressId);
+
+        assertNotNull(deliveryAddress.getDeletedAt());
+        verify(deliveryAddressReader, times(1)).getActiveDeliveryAddressByIdAndMemberId(deliveryAddressId, member.getId());
     }
 
     @Test
