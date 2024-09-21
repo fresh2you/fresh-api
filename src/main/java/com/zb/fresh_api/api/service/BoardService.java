@@ -6,6 +6,7 @@ import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.GetAllBoardResponse;
+import com.zb.fresh_api.api.dto.response.GetBoardMessagesResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
@@ -17,6 +18,7 @@ import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.enums.board.MessageType;
 import com.zb.fresh_api.domain.enums.category.CategoryType;
+import com.zb.fresh_api.domain.repository.reader.BoardMessageReader;
 import com.zb.fresh_api.domain.repository.reader.BoardReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.OrderReader;
@@ -42,6 +44,7 @@ public class BoardService {
     private final BoardMessageWriter boardMessageWriter;
     private final S3Uploader s3Uploader;
     private final OrderReader orderReader;
+    private final BoardMessageReader boardMessageReader;
 
     public AddBoardResponse addBoard(final Long memberId, final Long productId, final String title ) {
         Member member = memberReader.getById(memberId);
@@ -124,5 +127,12 @@ public class BoardService {
         board.updateLastMessagedAt(storeBoardMessage.getCreatedAt());
 
         return new AddBoardMessageResponse(storeBoardMessage);
+    }
+
+    public GetBoardMessagesResponse getBoardMessageList(Long boardId) {
+        Board board = boardReader.getById(boardId);
+        List<BoardMessage> boardMessageList = boardMessageReader.findByBoardId(boardId);
+
+        return GetBoardMessagesResponse.fromEntities(boardMessageList);
     }
 }
