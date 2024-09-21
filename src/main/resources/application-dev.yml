@@ -5,7 +5,7 @@ spring:
   config:
     activate:
       on-profile: dev
-#    import: aws-parameterstore:/param/fresh2you_dev/
+    import: aws-parameterstore:/param/fresh2you_${spring.profiles.active}/
 
   security:
     oauth2:
