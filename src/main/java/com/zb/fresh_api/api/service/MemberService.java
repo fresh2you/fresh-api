@@ -155,7 +155,7 @@ public class MemberService {
 
     @Transactional
     public AddDeliveryAddressResponse addDeliveryAddress(final Member member, final AddDeliveryAddressRequest request) {
-        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.findActiveDeliveryAddressesByMemberId(member.getId());
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getActiveDeliveryAddressesByMemberId(member.getId());
         final int addressCount = deliveryAddresses.size();
 
         validateAddressCount(addressCount);
@@ -172,7 +172,7 @@ public class MemberService {
 
     @Transactional
     public void modifyDeliveryAddress(final Member member, final Long deliveryAddressId, final ModifyDeliveryAddressRequest request) {
-        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.findActiveDeliveryAddressesByMemberId(member.getId());
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getActiveDeliveryAddressesByMemberId(member.getId());
         final DeliveryAddress deliveryAddress = deliveryAddresses.stream()
                 .filter(address -> address.getId().equals(deliveryAddressId))
                 .findFirst()
@@ -185,6 +185,18 @@ public class MemberService {
         }
 
         deliveryAddress.modify(request);
+    }
+
+    @Transactional
+    public void deleteDeliveryAddress(final Member member, final Long deliveryAddressId) {
+        final DeliveryAddress deliveryAddress = deliveryAddressReader.getActiveDeliveryAddressByIdAndMemberId(deliveryAddressId, member.getId());
+        deliveryAddress.delete();
+    }
+
+    @Transactional
+    public void deleteAllDeliveryAddress(final Member member) {
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getActiveDeliveryAddressesByMemberId(member.getId());
+        deliveryAddresses.forEach(DeliveryAddress::delete);
     }
 
     /**
