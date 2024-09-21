@@ -37,13 +37,11 @@ public class S3Uploader {
 
     public UploadedFile upload(final CategoryType category, final MultipartFile file) {
         final String key = getFilePath(category, file.getOriginalFilename());
-//        final Map<String, String> metadata = createMetadataFromFile(file);
         final PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
                 .contentType(file.getContentType())
                 .contentLength(file.getSize())
-//                .metadata(metadata)
                 .acl(ObjectCannedACL.PUBLIC_READ)
                 .build();
 

@@ -28,7 +28,7 @@ public class Category extends BaseTimeEntity {
     private Category parent;
 
     @Column(name="is_used", nullable = false, columnDefinition = "BOOLEAN comment '사용 여부'")
-    private Boolean isUsed;
+    private boolean isUsed;
 
     @Column(name = "name", nullable = false, columnDefinition = "varchar(20) comment '카테고리명'")
     private String name;
