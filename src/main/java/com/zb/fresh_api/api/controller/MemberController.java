@@ -2,8 +2,14 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.SignUpRequest;
-import com.zb.fresh_api.api.dto.request.*;
+import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
+import com.zb.fresh_api.api.dto.request.ChargePointRequest;
+import com.zb.fresh_api.api.dto.request.LoginRequest;
+import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
+import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
+import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
+import com.zb.fresh_api.api.dto.response.ChargePointResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.service.MemberService;
@@ -18,7 +24,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(
@@ -138,6 +153,20 @@ public class MemberController {
             @Parameter(hidden = true) @LoginMember Member loginMember) {
         memberService.deleteAllDeliveryAddress(loginMember);
         return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
+    @Operation(
+        summary = "포인트 충전",
+        description = "사용자의 포인트 충전을 위한 API 입니다."
+    )
+    @PostMapping("/point-charge")
+    public ResponseEntity<ApiResponse<ChargePointResponse>> chargePoint(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @RequestBody @Valid ChargePointRequest request
+    ) {
+        ChargePointResponse chargePointResponse = memberService.chargePoint(request,
+            loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS,chargePointResponse);
     }
 
 }
