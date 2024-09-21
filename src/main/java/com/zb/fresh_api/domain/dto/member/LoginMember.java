@@ -1,4 +1,4 @@
-package com.zb.fresh_api.api.dto;
+package com.zb.fresh_api.domain.dto.member;
 
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.enums.member.Provider;

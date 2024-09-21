@@ -1,6 +1,6 @@
 spring:
-  profiles:
-    active: local
+  config:
+    import: aws-parameterstore:/param/fresh2you_${spring.profiles.active}/
 
 springdoc:
   api-docs:

@@ -37,7 +37,7 @@ public class MemberController {
             description = "이메일회원가입, Oauth2회원가입에 사용되는 API입니다"
     )
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody @Valid SignUpRequest request) {
+    public ResponseEntity<ApiResponse<Void>> signup(@RequestBody @Valid SignUpRequest request) {
         memberService.signUp(request.email(), request.password(), request.nickname(), request.termsAgreements(), request.provider(), request.providerId());
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
@@ -47,7 +47,7 @@ public class MemberController {
             description = "이메일 가입 회원의 로그인을 진행한다."
     )
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> loginWithEmail(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success(ResponseCode.SUCCESS, memberService.login(request));
     }
 
@@ -56,7 +56,7 @@ public class MemberController {
             description = "카카오 로그인을 진행한다."
     )
     @PostMapping("/login/kakao")
-    public ResponseEntity<ApiResponse<OauthLoginResponse>> login(@Valid @RequestBody OauthLoginRequest request) {
+    public ResponseEntity<ApiResponse<OauthLoginResponse>> loginWithKakao(@Valid @RequestBody OauthLoginRequest request) {
         return ApiResponse.success(ResponseCode.SUCCESS, memberService.oauthLogin(request));
     }
 

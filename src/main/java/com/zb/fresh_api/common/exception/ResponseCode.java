@@ -13,13 +13,18 @@ public enum ResponseCode {
     SUCCESS("0200", "성공했습니다."),
 
     /**
-     * Common (0600 ~ 0700)
+     * Common (0600 ~ 0800)
      */
-    NOT_FOUND_ENUM_CONSTANT("0600", "열거형 상수값을 찾을 수 없습니다."),
+    INTERNAL_SERVER_ERROR("0600", "내부 서버 오류가 발생하였습니다."),
     IS_NULL("0601", "NULL 값이 들어왔습니다."),
     COMMON_INVALID_PARAM("0602", "요청한 값이 올바르지 않습니다."),
     INVALID_AUTHENTICATION("0603", "인증이 올바르지 않습니다."),
     NO_SUCH_METHOD("0604", "메소드를 찾을 수 없습니다."),
+    NOT_FOUND_ENUM_CONSTANT("0605", "열거형 상수값을 찾을 수 없습니다."),
+    S3_UPLOADER_ERROR("0606", "S3 업로드 중 오류가 발생하였습니다."),
+
+    FORBIDDEN("0700", "접근 권한이 없습니다."),
+    UNAUTHORIZED("0701", "유효한 인증 자격이 없습니다."),
 
     /**
      * Member (1000 ~ 1100)
@@ -46,6 +51,7 @@ public enum ResponseCode {
     NON_LOCKED_ACCOUNT("1203", "사용자 계정이 정지되었습니다."),
     DISABLE_ACCOUNT("1204", "사용자 계정은 비활성화 상태입니다."),
     EXPIRED_CREDENTIAL("1205", "사용자 인증 정보가 만료되었습니다."),
+    UNAUTHORIZED_ACCESS_EXCEPTION("1206", "사용자가 판매자가 아닙니다."),
 
     /**
      * Json Web Token (1300 ~ 1400)
@@ -63,7 +69,18 @@ public enum ResponseCode {
     VERIFICATION_NOT_FOUND("1401", "인증이 존재하지 않거나 인증 유효시간을 초과했습니다"),
     VERIFICATION_CODE_NOT_CORRECT("1402", "인증 코드가 일치하지 않습니다"),
     NOT_ENOUGH_BALANCE("1403", "서버 관리자에게 문의하세요"),
-    GOOGLE_SMTP_ERROR("1404", "서버 관리자에게 문의하세요")
+    GOOGLE_SMTP_ERROR("1404", "서버 관리자에게 문의하세요"),
+    PHONE_ALREADY_IN_USE("1405", "이미 사용중인 휴대전화 입니다"),
+    /**
+     * Category (1500 ~ 1600)
+     */
+    CATEGORY_NOT_FOUND("1500", "카테고리를 찾을 수 없습니다."),
+
+    /**
+     * Product (1600 ~ 1700)
+     */
+    PRODUCT_NOT_FOUND("1600", "상품을 찾을 수 없습니다"),
+    NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다.")
     ;
 
     private final String code;

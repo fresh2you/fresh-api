@@ -1,6 +1,7 @@
 package com.zb.fresh_api.api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.zb.fresh_api.domain.dto.member.OauthLoginMember;
 import com.zb.fresh_api.domain.dto.token.Token;
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,12 +1,10 @@
 package com.zb.fresh_api.api.service;
 
-import com.zb.fresh_api.api.dto.LoginMember;
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.LoginRequest;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
-import com.zb.fresh_api.api.dto.response.OauthLoginMember;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.api.principal.CustomUserDetails;
@@ -14,6 +12,8 @@ import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.member.LoginMember;
+import com.zb.fresh_api.domain.dto.member.OauthLoginMember;
 import com.zb.fresh_api.domain.dto.member.OauthUser;
 import com.zb.fresh_api.domain.dto.token.Token;
 import com.zb.fresh_api.domain.entity.member.Member;
@@ -32,22 +32,20 @@ import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
 import com.zb.fresh_api.domain.repository.writer.MemberWriter;
 import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
 import com.zb.fresh_api.domain.repository.writer.PointWriter;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -83,7 +81,7 @@ public class MemberService {
     public OauthLoginResponse oauthLogin(final OauthLoginRequest request) {
         final Provider provider = request.provider();
         final String accessToken = oauthProviderFactory.getAccessToken(provider, request.redirectUri(), request.code());
-        final OauthUser oAuthUser = oauthProviderFactory.getOAuthUser(provider, accessToken);
+        final OauthUser oAuthUser = oauthProviderFactory.getOauthUser(provider, accessToken);
 
         final String email = oAuthUser.email();
         final boolean isSignup = memberReader.existsByEmailAndProvider(email, provider);
