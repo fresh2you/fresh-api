@@ -11,13 +11,16 @@ import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.LikeProductResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
+import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.file.UploadedFile;
 import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.entity.product.ProductLike;
 import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
+import com.zb.fresh_api.domain.enums.category.CategoryType;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
@@ -45,6 +48,7 @@ public class ProductService {
     private final ProductLikeReader productLikeReader;
     private final MemberReader memberReader;
     private final ProductLikeWriter productLikeWriter;
+    private final S3Uploader s3Uploader;
 
     @Transactional
     public AddProductResponse addProduct(AddProductRequest request, Member member,
@@ -56,10 +60,10 @@ public class ProductService {
             () -> new CustomException(ResponseCode.CATEGORY_NOT_FOUND)
         );
 
-        // TODO 1. 이미지 변환 (S3)
-        final String profileImage = null;
+        final UploadedFile file = s3Uploader.upload(CategoryType.PRODUCT, image);
 
-        Product storedProduct = productWriter.store(Product.create(request, category, member, profileImage));
+
+        Product storedProduct = productWriter.store(Product.create(request, category, member, file.url()));
         return new AddProductResponse(storedProduct.getId(), storedProduct.getName(), storedProduct.getCreatedAt());
     }
 
