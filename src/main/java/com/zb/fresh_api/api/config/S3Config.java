@@ -28,7 +28,6 @@ public class S3Config {
         return S3Client.builder()
                 .credentialsProvider(provider)
                 .region(Region.of(region))
-//                .region(Region.AP_NORTHEAST_2)
                 .build();
     }
 
