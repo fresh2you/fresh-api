@@ -23,4 +23,11 @@ public class SecurityConstants {
             "/v1/api/members/signup", "/v1/api/members/login/**"
     };
 
+    public static final String[] PUBLIC_URLS = {
+            "/login","/register","/ws/**"
+    };
+
+    public static final String[] MEMBER_ONLY_URLS = {
+            "/chat/**", "/chatrooms/**"
+    };
 }

@@ -1,7 +1,5 @@
 package com.zb.fresh_api.api.websocket;
 
-import com.zb.fresh_api.api.dto.request.ChatMessageRequest;
-import com.zb.fresh_api.api.dto.response.ChatMessageResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
