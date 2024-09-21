@@ -6,14 +6,19 @@ import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
+import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.file.UploadedFile;
 import com.zb.fresh_api.domain.entity.board.Board;
 import com.zb.fresh_api.domain.entity.board.BoardMessage;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
+import com.zb.fresh_api.domain.enums.board.MessageType;
+import com.zb.fresh_api.domain.enums.category.CategoryType;
 import com.zb.fresh_api.domain.repository.reader.BoardReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
+import com.zb.fresh_api.domain.repository.reader.OrderReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.BoardMessageWriter;
 import com.zb.fresh_api.domain.repository.writer.BoardWriter;
@@ -21,6 +26,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +36,8 @@ public class BoardService {
     private final MemberReader memberReader;
     private final ProductReader productReader;
     private final BoardMessageWriter boardMessageWriter;
+    private final S3Uploader s3Uploader;
+    private final OrderReader orderReader;
 
     public AddBoardResponse addBoard(final Long memberId, final Long productId, final String title ) {
         Member member = memberReader.getById(memberId);
@@ -84,14 +92,23 @@ public class BoardService {
     }
 
     @Transactional
-    public AddBoardMessageResponse addBoardMessage(Long memberId, Long boardId, AddBoardMessageRequest request) {
+    public AddBoardMessageResponse addBoardMessage(final Long memberId, final Long boardId,final AddBoardMessageRequest request,
+        final MultipartFile image) {
         Member member = memberReader.getById(memberId);
         Board board = boardReader.getById(boardId);
-        if(!Objects.equals(board.getMember().getId(), memberId)){
+        
+        // member가 구매자, 판매자 둘다 아닌경우 에러 발생
+        if(!Objects.equals(board.getMember().getId(), memberId) &&
+        !orderReader.existsByProductIdAndMemberId(board.getProduct().getId(), memberId)
+        ){
             throw new CustomException(ResponseCode.NOT_BOARD_OWNER);
         }
 
-        BoardMessage boardMessage = BoardMessage.create(board,request.messageType(),request.content());
+        UploadedFile file = null;
+        if(request.messageType() == MessageType.IMAGE && image != null){
+             file = s3Uploader.upload(CategoryType.CHAT, image);
+        }
+        BoardMessage boardMessage = BoardMessage.create(board,request.messageType(),file == null  ? request.content() : file.url());
         BoardMessage storeBoardMessage = boardMessageWriter.store(boardMessage);
         board.updateLastMessagedAt(storeBoardMessage.getCreatedAt());
 

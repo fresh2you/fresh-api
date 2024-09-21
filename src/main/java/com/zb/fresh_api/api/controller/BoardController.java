@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(
     name = "게시판 API",
@@ -94,10 +96,11 @@ public class BoardController {
     public ResponseEntity<ApiResponse<AddBoardMessageResponse>> addBoardMessage(
         @Parameter(hidden = true) @LoginMember Member loginMember,
         @PathVariable(name = "boardId") Long boardId,
-        @RequestBody @Valid AddBoardMessageRequest request
+        @RequestBody @Valid AddBoardMessageRequest request,
+        @Parameter @RequestPart(value = "image", required = false) MultipartFile image
     ){
         AddBoardMessageResponse response = boardService.addBoardMessage(
-            loginMember.getId(), boardId, request);
+            loginMember.getId(), boardId, request, image);
         return ApiResponse.success(ResponseCode.SUCCESS,response);
 
     }
