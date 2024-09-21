@@ -77,8 +77,50 @@ class MemberServiceTest extends ServiceTest {
 
     @Mock
     private PointHistoryWriter pointHistoryWriter;
+
     @InjectMocks
     private MemberService memberService;
+
+    @Test
+    @DisplayName("배송지 전체 삭제 - 성공")
+    void 배송지_전체_삭제_성공() {
+        // given
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+                .set("id", Arbitraries.longs().greaterOrEqual(1))
+                .set("email", Arbitraries.strings().alpha().ofMinLength(4).ofMaxLength(8).map(param -> param + "@gmail.com"))
+                .set("phone", Arbitraries.strings().numeric().ofLength(11))
+                .set("provider", Arbitraries.of(Provider.class).sample())
+                .set("role", MemberRole.ROLE_USER)
+                .sample();
+
+        Long deliveryAddressId = Arbitraries.longs().between(1, 10).sample();
+        DeliveryAddress deliveryAddress = getBuilderMonkey().giveMeBuilder(DeliveryAddress.class)
+                .set("id", deliveryAddressId)
+                .set("member", member)
+                .set("isDefault", Arbitraries.of(true, false))
+                .sample();
+
+        List<DeliveryAddress> deliveryAddresses = new ArrayList<>();
+        deliveryAddresses.add(deliveryAddress);
+        int repeat = Arbitraries.integers().between(0, 2).sample();
+        for (int i = 0; i < repeat; i++) {
+            DeliveryAddress newDeliveryAddress = getBuilderMonkey().giveMeBuilder(DeliveryAddress.class)
+                    .set("id", Arbitraries.longs().greaterOrEqual(10).sample())
+                    .set("member", member)
+                    .sample();
+            deliveryAddresses.add(newDeliveryAddress);
+        }
+
+        // when
+        doReturn(deliveryAddresses).when(deliveryAddressReader).getAllActiveDeliveryAddressByMemberId(member.getId());
+
+        // then
+        memberService.deleteAllDeliveryAddress(member);
+
+        deliveryAddresses.forEach(address -> assertNotNull(address.getDeletedAt()));
+        verify(deliveryAddressReader, times(1)).getAllActiveDeliveryAddressByMemberId(member.getId());
+
+    }
 
     @Test
     @DisplayName("배송지 삭제 - 성공")
@@ -111,7 +153,7 @@ class MemberServiceTest extends ServiceTest {
     }
 
     @Test
-    @DisplayName("다른 유저의 배송지 삭제 - 실패")
+    @DisplayName("다른 유저의 배송지 삭제(존재하지 않는 배송지) - 실패")
     void 다른_유저의_배송지_삭제_실패() {
         // given
         Member member = getConstructorMonkey().giveMeBuilder(Member.class)
@@ -173,7 +215,7 @@ class MemberServiceTest extends ServiceTest {
         }
 
         // when
-        doReturn(deliveryAddresses).when(deliveryAddressReader).getActiveDeliveryAddressesByMemberId(member.getId());
+        doReturn(deliveryAddresses).when(deliveryAddressReader).getAllActiveDeliveryAddressByMemberId(member.getId());
 
         // then
         memberService.modifyDeliveryAddress(member, deliveryAddressId, request);
@@ -184,7 +226,7 @@ class MemberServiceTest extends ServiceTest {
         assertEquals(deliveryAddress.getDetailedAddress(), request.detailedAddress());
         assertEquals(deliveryAddress.getPostalCode(), request.postalCode());
 
-        verify(deliveryAddressReader, times(1)).getActiveDeliveryAddressesByMemberId(member.getId());
+        verify(deliveryAddressReader, times(1)).getAllActiveDeliveryAddressByMemberId(member.getId());
     }
 
     @Test
@@ -227,7 +269,7 @@ class MemberServiceTest extends ServiceTest {
         }
 
         // when
-        doReturn(deliveryAddresses).when(deliveryAddressReader).getActiveDeliveryAddressesByMemberId(member.getId());
+        doReturn(deliveryAddresses).when(deliveryAddressReader).getAllActiveDeliveryAddressByMemberId(member.getId());
 
         // then
         memberService.modifyDeliveryAddress(member, deliveryAddressId, request);
@@ -242,7 +284,7 @@ class MemberServiceTest extends ServiceTest {
         assertEquals(deliveryAddress.getDetailedAddress(), request.detailedAddress());
         assertEquals(deliveryAddress.getPostalCode(), request.postalCode());
 
-        verify(deliveryAddressReader, times(1)).getActiveDeliveryAddressesByMemberId(member.getId());
+        verify(deliveryAddressReader, times(1)).getAllActiveDeliveryAddressByMemberId(member.getId());
     }
 
     @Test
@@ -273,10 +315,10 @@ class MemberServiceTest extends ServiceTest {
         }
 
         // when, then
-        doReturn(deliveryAddresses).when(deliveryAddressReader).getActiveDeliveryAddressesByMemberId(member.getId());
+        doReturn(deliveryAddresses).when(deliveryAddressReader).getAllActiveDeliveryAddressByMemberId(member.getId());
         assertThrows(CustomException.class, () -> memberService.addDeliveryAddress(member, request));
 
-        verify(deliveryAddressReader, times(1)).getActiveDeliveryAddressesByMemberId(member.getId());
+        verify(deliveryAddressReader, times(1)).getAllActiveDeliveryAddressByMemberId(member.getId());
     }
 
     @Test
@@ -308,7 +350,7 @@ class MemberServiceTest extends ServiceTest {
         }
 
         // when
-        doReturn(deliveryAddresses).when(deliveryAddressReader).getActiveDeliveryAddressesByMemberId(member.getId());
+        doReturn(deliveryAddresses).when(deliveryAddressReader).getAllActiveDeliveryAddressByMemberId(member.getId());
 
         // then
         AddDeliveryAddressResponse response = memberService.addDeliveryAddress(member, request);
@@ -316,7 +358,7 @@ class MemberServiceTest extends ServiceTest {
         assertNotNull(response);
         assertEquals(deliveryAddresses.size() + 1, response.addressCount());
 
-        verify(deliveryAddressReader, times(1)).getActiveDeliveryAddressesByMemberId(member.getId());
+        verify(deliveryAddressReader, times(1)).getAllActiveDeliveryAddressByMemberId(member.getId());
         verify(deliveryAddressWriter, times(1)).store(any(DeliveryAddress.class));
     }
 

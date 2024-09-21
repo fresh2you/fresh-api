@@ -17,7 +17,7 @@ public class DeliveryAddressReader {
     private final DeliveryAddressJpaRepository deliveryAddressJpaRepository;
     private final DeliveryAddressQueryRepository deliveryAddressQueryRepository;
 
-    public List<DeliveryAddress> getActiveDeliveryAddressesByMemberId(Long memberId) {
+    public List<DeliveryAddress> getAllActiveDeliveryAddressByMemberId(Long memberId) {
         return deliveryAddressJpaRepository.findAllByMemberIdAndDeletedAtIsNull(memberId);
     }
 
