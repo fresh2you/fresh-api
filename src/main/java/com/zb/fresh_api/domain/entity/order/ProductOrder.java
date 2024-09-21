@@ -1,7 +1,6 @@
 package com.zb.fresh_api.domain.entity.order;
 
 import com.zb.fresh_api.domain.entity.address.DeliveryAddressSnapshot;
-import com.zb.fresh_api.domain.entity.member.Customer;
 import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,10 +21,6 @@ public class ProductOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", columnDefinition = "BIGINT UNSIGNED comment '고유 번호'")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '구매자 고유 번호'")
-    private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_snapshot_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '상품 스냅샷 고유 번호'")
