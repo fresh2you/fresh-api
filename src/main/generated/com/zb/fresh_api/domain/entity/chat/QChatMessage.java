@@ -21,13 +21,11 @@ public class QChatMessage extends EntityPathBase<ChatMessage> {
 
     public final NumberPath<Long> chatMessageId = createNumber("chatMessageId", Long.class);
 
-    public final StringPath chatMessageType = createString("chatMessageType");
-
     public final NumberPath<Long> chatRoomId = createNumber("chatRoomId", Long.class);
 
-    public final StringPath content = createString("content");
+    public final StringPath message = createString("message");
 
-    public final NumberPath<Long> memberId = createNumber("memberId", Long.class);
+    public final NumberPath<Long> senderId = createNumber("senderId", Long.class);
 
     public final DateTimePath<java.time.LocalDateTime> sentAt = createDateTime("sentAt", java.time.LocalDateTime.class);
 
@@ -35,7 +33,7 @@ public class QChatMessage extends EntityPathBase<ChatMessage> {
         super(ChatMessage.class, forVariable(variable));
     }
 
-    public QChatMessage(Path<? extends ChatMessage> path) {
+    public QChatMessage(Path<ChatMessage> path) {
         super(path.getType(), path.getMetadata());
     }
 

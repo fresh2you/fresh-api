@@ -24,17 +24,11 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     public final NumberPath<Long> categoryId = createNumber("categoryId", Long.class);
 
-    public final DateTimePath<java.time.LocalDateTime> chatRoomCreatedAt = createDateTime("chatRoomCreatedAt", java.time.LocalDateTime.class);
-
-    public final NumberPath<Long> chatRoomId = createNumber("chatRoomId", Long.class);
+    public final StringPath chatRoomId = createString("chatRoomId");
 
     public final StringPath lastMessage = createString("lastMessage");
 
-    public final DateTimePath<java.time.LocalDateTime> lastMessageSentAt = createDateTime("lastMessageSentAt", java.time.LocalDateTime.class);
-
     public final NumberPath<Integer> maxParticipants = createNumber("maxParticipants", Integer.class);
-
-    public final NumberPath<Long> memberId = createNumber("memberId", Long.class);
 
     public final SetPath<ChatRoomMember, QChatRoomMember> members = this.<ChatRoomMember, QChatRoomMember>createSet("members", ChatRoomMember.class, QChatRoomMember.class, PathInits.DIRECT2);
 

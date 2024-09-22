@@ -30,6 +30,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final BooleanPath isSeller = createBoolean("isSeller");
+
     public final StringPath nickname = createString("nickname");
 
     public final StringPath password = createString("password");
@@ -43,6 +45,8 @@ public class QMember extends EntityPathBase<Member> {
     public final StringPath providerId = createString("providerId");
 
     public final EnumPath<com.zb.fresh_api.domain.enums.member.MemberRole> role = createEnum("role", com.zb.fresh_api.domain.enums.member.MemberRole.class);
+
+    public final DateTimePath<java.time.LocalDateTime> sellerVerifiedAt = createDateTime("sellerVerifiedAt", java.time.LocalDateTime.class);
 
     public final EnumPath<com.zb.fresh_api.domain.enums.member.MemberStatus> status = createEnum("status", com.zb.fresh_api.domain.enums.member.MemberStatus.class);
 

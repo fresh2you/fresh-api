@@ -24,8 +24,6 @@ public class QChatRoomMember extends EntityPathBase<ChatRoomMember> {
 
     public final QChatRoom chatRoom;
 
-    public final NumberPath<Long> chatRoomId = createNumber("chatRoomId", Long.class);
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final BooleanPath isApproved = createBoolean("isApproved");
