@@ -10,6 +10,7 @@ import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.ChargePointResponse;
+import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.service.MemberService;
@@ -167,6 +168,19 @@ public class MemberController {
         ChargePointResponse chargePointResponse = memberService.chargePoint(request,
             loginMember.getId());
         return ApiResponse.success(ResponseCode.SUCCESS,chargePointResponse);
+    }
+
+    @Operation(
+        summary = "배송지 목록 조회",
+        description = "자신의 배송지 목록을 조회합니다"
+    )
+    @GetMapping("/delivery-addresses")
+    public ResponseEntity<ApiResponse<GetAllAddressResponse>> getDeliveryAddresses(
+        @Parameter(hidden = true) @LoginMember Member loginMember
+    ){
+        GetAllAddressResponse response = memberService.getAllAddress(loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS,response);
+
     }
 
 }

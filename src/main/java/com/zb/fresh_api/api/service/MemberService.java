@@ -4,6 +4,7 @@ import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.*;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.ChargePointResponse;
+import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
@@ -146,7 +147,6 @@ public class MemberService {
         Member member = memberWriter.store(
             Member.create(nickName, email, passwordEncoder.encode(password), provider, providerId,
                 MemberRole.ROLE_USER, MemberStatus.ACTIVE));
-
         processTermsAgreements(termsAgreementDtos, member);
         Point point = pointWriter.store(
             Point.create(member, BigDecimal.valueOf(500), PointStatus.ACTIVE)
@@ -282,5 +282,12 @@ public class MemberService {
         point.charge(request.point());
 
         return new ChargePointResponse(request.point(), point.getBalance());
+    }
+    public GetAllAddressResponse getAllAddress(Long memberId) {
+        Member member = memberReader.getById(memberId);
+        List<DeliveryAddress> deliveryAddressList = deliveryAddressReader.getAllActiveDeliveryAddressByMemberId(
+            memberId);
+
+        return GetAllAddressResponse.fromEntities(deliveryAddressList);
     }
 }
