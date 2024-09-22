@@ -1,6 +1,10 @@
 package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.domain.dto.chat.ChatMessageDto;
+import com.zb.fresh_api.api.service.ChatRoomService;
+import com.zb.fresh_api.domain.entity.chat.ChatRoomMember;
+import com.zb.fresh_api.domain.repository.jpa.ChatMessageRepository;
+import com.zb.fresh_api.domain.repository.jpa.ChatRoomMemberRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,12 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Tag(
         name = "채팅 API",
@@ -27,6 +31,9 @@ import java.util.List;
 public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatRoomService chatRoomService;
+    private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomMemberRepository memberRepository;
 
     @Operation(
             summary = "채팅 메시지 리스트 반환",
@@ -34,11 +41,24 @@ public class ChatController {
     )
     @GetMapping("/chat/{id}")
     public ResponseEntity<List<ChatMessageDto>> getChatMessages(
-            @Parameter(description = "채팅방 ID") @PathVariable Long id) {
-        // 임시로 리스트 형식으로 구현, 실제론 DB 접근 필요
-        ChatMessageDto test = new ChatMessageDto(1L, "test", "test");
-        return ResponseEntity.ok().body(List.of(test));
+            @Parameter(description = "채팅방 ID") @PathVariable String id) {
+        // DB에서 채팅 메시지를 가져와 ChatMessageDto로 변환
+        List<ChatMessageDto> chatMessages = chatMessageRepository.findByChatRoomId(Long.parseLong(id))
+                .stream()
+                .map(message -> {
+                    ChatRoomMember sender = memberRepository.findByChatRoom_ChatRoomIdAndMemberId(id, message.senderId());
+                    String senderName = sender != null ? "사용자 이름" : "Unknown User";
+                    return new ChatMessageDto(
+                            message.chatMessageId(),
+                            senderName,
+                            message.message()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok().body(chatMessages);
     }
+
 
     @Operation(
             summary = "메시지 송신 및 수신",
@@ -51,10 +71,21 @@ public class ChatController {
 
         log.info("Sending message to topic: /sub/chatroom/1");
 
-        // 메시지 인코딩
         String encodedMessage = new String(chatMessage.message().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
 
-        // 메시지를 해당 채팅방 구독자들에게 전송
         messagingTemplate.convertAndSend("/sub/chatroom/1", encodedMessage);
+    }
+
+    @Operation(
+            summary = "채팅방 나가기",
+            description = "사용자가 채팅방을 나가면 채팅방 멤버에서 제거되고, 마지막 멤버가 나가면 채팅방 삭제"
+    )
+    @PostMapping("/chat/{chatRoomId}/leave")
+    public ResponseEntity<Void> leaveChatRoom(
+            @Parameter(description = "채팅방 ID") @PathVariable String chatRoomId,
+            @Parameter(description = "사용자 ID") @RequestParam Long memberId) {
+
+        chatRoomService.leaveChatRoom(chatRoomId, memberId);
+        return ResponseEntity.ok().build();
     }
 }
