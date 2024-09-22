@@ -2,10 +2,12 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
+import com.zb.fresh_api.api.dto.request.BuyProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.BuyProductResponse;
 import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
 import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
@@ -19,6 +21,7 @@ import com.zb.fresh_api.domain.entity.member.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,7 +96,21 @@ public class ProductController {
         @Parameter(hidden = true) @LoginMember Member member) {
         DeleteProductResponse deleteProductId = productService.deleteProduct(request, member);
         return ApiResponse.success(ResponseCode.SUCCESS,deleteProductId);
+    }
 
+    @Operation(
+        summary = "상품 구매",
+        description = "상품 구매를 위한 API입니다."
+    )
+    @PostMapping("/{productId}/buy")
+    public ResponseEntity<ApiResponse<BuyProductResponse>> buyProduct(
+        @PathVariable(name = "productId") Long productId,
+        @RequestBody @Valid BuyProductRequest request,
+        @Parameter(hidden = true) @LoginMember Member member) {
+
+        BuyProductResponse response = productService.buyProduct(productId, request,
+            member.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS,response);
     }
 
     // TODO 키워드

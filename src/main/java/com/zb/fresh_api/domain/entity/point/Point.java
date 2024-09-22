@@ -58,4 +58,8 @@ public class Point extends BaseTimeEntity {
     public void charge(BigDecimal point){
         this.balance = balance.add(point);
     }
+
+    public void pay(BigDecimal price){
+        this.balance = balance.subtract(price);
+    }
 }
