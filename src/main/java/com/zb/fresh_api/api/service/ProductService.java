@@ -16,6 +16,9 @@ import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
+import com.zb.fresh_api.domain.repository.writer.DeliveryAddressSnapshotWriter;
+import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
+import com.zb.fresh_api.domain.repository.writer.ProductOrderWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import java.util.Objects;
@@ -38,7 +41,6 @@ public class ProductService {
     private final S3Uploader s3Uploader;
     private final DeliveryAddressReader deliveryAddressReader;
     private final PointReader pointReader;
-    private final PointWriter pointWriter;
     private final PointHistoryWriter pointHistoryWriter;
     private final DeliveryAddressSnapshotWriter deliveryAddressSnapshotWriter;
     private final ProductOrderWriter productOrderWriter;
