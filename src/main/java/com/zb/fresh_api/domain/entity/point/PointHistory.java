@@ -51,6 +51,9 @@ public class PointHistory extends BaseTimeEntity {
     @Column(name = "amount", nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) comment '거래 금액'")
     private BigDecimal amount;
 
+
+
+
     @Column(name = "balanceBefore", nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) comment '거래 전 잔액'")
     private BigDecimal balanceBefore;
 
