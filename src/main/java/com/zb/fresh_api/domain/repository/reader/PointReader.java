@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class PointReader {
     private final PointJpaRepository pointJpaRepository;
 
-    public Point getPointByMemberId(Long memberId) {
+    public Point getByMemberId(Long memberId){
         return pointJpaRepository.findByMemberId(memberId).orElseThrow(
             () -> new CustomException(ResponseCode.POINT_NOT_FOUND)
         );
