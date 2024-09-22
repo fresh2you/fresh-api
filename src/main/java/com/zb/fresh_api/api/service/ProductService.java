@@ -34,6 +34,7 @@ public class ProductService {
     private final ProductWriter productWriter;
     private final ProductReader productReader;
     private final CategoryReader categoryReader;
+
     private final ProductSnapshotWriter productSnapshotWriter;
     private final ProductLikeReader productLikeReader;
     private final MemberReader memberReader;
