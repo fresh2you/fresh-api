@@ -86,4 +86,8 @@ public class Product extends BaseTimeEntity {
     public static void delete(Product product){
         product.deleted_at = LocalDateTime.now();
     }
+
+    public void decreaseQuantity(int quantity){
+        this.quantity = this.quantity - quantity;
+    }
 }
