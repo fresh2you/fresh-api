@@ -56,7 +56,6 @@ public class ChatController {
         return ApiResponse.success(ResponseCode.SUCCESS, chatMessages);
     }
 
-
     @Operation(
             summary = "메시지 송신 및 수신",
             description = "클라이언트에서 /app/message로 메시지를 전송하면 채팅방 구독자들에게 메시지를 전달"
