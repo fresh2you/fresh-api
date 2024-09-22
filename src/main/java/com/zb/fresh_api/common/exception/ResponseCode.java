@@ -84,6 +84,7 @@ public enum ResponseCode {
      */
     PRODUCT_NOT_FOUND("1600", "상품을 찾을 수 없습니다"),
     NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다."),
+    NOT_ENOUGH_QUANTITY("1602", "상품 수량이 충분하지 않습니다."),
 
     /**
      * ProductLike (1700 ~ 1800)
@@ -102,15 +103,22 @@ public enum ResponseCode {
     /**
      * Delivery (1900 ~ 2000)
      */
-    NOT_FOUND_DELIVERY_ADDRESS("1900", "등록된 배송지 정보를 찾을 수 없습니다."),
-    EXCEEDED_DELIVERY_ADDRESS_COUNT("1901", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
+    NOT_FOUND_DELIVERY_ADDRESS("2000", "등록된 배송지 정보를 찾을 수 없습니다."),
+    EXCEEDED_DELIVERY_ADDRESS_COUNT("2001", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
 
     /**
      * 채팅방 관련 오류 코드 (2000 ~ 2100)
      */
     NOT_FOUND_CHATROOM("2000", "채팅방을 찾을 수 없습니다."),
     MAX_PARTICIPANTS_EXCEEDED("2001", "참가자 수가 최대 인원을 초과했습니다."),
-    NOT_FOUND_CHATROOM_MEMBER("2002", "채팅방 멤버를 찾을 수 없습니다.")
+    NOT_FOUND_CHATROOM_MEMBER("2002", "채팅방 멤버를 찾을 수 없습니다."),
+
+    /**
+     * Point (2100 ~ 2200)
+     */
+    POINT_NOT_FOUND("2100", "포인트 정보를 찾을 수 없습니다"),
+    POINT_NOT_ENOUGH("2101", "포인트가 충분하지 않습니다")
+
     ;
 
     private final String code;
