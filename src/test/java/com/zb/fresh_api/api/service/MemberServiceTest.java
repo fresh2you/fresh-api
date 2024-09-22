@@ -22,6 +22,7 @@ import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.ChargePointResponse;
+import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.common.base.ServiceTest;
@@ -575,6 +576,27 @@ class MemberServiceTest extends ServiceTest {
         assertEquals(response.balance(), request.point().add(pointBalance));
         assertEquals(response.chargePoint(), request.point());
         verify(pointHistoryWriter, times(1)).store(any(PointHistory.class));
+    }
+
+    @Test
+    @DisplayName("배송지 목록 조회")
+    void getAllAddress_success(){
+        // given
+        Member member = getMember();
+        List<DeliveryAddress> deliveryList = new ArrayList<>(List.of(
+            getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).set("member", member).sample(),
+            getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).set("member", member).sample(),
+            getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).set("member", member).sample()
+        ));
+        doReturn(deliveryList).when(deliveryAddressReader).getAllActiveDeliveryAddressByMemberId(member.getId());
+
+        // when
+        GetAllAddressResponse response = memberService.getAllAddress(member.getId());
+
+        // then
+        assertNotNull(response);
+        assertEquals(response.addressList().size(), deliveryList.size());
+        verify(deliveryAddressReader, times(1)).getAllActiveDeliveryAddressByMemberId(member.getId());
     }
 }
 
