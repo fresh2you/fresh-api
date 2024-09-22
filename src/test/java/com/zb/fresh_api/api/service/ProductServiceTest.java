@@ -13,21 +13,35 @@ import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
+import com.zb.fresh_api.api.dto.request.BuyProductRequest;
+import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
+import com.zb.fresh_api.api.dto.response.AddProductResponse;
+import com.zb.fresh_api.api.dto.response.BuyProductResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.LikeProductResponse;
 import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.entity.address.DeliveryAddress;
+import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
+import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.entity.product.ProductLike;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
+import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
+import com.zb.fresh_api.domain.repository.reader.MemberReader;
+import com.zb.fresh_api.domain.repository.reader.PointReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
 import com.zb.fresh_api.domain.repository.writer.ProductLikeWriter;
+import com.zb.fresh_api.domain.repository.writer.DeliveryAddressSnapshotWriter;
+import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
+import com.zb.fresh_api.domain.repository.writer.ProductOrderWriter;
+import com.zb.fresh_api.domain.repository.writer.ProductSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -55,6 +69,20 @@ class ProductServiceTest extends ServiceTest {
 
     @Mock
     private  ProductReader productReader;
+    @Mock
+    private  ProductSnapshotWriter productSnapshotWriter;
+    @Mock
+    private  MemberReader memberReader;
+    @Mock
+    private  DeliveryAddressReader deliveryAddressReader;
+    @Mock
+    private  PointReader pointReader;
+    @Mock
+    private  PointHistoryWriter pointHistoryWriter;
+    @Mock
+    private  DeliveryAddressSnapshotWriter deliveryAddressSnapshotWriter;
+    @Mock
+    private  ProductOrderWriter productOrderWriter;
 
     @Mock
     private ProductLikeReader productLikeReader;
@@ -353,5 +381,58 @@ class ProductServiceTest extends ServiceTest {
         // then
         verify(productLikeWriter, times(1)).delete(productLike);
     }
+
+
+    @Test
+    @DisplayName("제품 구매 성공")
+    void buyProduct_success() {
+        // given
+        Long productId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long memberId = Arbitraries.longs().greaterOrEqual(1L).sample();
+        Long deliveryAddressId =  Arbitraries.longs().greaterOrEqual(1L).sample();
+        BigDecimal productPrice = Arbitraries.bigDecimals().greaterOrEqual(BigDecimal.valueOf(10)).lessOrEqual(
+            BigDecimal.valueOf(100)
+        ).sample();
+        int quantity = Arbitraries.integers().greaterOrEqual(1).lessOrEqual(10).sample();
+        BuyProductRequest request = getConstructorMonkey().giveMeBuilder(BuyProductRequest.class)
+            .set("quantity", quantity)
+            .set("deliveryAddressId",deliveryAddressId)
+            .sample();
+
+        BigDecimal memberBalance = productPrice.multiply(BigDecimal.valueOf(request.quantity())).add(BigDecimal.valueOf(1));
+        Product product = getReflectionMonkey().giveMeBuilder(Product.class)
+            .set("id", productId)
+            .set("price", productPrice)
+            .set("quantity", quantity)
+            .sample();
+        Member member = getConstructorMonkey().giveMeBuilder(Member.class)
+            .set("id", memberId)
+            .sample();
+        DeliveryAddress deliveryAddress = getReflectionMonkey().giveMeBuilder(DeliveryAddress.class)
+            .set("id", request.deliveryAddressId())
+            .set("memberId", memberId)
+            .sample();
+        Point memberPoint = getConstructorMonkey().giveMeBuilder(Point.class)
+            .set("balance", memberBalance)
+            .sample();
+
+        doReturn(product).when(productReader).getById(productId);
+        doReturn(member).when(memberReader).getById(memberId);
+        doReturn(deliveryAddress).when(deliveryAddressReader).getActiveDeliveryAddressByIdAndMemberId(request.deliveryAddressId(), memberId);
+        doReturn(memberPoint).when(pointReader).getByMemberId(memberId);
+
+        // When
+        BuyProductResponse response = productService.buyProduct(productId, request, memberId);
+
+        // then
+        assertNotNull(response);
+        assertEquals(product.getName(), response.productName());
+        assertEquals(deliveryAddress.getRecipientName(), response.buyerName());
+        assertEquals(product.getPrice().multiply(BigDecimal.valueOf(request.quantity())), response.totalPrice());
+        verify(productSnapshotWriter, times(1)).store(any());
+        verify(deliveryAddressSnapshotWriter, times(1)).store(any());
+        verify(productOrderWriter, times(1)).store(any());
+    }
+
 
 }
