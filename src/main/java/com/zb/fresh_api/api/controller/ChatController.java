@@ -1,10 +1,13 @@
 package com.zb.fresh_api.api.controller;
 
+import com.zb.fresh_api.common.exception.CustomException;
+import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.common.response.ApiResponse;
 import com.zb.fresh_api.domain.dto.chat.ChatMessageDto;
 import com.zb.fresh_api.api.service.ChatRoomService;
 import com.zb.fresh_api.domain.entity.chat.ChatRoomMember;
-import com.zb.fresh_api.domain.repository.jpa.ChatMessageRepository;
-import com.zb.fresh_api.domain.repository.jpa.ChatRoomMemberRepository;
+import com.zb.fresh_api.domain.repository.reader.ChatRoomMemberReader;
+import com.zb.fresh_api.domain.repository.reader.ChatMessageReader;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,31 +35,25 @@ public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatRoomService chatRoomService;
-    private final ChatMessageRepository chatMessageRepository;
-    private final ChatRoomMemberRepository memberRepository;
+    private final ChatMessageReader chatMessageReader;
+    private final ChatRoomMemberReader memberReader;
 
-    @Operation(
-            summary = "채팅 메시지 리스트 반환",
-            description = "지정된 채팅방 ID에 따른 메시지 리스트를 반환"
-    )
+    @Operation(summary = "채팅 메시지 리스트 반환", description = "지정된 채팅방 ID에 따른 메시지 리스트를 반환")
     @GetMapping("/chat/{id}")
-    public ResponseEntity<List<ChatMessageDto>> getChatMessages(
+    public ResponseEntity<ApiResponse<List<ChatMessageDto>>> getChatMessages(
             @Parameter(description = "채팅방 ID") @PathVariable String id) {
-        // DB에서 채팅 메시지를 가져와 ChatMessageDto로 변환
-        List<ChatMessageDto> chatMessages = chatMessageRepository.findByChatRoomId(Long.parseLong(id))
+
+        List<ChatMessageDto> chatMessages = chatMessageReader.getMessagesByChatRoomId(Long.parseLong(id))
                 .stream()
                 .map(message -> {
-                    ChatRoomMember sender = memberRepository.findByChatRoom_ChatRoomIdAndMemberId(id, message.senderId());
+                    ChatRoomMember sender = memberReader.findByChatRoomIdAndMemberId(id, message.senderId())
+                            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_CHATROOM_MEMBER));
                     String senderName = sender != null ? "사용자 이름" : "Unknown User";
-                    return new ChatMessageDto(
-                            message.chatMessageId(),
-                            senderName,
-                            message.message()
-                    );
+                    return new ChatMessageDto(message.chatMessageId(), senderName, message.message());
                 })
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok().body(chatMessages);
+        return ApiResponse.success(ResponseCode.SUCCESS, chatMessages);
     }
 
 
@@ -81,11 +78,11 @@ public class ChatController {
             description = "사용자가 채팅방을 나가면 채팅방 멤버에서 제거되고, 마지막 멤버가 나가면 채팅방 삭제"
     )
     @PostMapping("/chat/{chatRoomId}/leave")
-    public ResponseEntity<Void> leaveChatRoom(
+    public ResponseEntity<ApiResponse<Void>> leaveChatRoom(
             @Parameter(description = "채팅방 ID") @PathVariable String chatRoomId,
             @Parameter(description = "사용자 ID") @RequestParam Long memberId) {
 
         chatRoomService.leaveChatRoom(chatRoomId, memberId);
-        return ResponseEntity.ok().build();
+        return ApiResponse.success(ResponseCode.SUCCESS);
     }
 }
