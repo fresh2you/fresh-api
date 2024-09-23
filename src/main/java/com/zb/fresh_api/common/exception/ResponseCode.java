@@ -84,13 +84,12 @@ public enum ResponseCode {
     PRODUCT_NOT_FOUND("1600", "상품을 찾을 수 없습니다"),
     NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다."),
 
-    
     /**
      * Delivery (1700 ~ 1800)
      */
     NOT_FOUND_DELIVERY_ADDRESS("1700", "등록된 배송지 정보를 찾을 수 없습니다."),
     EXCEEDED_DELIVERY_ADDRESS_COUNT("1701", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
-    
+
     /**
      * 채팅방 관련 오류 코드 (1800 ~ 1900)
      */
