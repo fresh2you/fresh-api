@@ -152,7 +152,7 @@ public class ProductService {
 
         if(productLikeReader.isExist(productId,memberId)){
             throw  new CustomException(ResponseCode.PRODUCT_ALREADY_LIKED);
-        };
+        }
 
         ProductLike productLike = productLikeWriter.store(ProductLike.create(member, product));
 

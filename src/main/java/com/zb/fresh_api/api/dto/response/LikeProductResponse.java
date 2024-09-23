@@ -20,6 +20,6 @@ public record LikeProductResponse(
 ) {
     public LikeProductResponse(ProductLike productLike) {
         this(productLike.getId(), productLike.getProduct().getId(),
-            productLike.getProduct().getName(), productLike.getLiked_at());
+            productLike.getProduct().getName(), productLike.getLikedAt());
     }
 }
