@@ -3,6 +3,7 @@ package com.zb.fresh_api.api.service;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -14,6 +15,10 @@ import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.request.BuyProductRequest;
+import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
+import com.zb.fresh_api.api.dto.response.BuyProductResponse;
+import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
+import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.BuyProductResponse;
@@ -24,7 +29,6 @@ import com.zb.fresh_api.common.base.ServiceTest;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.entity.address.DeliveryAddress;
-import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.entity.product.Product;
@@ -36,10 +40,11 @@ import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
 import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.PointReader;
+import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
-import com.zb.fresh_api.domain.repository.writer.ProductLikeWriter;
 import com.zb.fresh_api.domain.repository.writer.DeliveryAddressSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
+import com.zb.fresh_api.domain.repository.writer.ProductLikeWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductOrderWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
@@ -87,8 +92,6 @@ class ProductServiceTest extends ServiceTest {
     @Mock
     private ProductLikeReader productLikeReader;
 
-    @Mock
-    private  MemberReader memberReader;
 
     @Mock
     private S3Uploader s3Uploader;
