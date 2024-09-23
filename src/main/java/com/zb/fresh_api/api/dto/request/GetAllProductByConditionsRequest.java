@@ -13,6 +13,6 @@ public record GetAllProductByConditionsRequest(
     @Schema(description = "페이지 번호", defaultValue = "0")
     int page,
     
-    @Schema(description = "페이지 크기",defaultValue = "10")
+    @Schema(description = "페이지 크기",defaultValue = "20")
     int size
 ){}
