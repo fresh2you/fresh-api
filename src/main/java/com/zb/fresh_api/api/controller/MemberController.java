@@ -2,9 +2,8 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.SignUpRequest;
-import com.zb.fresh_api.api.dto.request.LoginRequest;
-import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
-import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
+import com.zb.fresh_api.api.dto.request.*;
+import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.service.MemberService;
@@ -17,6 +16,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,7 +47,7 @@ public class MemberController {
             description = "이메일 가입 회원의 로그인을 진행한다."
     )
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> loginWithEmail(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> loginWithEmail(@RequestBody @Valid LoginRequest request) {
         return ApiResponse.success(ResponseCode.SUCCESS, memberService.login(request));
     }
 
@@ -56,7 +56,7 @@ public class MemberController {
             description = "카카오 로그인을 진행한다."
     )
     @PostMapping("/login/kakao")
-    public ResponseEntity<ApiResponse<OauthLoginResponse>> loginWithKakao(@Valid @RequestBody OauthLoginRequest request) {
+    public ResponseEntity<ApiResponse<OauthLoginResponse>> loginWithKakao(@RequestBody @Valid OauthLoginRequest request) {
         return ApiResponse.success(ResponseCode.SUCCESS, memberService.oauthLogin(request));
     }
 
@@ -84,12 +84,59 @@ public class MemberController {
             summary = "프로필 변경",
             description = "회원의 이미지 또는 닉네임을 변경한다."
     )
-    @PatchMapping("/profile")
+    @PatchMapping(value = "/profile", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ApiResponse<Void>> updateProfile(
             @Parameter(hidden = true) @LoginMember Member loginMember,
-            @Valid @RequestBody UpdateProfileRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @Parameter @RequestPart(value = "request", required = false) @Valid UpdateProfileRequest request,
+            @Parameter @RequestPart(value = "image", required = false) MultipartFile image) {
         memberService.updateProfile(loginMember, request, image);
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
+    @Operation(
+            summary = "배송지 추가",
+            description = "배송지 정보를 추가합니다. (최대3개, 대표1개)"
+    )
+    @PostMapping("/delivery-addresses")
+    public ResponseEntity<ApiResponse<AddDeliveryAddressResponse>> addDeliveryAddress(
+            @Parameter(hidden = true) @LoginMember Member loginMember,
+            @RequestBody @Valid AddDeliveryAddressRequest request) {
+        return ApiResponse.success(ResponseCode.SUCCESS, memberService.addDeliveryAddress(loginMember, request));
+    }
+
+    @Operation(
+            summary = "배송지 수정",
+            description = "배송지 정보를 수정합니다."
+    )
+    @PatchMapping("/delivery-addresses/{deliveryAddressId}")
+    public ResponseEntity<ApiResponse<Void>> modifyDeliveryAddress(
+            @Parameter(hidden = true) @LoginMember Member loginMember,
+            @PathVariable Long deliveryAddressId,
+            @RequestBody @Valid ModifyDeliveryAddressRequest request) {
+        memberService.modifyDeliveryAddress(loginMember, deliveryAddressId, request);
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
+    @Operation(
+            summary = "배송지 삭제",
+            description = "배송지 정보를 삭제합니다."
+    )
+    @DeleteMapping("/delivery-addresses/{deliveryAddressId}")
+    public ResponseEntity<ApiResponse<Void>> deleteDeliveryAddress(
+            @Parameter(hidden = true) @LoginMember Member loginMember,
+            @PathVariable Long deliveryAddressId) {
+        memberService.deleteDeliveryAddress(loginMember, deliveryAddressId);
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
+    @Operation(
+            summary = "배송지 전체 삭제",
+            description = "배송지 정보를 전체 삭제합니다."
+    )
+    @DeleteMapping("/delivery-addresses")
+    public ResponseEntity<ApiResponse<Void>> deleteDeliveryAddress(
+            @Parameter(hidden = true) @LoginMember Member loginMember) {
+        memberService.deleteAllDeliveryAddress(loginMember);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 

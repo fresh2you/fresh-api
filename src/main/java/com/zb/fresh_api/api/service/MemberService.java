@@ -1,37 +1,38 @@
 package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
-import com.zb.fresh_api.api.dto.request.LoginRequest;
-import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
-import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
+import com.zb.fresh_api.api.dto.request.*;
+import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.api.principal.CustomUserDetails;
 import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
+import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.file.UploadedFile;
 import com.zb.fresh_api.domain.dto.member.LoginMember;
 import com.zb.fresh_api.domain.dto.member.OauthLoginMember;
 import com.zb.fresh_api.domain.dto.member.OauthUser;
 import com.zb.fresh_api.domain.dto.token.Token;
+import com.zb.fresh_api.domain.entity.address.DeliveryAddress;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.member.MemberTerms;
 import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.entity.point.PointHistory;
 import com.zb.fresh_api.domain.entity.terms.Terms;
+import com.zb.fresh_api.domain.enums.category.CategoryType;
 import com.zb.fresh_api.domain.enums.member.MemberRole;
 import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.enums.point.PointStatus;
 import com.zb.fresh_api.domain.enums.point.PointTransactionType;
+import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
-import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
-import com.zb.fresh_api.domain.repository.writer.MemberWriter;
-import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
-import com.zb.fresh_api.domain.repository.writer.PointWriter;
+import com.zb.fresh_api.domain.repository.writer.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,6 +56,9 @@ public class MemberService {
     private final MemberWriter memberWriter;
     private final MemberTermsWriter memberTermsWriter;
 
+    private final DeliveryAddressReader deliveryAddressReader;
+    private final DeliveryAddressWriter deliveryAddressWriter;
+
     private final TermsReader termsReader;
 
     private final PasswordEncoder passwordEncoder;
@@ -64,6 +68,8 @@ public class MemberService {
     private final TokenProvider tokenProvider;
     private final OauthProviderFactory oauthProviderFactory;
     private final CustomUserDetailsService customUserDetailsService;
+
+    private final S3Uploader s3Uploader;
 
     @Transactional
     public LoginResponse login(final LoginRequest request) {
@@ -93,11 +99,9 @@ public class MemberService {
     public void updateProfile(final Member member,
                               final UpdateProfileRequest request,
                               final MultipartFile image) {
-        // TODO 1. 이미지 변환 (S3)
-        final String profileImage = null;
-
-        // 2. 프로필 변경
-        member.updateProfile(request.nickname(), profileImage);
+        final UploadedFile file = s3Uploader.upload(CategoryType.MEMBER, image);
+        member.updateProfile(request.nickname(), file.url());
+        memberWriter.store(member);
     }
 
     @Transactional(readOnly = true)
@@ -147,6 +151,52 @@ public class MemberService {
             PointHistory.create(point, PointTransactionType.CHARGE, BigDecimal.valueOf(500),
                 BigDecimal.valueOf(0), BigDecimal.valueOf(500),
                 "회원가입 기념 500원 충전"));
+    }
+
+    @Transactional
+    public AddDeliveryAddressResponse addDeliveryAddress(final Member member, final AddDeliveryAddressRequest request) {
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getAllActiveDeliveryAddressByMemberId(member.getId());
+        final int addressCount = deliveryAddresses.size();
+
+        validateAddressCount(addressCount);
+
+        if (request.isDefault()) {
+            deliveryAddresses.forEach(DeliveryAddress::cancelDefault);
+        }
+
+        final DeliveryAddress newDeliveryAddress = DeliveryAddress.create(member, request);
+        deliveryAddressWriter.store(newDeliveryAddress);
+
+        return new AddDeliveryAddressResponse(addressCount + 1L);
+    }
+
+    @Transactional
+    public void modifyDeliveryAddress(final Member member, final Long deliveryAddressId, final ModifyDeliveryAddressRequest request) {
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getAllActiveDeliveryAddressByMemberId(member.getId());
+        final DeliveryAddress deliveryAddress = deliveryAddresses.stream()
+                .filter(address -> address.getId().equals(deliveryAddressId))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_DELIVERY_ADDRESS));
+
+        if (request.isDefault()) {
+            deliveryAddresses.stream()
+                    .filter(address -> !address.getId().equals(deliveryAddressId))
+                    .forEach(DeliveryAddress::cancelDefault);
+        }
+
+        deliveryAddress.modify(request);
+    }
+
+    @Transactional
+    public void deleteDeliveryAddress(final Member member, final Long deliveryAddressId) {
+        final DeliveryAddress deliveryAddress = deliveryAddressReader.getActiveDeliveryAddressByIdAndMemberId(deliveryAddressId, member.getId());
+        deliveryAddress.delete();
+    }
+
+    @Transactional
+    public void deleteAllDeliveryAddress(final Member member) {
+        final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getAllActiveDeliveryAddressByMemberId(member.getId());
+        deliveryAddresses.forEach(DeliveryAddress::delete);
     }
 
     /**
@@ -204,6 +254,12 @@ public class MemberService {
 
     protected Token resolveToken(final boolean isSignup, final String email) {
         return !isSignup ? Token.emptyToken() : tokenProvider.getTokenByEmail(email);
+    }
+
+    private void validateAddressCount(final int addressCount) {
+        if (addressCount >= 3) {
+            throw new CustomException(ResponseCode.EXCEEDED_DELIVERY_ADDRESS_COUNT);
+        }
     }
 
 }

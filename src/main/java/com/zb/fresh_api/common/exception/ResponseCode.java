@@ -22,6 +22,8 @@ public enum ResponseCode {
     NO_SUCH_METHOD("0604", "메소드를 찾을 수 없습니다."),
     NOT_FOUND_ENUM_CONSTANT("0605", "열거형 상수값을 찾을 수 없습니다."),
     S3_UPLOADER_ERROR("0606", "S3 업로드 중 오류가 발생하였습니다."),
+    METHOD_ARG_NOT_VALID("0607", "유효성 오류가 발생했습니다."),
+    INVALID_FILE_NAME_OR_EXTENSIONS("0608", "파일 이름 또는 확장자가 잘못되었습니다."),
 
     FORBIDDEN("0700", "접근 권한이 없습니다."),
     UNAUTHORIZED("0701", "유효한 인증 자격이 없습니다."),
@@ -82,12 +84,19 @@ public enum ResponseCode {
     PRODUCT_NOT_FOUND("1600", "상품을 찾을 수 없습니다"),
     NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다."),
 
+    
+    /**
+     * Delivery (1700 ~ 1800)
+     */
+    NOT_FOUND_DELIVERY_ADDRESS("1700", "등록된 배송지 정보를 찾을 수 없습니다."),
+    EXCEEDED_DELIVERY_ADDRESS_COUNT("1701", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
+    
     /**
      * 채팅방 관련 오류 코드 (1800 ~ 1900)
      */
     NOT_FOUND_CHATROOM("1800", "채팅방을 찾을 수 없습니다."),
     MAX_PARTICIPANTS_EXCEEDED("1801", "참가자 수가 최대 인원을 초과했습니다."),
-    NOT_FOUND_CHATROOM_MEMBER("1802", "채팅방 멤버를 찾을 수 없습니다."),
+    NOT_FOUND_CHATROOM_MEMBER("1802", "채팅방 멤버를 찾을 수 없습니다.")
     ;
 
     private final String code;

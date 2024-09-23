@@ -5,7 +5,7 @@ spring:
   config:
     activate:
       on-profile: dev
-#    import: aws-parameterstore:/param/fresh2you_dev/
+    import: aws-parameterstore:/param/fresh2you_${spring.profiles.active}/
 
   security:
     oauth2:
@@ -66,7 +66,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
@@ -74,6 +74,19 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true      # 쿼리 로그 포맷 (정렬)
         show_sql: false        # 쿼리 로그 출력
+
+
+cloud:
+  aws:
+    s3:
+      bucket: ${s3.bucket}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${s3.access}
+      secretKey: ${s3.secret}
 
 decorator:
   datasource:

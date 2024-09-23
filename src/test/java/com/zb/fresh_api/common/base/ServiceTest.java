@@ -1,6 +1,7 @@
 package com.zb.fresh_api.common.base;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
+import com.navercorp.fixturemonkey.api.introspector.BuilderArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
 import com.navercorp.fixturemonkey.jakarta.validation.plugin.JakartaValidationPlugin;
@@ -41,6 +42,13 @@ public abstract class ServiceTest {
         return FixtureMonkey.builder()
                 .plugin(new JakartaValidationPlugin())
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build();
+    }
+
+    protected final FixtureMonkey getBuilderMonkey() {
+        return FixtureMonkey.builder()
+                .plugin(new JakartaValidationPlugin())
+                .objectIntrospector(BuilderArbitraryIntrospector.INSTANCE)
                 .build();
     }
 
