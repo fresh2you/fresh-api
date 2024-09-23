@@ -94,7 +94,13 @@ public enum ResponseCode {
      * ProductLike (1800 ~ 1900)
      */
     PRODUCT_LIKE_NOT_FOUND("1800", "상품에 대한 좋아요가 존재하지 않습니다"),
-    PRODUCT_ALREADY_LIKED("1801", "이미 좋아요한 상품입니다")
+    PRODUCT_ALREADY_LIKED("1801", "이미 좋아요한 상품입니다"),
+
+    /**
+     * Board (1900 ~ 1901)
+     */
+    BOARD_ALREADY_EXIST("1901", "이미 상품에 대한 게시판이 존재합니다")
+
     ;
 
     private final String code;
