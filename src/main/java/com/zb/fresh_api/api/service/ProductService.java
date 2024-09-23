@@ -2,24 +2,37 @@ package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
-import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
+import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
+import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
+import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
+import com.zb.fresh_api.api.dto.response.LikeProductResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
+import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.file.UploadedFile;
 import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
+import com.zb.fresh_api.domain.entity.product.ProductLike;
 import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
+import com.zb.fresh_api.domain.enums.category.CategoryType;
 import com.zb.fresh_api.domain.repository.reader.CategoryReader;
+import com.zb.fresh_api.domain.repository.reader.MemberReader;
+import com.zb.fresh_api.domain.repository.reader.ProductLikeReader;
 import com.zb.fresh_api.domain.repository.reader.ProductReader;
+import com.zb.fresh_api.domain.repository.writer.ProductLikeWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductSnapshotWriter;
 import com.zb.fresh_api.domain.repository.writer.ProductWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +45,10 @@ public class ProductService {
     private final ProductReader productReader;
     private final CategoryReader categoryReader;
     private final ProductSnapshotWriter productSnapshotWriter;
+    private final ProductLikeReader productLikeReader;
+    private final MemberReader memberReader;
+    private final ProductLikeWriter productLikeWriter;
+    private final S3Uploader s3Uploader;
 
     @Transactional
     public AddProductResponse addProduct(AddProductRequest request, Member member,
@@ -43,16 +60,16 @@ public class ProductService {
             () -> new CustomException(ResponseCode.CATEGORY_NOT_FOUND)
         );
 
-        // TODO 1. 이미지 변환 (S3)
-        final String profileImage = null;
+        final UploadedFile file = s3Uploader.upload(CategoryType.PRODUCT, image);
 
-        Product storedProduct = productWriter.store(Product.create(request, category, member, profileImage));
+
+        Product storedProduct = productWriter.store(Product.create(request, category, member, file.url()));
         return new AddProductResponse(storedProduct.getId(), storedProduct.getName(), storedProduct.getCreatedAt());
     }
 
     @Transactional(readOnly = true)
-    public GetProductDetailResponse getProductDetail(final GetProductDetailRequest request) {
-        Product product = productReader.findById(request.productId())
+    public GetProductDetailResponse getProductDetail(final Long productId) {
+        Product product = productReader.findById(productId)
             .orElseThrow(() -> new CustomException(ResponseCode.PRODUCT_NOT_FOUND));
 
         return GetProductDetailResponse.fromEntity(product);
@@ -109,4 +126,53 @@ public class ProductService {
         return new DeleteProductResponse(product.getId());
 
     }
+
+
+    public GetAllProductByConditionsResponse findProducts(GetAllProductByConditionsRequest request) {
+        Page<Product> products = productReader.findAll(request);
+
+        return GetAllProductByConditionsResponse.fromEntities(products);
+    }
+
+    public FindAllProductLikeResponse findAllProductLike(Long memberId){
+        List<Long> productLikes = productLikeReader.findProductIdByMemberId(memberId);
+
+        List<Product> productList = new ArrayList<>();
+        for(Long productId : productLikes){
+            Product product = productReader.findById(productId).orElseThrow(
+                () -> new CustomException(ResponseCode.PRODUCT_NOT_FOUND)
+            );
+            productList.add(product);
+        }
+
+        return FindAllProductLikeResponse.fromEntities(productList);
+    }
+
+    public LikeProductResponse like(Long productId,Long memberId) {
+        Product product = productReader.findById(productId).orElseThrow(
+            () -> new CustomException(ResponseCode.PRODUCT_NOT_FOUND)
+        );
+        Member member = memberReader.getById(memberId);
+
+        if(productLikeReader.isExist(productId,memberId)){
+            throw  new CustomException(ResponseCode.PRODUCT_ALREADY_LIKED);
+        }
+
+        ProductLike productLike = productLikeWriter.store(ProductLike.create(member, product));
+
+        return new LikeProductResponse(productLike);
+    }
+
+    public void unLike(Long productId,Long memberId) {
+        productReader.findById(productId).orElseThrow(
+            ()-> new CustomException(ResponseCode.PRODUCT_NOT_FOUND)
+        );
+        memberReader.getById(memberId);
+
+        ProductLike productLike = productLikeReader.findByProductIdAndMemberId(productId, memberId)
+            .orElseThrow(() -> new CustomException(ResponseCode.PRODUCT_LIKE_NOT_FOUND));
+
+        productLikeWriter.delete(productLike);
+    }
+
 }

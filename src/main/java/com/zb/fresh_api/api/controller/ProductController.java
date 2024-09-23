@@ -3,11 +3,14 @@ package com.zb.fresh_api.api.controller;
 import com.zb.fresh_api.api.annotation.LoginMember;
 import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
-import com.zb.fresh_api.api.dto.request.GetProductDetailRequest;
+import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.DeleteProductResponse;
+import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
+import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
+import com.zb.fresh_api.api.dto.response.LikeProductResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
 import com.zb.fresh_api.api.service.ProductService;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -58,9 +61,9 @@ public class ProductController {
         summary = "상품 상세 조회",
         description = "상품 ID를 통해 상품을 상세 조회합니다."
     )
-    @GetMapping()
-    public ResponseEntity<ApiResponse<GetProductDetailResponse>> getProduct(GetProductDetailRequest request) {
-        GetProductDetailResponse productDetail = productService.getProductDetail(request);
+    @GetMapping("/{productId}")
+    public ResponseEntity<ApiResponse<GetProductDetailResponse>> getProduct(@PathVariable(value = "productId") Long productId) {
+        GetProductDetailResponse productDetail = productService.getProductDetail(productId);
         return ApiResponse.success(ResponseCode.SUCCESS, productDetail);
     }
 
@@ -92,4 +95,54 @@ public class ProductController {
 
     }
 
+    // TODO 키워드
+    //  제목
+    //  상품 설명
+    //  판매자 이름
+    @Operation(
+        summary = "상품 목록 조회",
+        description = "키워드 또는 카테고리 타입 등을 통해 상품을 상세 조회합니다."
+    )
+    @GetMapping()
+    public ResponseEntity<ApiResponse<GetAllProductByConditionsResponse>> getAllProductByConditions(
+        GetAllProductByConditionsRequest request) {
+        GetAllProductByConditionsResponse products = productService.findProducts(request);
+        return ApiResponse.success(ResponseCode.SUCCESS, products);
+    }
+
+    @Operation(
+        summary = "좋아요 상품 목록 조회",
+        description = "키워드 또는 카테고리 타입 등을 통해 상품을 상세 조회합니다."
+    )
+    @GetMapping("/like")
+    public ResponseEntity<ApiResponse<FindAllProductLikeResponse>> getAllProductByLike(
+        @Parameter(hidden = true) @LoginMember Member loginMember) {
+        FindAllProductLikeResponse productList = productService.findAllProductLike(
+            loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS, productList);
+    }
+
+    @Operation(
+        summary = "상품 좋아요",
+        description = "상품 좋아요 추가 "
+    )
+    @PostMapping("/{productId}/like")
+    public ResponseEntity<ApiResponse<LikeProductResponse>> setProductLike(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @PathVariable(name = "productId") Long productId) {
+        LikeProductResponse likeProductResponse = productService.like(productId, loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS,likeProductResponse);
+    }
+
+    @Operation(
+        summary = "상품 좋아요 취소",
+        description = "상품의 좋아요 삭제"
+    )
+    @DeleteMapping("/{productId}/like")
+    public ResponseEntity<ApiResponse<Void>> setProductUnLike(
+        @Parameter(hidden = true) @LoginMember Member loginMember,
+        @PathVariable(name = "productId") Long productId) {
+        productService.unLike(productId, loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
 }

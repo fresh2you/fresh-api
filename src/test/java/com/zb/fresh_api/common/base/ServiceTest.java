@@ -6,8 +6,11 @@ import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitra
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
 import com.navercorp.fixturemonkey.jakarta.validation.plugin.JakartaValidationPlugin;
 import com.zb.fresh_api.domain.config.JpaAuditingConfig;
+import com.zb.fresh_api.domain.entity.board.Board;
 import com.zb.fresh_api.domain.entity.member.Member;
+import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.enums.member.Provider;
+import java.math.BigDecimal;
 import net.jqwik.api.Arbitraries;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +32,27 @@ public abstract class ServiceTest {
                 .set("provider", Arbitraries.of(Provider.class))
                 .set("providerId", Arbitraries.strings().withCharRange('a', 'z').ofMinLength(1).ofMaxLength(50))
                 .sample();
+    }
+
+    protected Product getProduct(Member member) {
+        return getReflectionMonkey().giveMeBuilder(Product.class)
+            .set("id", Arbitraries.longs().greaterOrEqual(4L))
+            .set("member", member)
+            .set("name", Arbitraries.strings().ofMaxLength(20))
+            .set("description", Arbitraries.strings().ofMaxLength(255))
+            .set("quantity", Arbitraries.integers().greaterOrEqual(1))
+            .set("price", Arbitraries.bigDecimals().greaterOrEqual(BigDecimal.valueOf(1)))
+            .set("productImage", Arbitraries.strings().ofMaxLength(255))
+            .sample();
+    }
+
+    protected Board getBoard(Member member, Product product){
+        return getReflectionMonkey().giveMeBuilder(Board.class)
+            .set("id", Arbitraries.longs().greaterOrEqual(1L))
+            .set("member", member)
+            .set("product", product)
+            .set("title" , Arbitraries.strings().ofMaxLength(20))
+            .sample();
     }
 
     protected final FixtureMonkey getReflectionMonkey() {
