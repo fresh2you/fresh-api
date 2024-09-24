@@ -109,7 +109,10 @@ public enum ResponseCode {
      */
     NOT_FOUND_CHATROOM("2000", "채팅방을 찾을 수 없습니다."),
     MAX_PARTICIPANTS_EXCEEDED("2001", "참가자 수가 최대 인원을 초과했습니다."),
-    NOT_FOUND_CHATROOM_MEMBER("2002", "채팅방 멤버를 찾을 수 없습니다.")
+    NOT_FOUND_CHATROOM_MEMBER("2002", "채팅방 멤버를 찾을 수 없습니다."),
+    ALREADY_BLOCKED("2003", "이미 차단한 사용자입니다."),
+    NOT_BLOCKED("2004", "차단된 사용자가 아닙니다."),
+    BLOCKED_BY_USER("2005", "차단된 사용자로 인해 메시지를 보낼 수 없습니다."),
     ;
 
     private final String code;
