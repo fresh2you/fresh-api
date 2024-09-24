@@ -1,11 +1,9 @@
 package com.zb.fresh_api.domain.entity.chat;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @NoArgsConstructor
 public class ChatRoomMember {
 
@@ -13,19 +11,30 @@ public class ChatRoomMember {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long chatRoomId;
+    @ManyToOne
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
+
     private Long memberId;
     private boolean isSeller;
     private boolean isApproved;
 
-    @ManyToOne
-    @JoinColumn(name = "chatRoomId", insertable = false, updatable = false)
-    private ChatRoom chatRoom;
-
-    public ChatRoomMember(Long chatRoomId, Long memberId, boolean isSeller, boolean isApproved) {
-        this.chatRoomId = chatRoomId;
+    public ChatRoomMember(ChatRoom chatRoom, Long memberId, boolean isSeller, boolean isApproved) {
+        this.chatRoom = chatRoom;
         this.memberId = memberId;
         this.isSeller = isSeller;
         this.isApproved = isApproved;
+    }
+
+    public ChatRoomMember approve() {
+        return new ChatRoomMember(this.chatRoom, this.memberId, this.isSeller, true);
+    }
+
+    public Long getMemberId() {
+        return this.memberId;
+    }
+
+    public boolean isApproved() {
+        return this.isApproved;
     }
 }

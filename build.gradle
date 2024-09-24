@@ -88,6 +88,9 @@ dependencies {
 	//Jackson JSON
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+	//hibernate
+	implementation 'org.hibernate:hibernate-core:6.2.7.Final'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
