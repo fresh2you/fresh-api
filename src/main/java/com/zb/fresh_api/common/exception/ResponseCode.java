@@ -36,7 +36,6 @@ public enum ResponseCode {
     PARAM_EMAIL_NOT_VALID("1002", "입력한 이메일이 잘못되었습니다"),
     PARAM_NICKNAME_NOT_VALID("1003", "입력한 닉네임이 잘못되었습니다"),
     NOT_FOUND_MEMBER("1004", "회원 정보를 찾을 수 없습니다."),
-    POINT_NOT_FOUND("1005", "사용자와 일치하는 포인트를 찾을 수 없습니다"),
 
     /**
      * Terms (1100 ~ 1200)
