@@ -85,17 +85,31 @@ public enum ResponseCode {
     NOT_PRODUCT_OWNER("1601", "수정하려는 사용자가 판매자와 일치하지 않습니다."),
 
     /**
-     * Delivery (1700 ~ 1800)
+     * ProductLike (1700 ~ 1800)
      */
-    NOT_FOUND_DELIVERY_ADDRESS("1700", "등록된 배송지 정보를 찾을 수 없습니다."),
-    EXCEEDED_DELIVERY_ADDRESS_COUNT("1701", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
+    PRODUCT_LIKE_NOT_FOUND("1700", "상품에 대한 좋아요가 존재하지 않습니다"),
+    PRODUCT_ALREADY_LIKED("1701", "이미 좋아요한 상품입니다"),
 
     /**
-     * 채팅방 관련 오류 코드 (1800 ~ 1900)
+     * Board (1800 ~ 1900)
      */
-    NOT_FOUND_CHATROOM("1800", "채팅방을 찾을 수 없습니다."),
-    MAX_PARTICIPANTS_EXCEEDED("1801", "참가자 수가 최대 인원을 초과했습니다."),
-    NOT_FOUND_CHATROOM_MEMBER("1802", "채팅방 멤버를 찾을 수 없습니다.")
+    BOARD_NOT_FOUND("1800", "게시판이 존재하지 않습니다"),
+    BOARD_ALREADY_EXIST("1801", "이미 상품에 대한 게시판이 존재합니다"),
+    NOT_BOARD_OWNER("1802", "사용자가 판매자와 일치하지 않습니다." ),
+    BOARD_MESSAGE_NOT_FOUND("1803", "게시글이 존재하지 않습니다"),
+
+    /**
+     * Delivery (1900 ~ 2000)
+     */
+    NOT_FOUND_DELIVERY_ADDRESS("1900", "등록된 배송지 정보를 찾을 수 없습니다."),
+    EXCEEDED_DELIVERY_ADDRESS_COUNT("1901", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
+
+    /**
+     * 채팅방 관련 오류 코드 (2000 ~ 2100)
+     */
+    NOT_FOUND_CHATROOM("2000", "채팅방을 찾을 수 없습니다."),
+    MAX_PARTICIPANTS_EXCEEDED("2001", "참가자 수가 최대 인원을 초과했습니다."),
+    NOT_FOUND_CHATROOM_MEMBER("2002", "채팅방 멤버를 찾을 수 없습니다.")
     ;
 
     private final String code;
