@@ -1,23 +1,28 @@
 package com.zb.fresh_api.api.controller;
 
-import com.zb.fresh_api.api.dto.request.ChatMessageRequest;
-import com.zb.fresh_api.api.dto.response.ChatMessageResponse;
-import com.zb.fresh_api.api.service.ChatMessageService;
+import com.zb.fresh_api.common.exception.CustomException;
+import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.common.response.ApiResponse;
+import com.zb.fresh_api.domain.dto.chat.ChatMessageDto;
 import com.zb.fresh_api.api.service.ChatRoomService;
+import com.zb.fresh_api.domain.entity.chat.ChatRoomMember;
+import com.zb.fresh_api.domain.repository.reader.ChatRoomMemberReader;
+import com.zb.fresh_api.domain.repository.reader.ChatMessageReader;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Tag(
         name = "채팅 API",
@@ -29,47 +34,54 @@ import java.util.UUID;
 public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
+    private final ChatMessageReader chatMessageReader;
+    private final ChatRoomMemberReader memberReader;
+
+    @Operation(summary = "채팅 메시지 리스트 반환", description = "지정된 채팅방 ID에 따른 메시지 리스트를 반환")
+    @GetMapping("/chat/{id}")
+    public ResponseEntity<ApiResponse<List<ChatMessageDto>>> getChatMessages(
+            @Parameter(description = "채팅방 ID") @PathVariable String id) {
+
+        List<ChatMessageDto> chatMessages = chatMessageReader.getMessagesByChatRoomId(Long.parseLong(id))
+                .stream()
+                .map(message -> {
+                    ChatRoomMember sender = memberReader.findByChatRoomIdAndMemberId(id, message.senderId())
+                            .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_CHATROOM_MEMBER));
+                    String senderName = sender != null ? "사용자 이름" : "Unknown User";
+                    return new ChatMessageDto(message.chatMessageId(), senderName, message.message());
+                })
+                .collect(Collectors.toList());
+
+        return ApiResponse.success(ResponseCode.SUCCESS, chatMessages);
+    }
 
     @Operation(
-            summary = "채팅 메시지 전송",
-            description = "클라이언트가 /app/chat/sendMessage로 메시지를 보내면 채팅방에 메시지를 전송"
+            summary = "메시지 송신 및 수신",
+            description = "클라이언트에서 /app/message로 메시지를 전송하면 채팅방 구독자들에게 메시지를 전달"
     )
-    @MessageMapping("/chat/sendMessage")
-    public void sendMessage(
-            @Valid @Parameter(description = "전송할 채팅 메시지 요청") ChatMessageRequest messageRequest,
+    @MessageMapping("/message")
+    public void receiveMessage(
+            @Parameter(description = "전송할 메시지") ChatMessageDto chatMessage,
             SimpMessageHeaderAccessor headerAccessor) {
 
-        log.info("Broadcasting message to topic: /topic/chatroom/" + messageRequest.chatRoomId());
+        log.info("Sending message to topic: /sub/chatroom/1");
 
-        String senderId = messageRequest.senderId();
-        String receiverId = messageRequest.receiverId();  // 수신자 ID (1:1 채팅의 경우)
+        String encodedMessage = new String(chatMessage.message().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
 
-        String encodedMessage = new String(messageRequest.message().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+        messagingTemplate.convertAndSend("/sub/chatroom/1", encodedMessage);
+    }
 
-        // ChatMessageResponse 생성
-        ChatMessageResponse chatMessageResponse = new ChatMessageResponse(
-                UUID.randomUUID().toString(),
-                senderId,
-                encodedMessage,
-                LocalDateTime.now().toString()
-        );
+    @Operation(
+            summary = "채팅방 나가기",
+            description = "사용자가 채팅방을 나가면 채팅방 멤버에서 제거되고, 마지막 멤버가 나가면 채팅방 삭제"
+    )
+    @PostMapping("/chat/{chatRoomId}/leave")
+    public ResponseEntity<ApiResponse<Void>> leaveChatRoom(
+            @Parameter(description = "채팅방 ID") @PathVariable String chatRoomId,
+            @Parameter(description = "사용자 ID") @RequestParam Long memberId) {
 
-        // 1:1 채팅의 경우 특정 사용자에게 전송
-        if (receiverId != null && !receiverId.isEmpty()) {
-            messagingTemplate.convertAndSendToUser(receiverId, "/queue/private", chatMessageResponse);
-        } else {
-            // 1:10 채팅방의 모든 참여자에게 전송
-            messagingTemplate.convertAndSend("/topic/chatroom/" + messageRequest.chatRoomId(), chatMessageResponse);
-        }
-
-        // 메시지 저장
-        chatMessageService.saveMessage(
-                Long.parseLong(messageRequest.chatRoomId().toString()),
-                Long.parseLong(senderId),
-                "text",
-                encodedMessage
-        );
+        chatRoomService.leaveChatRoom(chatRoomId, memberId);
+        return ApiResponse.success(ResponseCode.SUCCESS);
     }
 }

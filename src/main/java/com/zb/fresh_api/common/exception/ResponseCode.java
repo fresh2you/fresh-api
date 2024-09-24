@@ -104,6 +104,13 @@ public enum ResponseCode {
      */
     NOT_FOUND_DELIVERY_ADDRESS("1900", "등록된 배송지 정보를 찾을 수 없습니다."),
     EXCEEDED_DELIVERY_ADDRESS_COUNT("1901", "등록할 수 있는 배송지의 개수가 초과되었습니다. (최대 3개)"),
+
+    /**
+     * 채팅방 관련 오류 코드 (2000 ~ 2100)
+     */
+    NOT_FOUND_CHATROOM("2000", "채팅방을 찾을 수 없습니다."),
+    MAX_PARTICIPANTS_EXCEEDED("2001", "참가자 수가 최대 인원을 초과했습니다."),
+    NOT_FOUND_CHATROOM_MEMBER("2002", "채팅방 멤버를 찾을 수 없습니다.")
     ;
 
     private final String code;

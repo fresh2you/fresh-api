@@ -1,13 +1,7 @@
-package com.zb.fresh_api.domain.chat;
+package com.zb.fresh_api.domain.dto.chat;
 
 public record ChatMessageDto(
-        Long chatRoomId,
-        Long memberId,
-        MessageType messageType,
-        String content
-) {
-    public enum MessageType {
-        TEXT, IMAGE
-    }
-}
-
+        Long id,
+        String name,
+        String message
+) {}
