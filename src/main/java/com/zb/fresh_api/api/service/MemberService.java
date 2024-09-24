@@ -270,7 +270,7 @@ public class MemberService {
     public ChargePointResponse chargePoint(ChargePointRequest request, Long memberId) {
         // 멤버 유효한지 확인후
         Member member = memberReader.getById(memberId);
-        Point point = pointReader.getPointByMemberId(memberId);
+        Point point = pointReader.getByMemberId(memberId);
 
         // 포인트 히스토리 테이블 생성
         PointHistory pointHistory = pointHistoryWriter.store(

@@ -565,7 +565,7 @@ class MemberServiceTest extends ServiceTest {
             .set("balance" , pointBalance)
             .sample();
         doReturn(member).when(memberReader).getById(member.getId());
-        doReturn(point).when(pointReader).getPointByMemberId(member.getId());
+        doReturn(point).when(pointReader).getByMemberId(member.getId());
 
         // when
         ChargePointResponse response = memberService.chargePoint(request, member.getId());
