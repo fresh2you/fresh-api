@@ -3,6 +3,8 @@ package com.zb.fresh_api.api.service;
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.*;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
+import com.zb.fresh_api.api.dto.response.ChargePointResponse;
+import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
@@ -31,6 +33,7 @@ import com.zb.fresh_api.domain.enums.point.PointStatus;
 import com.zb.fresh_api.domain.enums.point.PointTransactionType;
 import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
+import com.zb.fresh_api.domain.repository.reader.PointReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
 import com.zb.fresh_api.domain.repository.writer.*;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +66,7 @@ public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final PointWriter pointWriter;
+    private final PointReader pointReader;
     private final PointHistoryWriter pointHistoryWriter;
 
     private final TokenProvider tokenProvider;
@@ -262,4 +266,28 @@ public class MemberService {
         }
     }
 
+    @Transactional
+    public ChargePointResponse chargePoint(ChargePointRequest request, Long memberId) {
+        // 멤버 유효한지 확인후
+        Member member = memberReader.getById(memberId);
+        Point point = pointReader.getByMemberId(memberId);
+
+        // 포인트 히스토리 테이블 생성
+        PointHistory pointHistory = pointHistoryWriter.store(
+            PointHistory.create(point, PointTransactionType.CHARGE,
+                request.point(), point.getBalance(), point.getBalance().add(request.point()),
+                "포인트 충전"));
+
+        // 포인트 테이블 업데이트
+        point.charge(request.point());
+
+        return new ChargePointResponse(request.point(), point.getBalance());
+    }
+    public GetAllAddressResponse getAllAddress(Long memberId) {
+        Member member = memberReader.getById(memberId);
+        List<DeliveryAddress> deliveryAddressList = deliveryAddressReader.getAllActiveDeliveryAddressByMemberId(
+            memberId);
+
+        return GetAllAddressResponse.fromEntities(deliveryAddressList);
+    }
 }

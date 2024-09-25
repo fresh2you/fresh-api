@@ -11,7 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
@@ -35,7 +35,7 @@ public class PointHistory extends BaseTimeEntity {
     @Column(name = "id", columnDefinition = "BIGINT UNSIGNED comment '고유 번호'")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "point_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '회원 포인트 번호'")
     private Point point;
 
@@ -50,6 +50,9 @@ public class PointHistory extends BaseTimeEntity {
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) comment '거래 금액'")
     private BigDecimal amount;
+
+
+
 
     @Column(name = "balanceBefore", nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) comment '거래 전 잔액'")
     private BigDecimal balanceBefore;
