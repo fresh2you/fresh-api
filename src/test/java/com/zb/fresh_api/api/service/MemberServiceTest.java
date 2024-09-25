@@ -93,8 +93,7 @@ class MemberServiceTest extends ServiceTest {
     private PointWriter pointWriter;
 
     @Mock
-    private PointReader pointReader;
-
+    private PointReader  pointReader;
     @Mock
     private PointHistoryWriter pointHistoryWriter;
 
