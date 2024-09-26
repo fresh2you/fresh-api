@@ -35,7 +35,7 @@ public class ChatMessageService {
                     Member member = memberReader.getById(sender.getMemberId());
                     String senderName = member != null ? member.getNickname() : "Unknown User";
 
-                    return new ChatMessageDto(message.chatMessageId(), senderName, message.message());
+                    return new ChatMessageDto(message.chatMessageId(), message.senderId(), senderName, message.message());
                 })
                 .collect(Collectors.toList());
     }

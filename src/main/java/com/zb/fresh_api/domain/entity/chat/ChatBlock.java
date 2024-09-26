@@ -16,11 +16,15 @@ public class ChatBlock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long ChatblockerId;
-    private Long ChatblockedId;
+    private Long chatBlockerId;
+    private Long chatBlockedId;
 
-    public ChatBlock(Long ChatBlockerId, Long ChatBlockedId) {
-        this.ChatblockerId = ChatBlockerId;
-        this.ChatblockedId = ChatBlockedId;
+    public static ChatBlock create(Long chatBlockerId, Long chatBlockedId) {
+        return new ChatBlock(chatBlockerId, chatBlockedId);
+    }
+
+    private ChatBlock(Long chatBlockerId, Long chatBlockedId) {
+        this.chatBlockerId = chatBlockerId;
+        this.chatBlockedId = chatBlockedId;
     }
 }

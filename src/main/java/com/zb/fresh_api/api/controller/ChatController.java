@@ -19,9 +19,10 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@Tag(name = "채팅 API", description = "채팅방과 관련된 API.")
+@Tag(name = "v1 채팅 API", description = "v1 채팅방과 관련된 API.")
 @Slf4j
 @RestController
+@RequestMapping("/v1/chat")
 @RequiredArgsConstructor
 public class ChatController {
 
@@ -30,10 +31,10 @@ public class ChatController {
     private final ChatMessageService chatMessageService;
 
     @Operation(summary = "채팅 메시지 리스트 반환", description = "지정된 채팅방 ID에 따른 메시지 리스트를 반환")
-    @GetMapping("/chat/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<List<ChatMessageDto>>> getChatMessages(
-            @Parameter(description = "채팅방 ID") @PathVariable String id) {
-        List<ChatMessageDto> chatMessages = chatMessageService.getChatMessages(Long.parseLong(id));
+            @Parameter(description = "채팅방 ID") @PathVariable Long id) {
+        List<ChatMessageDto> chatMessages = chatMessageService.getChatMessages(id);
         return ApiResponse.success(ResponseCode.SUCCESS, chatMessages);
     }
 
@@ -49,7 +50,7 @@ public class ChatController {
     }
 
     @Operation(summary = "채팅방 나가기", description = "사용자가 채팅방을 나가면 채팅방 멤버에서 제거되고, 마지막 멤버가 나가면 채팅방 삭제")
-    @PostMapping("/chat/{chatRoomId}/leave")
+    @PostMapping("/{chatRoomId}/leave")
     public ResponseEntity<ApiResponse<Void>> leaveChatRoom(
             @Parameter(description = "채팅방 ID") @PathVariable String chatRoomId,
             @Parameter(description = "사용자 ID") @RequestParam Long memberId) {
