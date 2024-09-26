@@ -1,10 +1,12 @@
 package com.zb.fresh_api.domain.repository.reader;
 
 import com.zb.fresh_api.domain.annotation.Reader;
+import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.repository.jpa.OrderJpaRepository;
 import com.zb.fresh_api.domain.repository.query.OrderQueryRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Reader
 @RequiredArgsConstructor
@@ -18,5 +20,9 @@ public class OrderReader {
 
     public List<Long> findProductIdsByMemberId(Long memberId){
         return orderQueryRepository.findProductIdsByMemberId(memberId);
+    }
+
+    public boolean existsProductOrderByMemberId(Member member) {
+        return orderQueryRepository.existsProductOrderByMemberId(member.getId());
     }
 }

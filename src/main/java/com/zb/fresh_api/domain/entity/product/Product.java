@@ -5,22 +5,11 @@ import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
 import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.entity.member.Member;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
@@ -60,7 +49,7 @@ public class Product extends BaseTimeEntity {
     private String productImage;
     
     @Column(name = "deleted_at", columnDefinition = "datetime comment '삭제일'")
-    private LocalDateTime deleted_at;
+    private LocalDateTime deletedAt;
 
     public static Product create(AddProductRequest request,Category category, Member member, String productImage){
         return Product.builder()
@@ -84,7 +73,7 @@ public class Product extends BaseTimeEntity {
     }
 
     public static void delete(Product product){
-        product.deleted_at = LocalDateTime.now();
+        product.deletedAt = LocalDateTime.now();
     }
 
     public void decreaseQuantity(int quantity){
