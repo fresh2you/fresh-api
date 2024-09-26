@@ -8,6 +8,7 @@ import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
+import com.zb.fresh_api.api.dto.response.GetAllBoardResponse;
 import com.zb.fresh_api.api.dto.response.GetBoardMessagesResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.api.service.BoardService;
@@ -81,16 +82,16 @@ public class BoardController {
         return ApiResponse.success(ResponseCode.SUCCESS,response);
     }
 
-//    @Operation(
-//        summary = "게시판 목록 조회",
-//        description = "게시판 목록 조회를 위한 API입니다"
-//    )
-//    @GetMapping
-//    public ResponseEntity<ApiResponse<GetAllBoardResponse>> getAllBoard(
-//        @Parameter(hidden = true) @LoginMember Member loginMember) {
-//        GetAllBoardResponse boardList = boardService.getAllBoard(loginMember.getId());
-//        return ApiResponse.success(ResponseCode.SUCCESS, boardList);
-//    }
+    @Operation(
+        summary = "게시판 목록 조회",
+        description = "게시판 목록 조회를 위한 API입니다"
+    )
+    @GetMapping
+    public ResponseEntity<ApiResponse<GetAllBoardResponse>> getAllBoard(
+        @Parameter(hidden = true) @LoginMember Member loginMember) {
+        GetAllBoardResponse boardList = boardService.getAllBoard(loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS, boardList);
+    }
 
     @Operation(
         summary = "게시판 상세 조회",

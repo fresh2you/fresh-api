@@ -1,5 +1,9 @@
 package com.zb.fresh_api.domain.repository.query;
 
+import static com.zb.fresh_api.domain.entity.address.QDeliveryAddress.deliveryAddress;
+import static com.zb.fresh_api.domain.entity.address.QDeliveryAddressSnapshot.deliveryAddressSnapshot;
+import static com.zb.fresh_api.domain.entity.member.QMember.member;
+
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zb.fresh_api.domain.entity.order.QProductOrder;
 import java.util.List;
@@ -27,8 +31,11 @@ public class OrderQueryRepository {
         return jpaQueryFactory
             .select(productOrder.productSnapshot.product.id)
             .from(productOrder)
-            .where(productOrder.deliveryAddressSnapshot.deliveryAddress.member.id.eq(memberId)
-                .or(productOrder.productSnapshot.product.member.id.eq(memberId)))
+            .join(productOrder.deliveryAddressSnapshot, deliveryAddressSnapshot)
+            .join(deliveryAddressSnapshot.deliveryAddress, deliveryAddress)
+            .join(deliveryAddress.member, member)
+            .where(deliveryAddress.member.id.eq(memberId))
             .fetch();
     }
+
 }
