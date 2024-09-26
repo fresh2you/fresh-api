@@ -46,7 +46,12 @@ public class SecurityConstants {
             /**
              * Recommend
             */
-            "/v1/api/recommendations/**"
+            "/v1/api/recommendations/**",
+
+            /**
+             * Auth
+            */
+            "/v1/api/auth/**"
     };
 
     public static final String[] PUBLIC_URLS = {
