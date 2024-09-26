@@ -1,14 +1,18 @@
 package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
-import com.zb.fresh_api.api.dto.request.*;
+import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
+import com.zb.fresh_api.api.dto.request.ChargePointRequest;
+import com.zb.fresh_api.api.dto.request.LoginRequest;
+import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
+import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
+import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
 import com.zb.fresh_api.api.dto.response.ChargePointResponse;
 import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
 import com.zb.fresh_api.api.dto.response.LoginResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
-import com.zb.fresh_api.api.principal.CustomUserDetails;
 import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
 import com.zb.fresh_api.api.utils.S3Uploader;
@@ -35,19 +39,22 @@ import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
 import com.zb.fresh_api.domain.repository.reader.PointReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
-import com.zb.fresh_api.domain.repository.writer.*;
+import com.zb.fresh_api.domain.repository.writer.DeliveryAddressWriter;
+import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
+import com.zb.fresh_api.domain.repository.writer.MemberWriter;
+import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
+import com.zb.fresh_api.domain.repository.writer.PointWriter;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -77,8 +84,7 @@ public class MemberService {
 
     @Transactional
     public LoginResponse login(final LoginRequest request) {
-        final CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(request.email());
-        final Member member = userDetails.member();
+        Member member = memberReader.getByEmailAndProvider(request.email(), Provider.EMAIL);
 
         validatePassword(request.password(), member.getPassword());
 
