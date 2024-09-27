@@ -290,4 +290,10 @@ public class MemberService {
 
         return GetAllAddressResponse.fromEntities(deliveryAddressList);
     }
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Member member = memberReader.getById(memberId);
+        member.delete();
+    }
 }
