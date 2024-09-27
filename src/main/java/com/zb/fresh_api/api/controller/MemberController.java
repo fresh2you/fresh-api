@@ -190,4 +190,14 @@ public class MemberController {
 
     }
 
+    @Operation(
+        summary = "회원 삭제",
+        description = "회원 삭제를 위한 API입니다"
+    )
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<ApiResponse<Void>> withdrawMember(@Parameter(hidden = true) @LoginMember Member loginMember){
+        memberService.deleteMember(loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS);
+
+    }
 }
