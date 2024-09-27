@@ -94,8 +94,8 @@ public class BoardService {
 
     public GetAllBoardResponse getAllBoard(final Long memberId) {
         Member member = memberReader.getById(memberId);
-        
-        List<Long> productIds = orderReader.findProductIdsByMemberId(memberId);
+
+        List<Long> productIds = getProductIds(memberId, member);
 
         List<Board> boardResponse = new ArrayList<>();
         for(Long productId : productIds){
@@ -104,6 +104,16 @@ public class BoardService {
         }
 
         return GetAllBoardResponse.fromEntities(boardResponse);
+    }
+
+    private List<Long> getProductIds(Long memberId, Member member) {
+        List<Long> productIds = new ArrayList<>();
+        if(member.isSeller()){
+            productIds = boardReader.findProductIdsByMemberId(memberId);
+        }else{
+            productIds =  orderReader.findProductIdsByMemberId(memberId);
+        }
+        return productIds;
     }
 
     @Transactional

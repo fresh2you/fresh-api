@@ -80,10 +80,10 @@ public class ProductService {
             () -> new CustomException(ResponseCode.CATEGORY_NOT_FOUND)
         );
 
-        final UploadedFile file = s3Uploader.upload(CategoryType.PRODUCT, image);
+        final String fileUrl = getImageUrl(CategoryType.PRODUCT, image);
 
 
-        Product storedProduct = productWriter.store(Product.create(request, category, member, file.url()));
+        Product storedProduct = productWriter.store(Product.create(request, category, member, fileUrl));
         return new AddProductResponse(storedProduct.getId(), storedProduct.getName(), storedProduct.getCreatedAt());
     }
 
@@ -107,7 +107,7 @@ public class ProductService {
 
         productSnapshotWriter.store(ProductSnapshot.create(product));
 
-        final String newProfileImage = convertImage(imageRequest);
+        final String newProfileImage = getImageUrl(CategoryType.PRODUCT, imageRequest);
         Category newCategory = findCategory(request.categoryId());
         product.update(request, newProfileImage, newCategory);
 
@@ -115,11 +115,10 @@ public class ProductService {
         return new UpdateProductResponse(product.getId());
     }
 
-    // TODO 1. 이미지 변환 (S3)
-    private String convertImage(MultipartFile imageRequest) {
+    private String getImageUrl(CategoryType categoryType, MultipartFile imageRequest) {
         if (imageRequest != null && !imageRequest.isEmpty()) {
-            // 이미지 변환 로직 (예: S3 업로드)
-            return "newProfileImageUrl"; // 실제 변환된 이미지 URL을 반환
+            final UploadedFile file = s3Uploader.upload(categoryType, imageRequest);
+            return file.url();
         }
         return null;
     }
