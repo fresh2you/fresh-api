@@ -36,7 +36,6 @@ public class RecommendService {
             products = productReader.getAllRecommendProduct(member, request.size());
         }
 
-
         return new LoadProductRecommendListResponse(products, products.size());
     }
 

@@ -1,6 +1,7 @@
 package com.zb.fresh_api.domain.repository.query;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -27,9 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -104,25 +103,24 @@ public class ProductQueryRepository {
 
     public List<RecommendProductSummary> findAllRecommendProduct(Long memberId, int size) {
         // 1. 카테고리별 구매 이력 조회
-        List<CategoryProductOrder> categoryProductOrders =
-                jpaQueryFactory
-                        .select(
-                                Projections
-                                        .constructor(
-                                                CategoryProductOrder.class,
-                                                category.id,
-                                                productOrder.count().as("count")
-                                        )
-                        )
-                        .from(productOrder)
-                        .innerJoin(productSnapshot).on(productOrder.productSnapshot.eq(productSnapshot))
-                        .innerJoin(product).on(productSnapshot.product.eq(product))
-                        .innerJoin(category).on(product.category.eq(category))
-                        .innerJoin(deliveryAddressSnapshot).on(productOrder.deliveryAddressSnapshot.eq(deliveryAddressSnapshot))
-                        .innerJoin(deliveryAddress).on(deliveryAddressSnapshot.deliveryAddress.eq(deliveryAddress))
-                        .where(deliveryAddress.member.id.eq(memberId))
-                        .groupBy(QCategory.category.name)
-                        .fetch();
+        List<CategoryProductOrder> categoryProductOrders = jpaQueryFactory
+                .select(
+                        Projections
+                                .constructor(
+                                        CategoryProductOrder.class,
+                                        category.id,
+                                        productOrder.count().as("count")
+                                )
+                )
+                .from(productOrder)
+                .innerJoin(productSnapshot).on(productOrder.productSnapshot.eq(productSnapshot))
+                .innerJoin(product).on(productSnapshot.product.eq(product))
+                .innerJoin(category).on(product.category.eq(category))
+                .innerJoin(deliveryAddressSnapshot).on(productOrder.deliveryAddressSnapshot.eq(deliveryAddressSnapshot))
+                .innerJoin(deliveryAddress).on(deliveryAddressSnapshot.deliveryAddress.eq(deliveryAddress))
+                .where(deliveryAddress.member.id.eq(memberId))
+                .groupBy(QCategory.category.id)
+                .fetch();
 
         // 2. 판매자별 구매 이력 조회
         List<SellerProductOrder> sellerProductOrders = jpaQueryFactory
@@ -150,12 +148,15 @@ public class ProductQueryRepository {
                         CategoryProductOrder::count
                 ));
 
-        // 판매자별 가중치 (구매 이력 기반)
+        categoryMap.forEach((key, value) -> System.out.println("Category ID: " + key + ", Count: " + value));
+
         Map<Long, Long> sellerMap = sellerProductOrders.stream()
                 .collect(Collectors.toMap(
                         SellerProductOrder::sellerId,
                         SellerProductOrder::count
                 ));
+
+//        sellerMap.forEach((key, value) -> System.out.println("seller ID: " + key + ", Count: " + value));
 
         // Step 4: 추천 상품 조회 (카테고리, 판매자 가중치를 기반으로)
         List<RecommendProductSummary> recommendedProducts = jpaQueryFactory
@@ -182,22 +183,8 @@ public class ProductQueryRepository {
                 )
                 // TODO Map get() 오류 해결해야함.
                 .orderBy(
-//                        new CaseBuilder()
-//                                .when(category.id.in(categoryMap.keySet()))
-//                                .then(categoryMap.get(category.id))
-//                                .otherwise(0L).desc(),
-//                        new CaseBuilder()
-//                                .when(member.id.in(sellerMap.keySet()))
-//                                .then(sellerMap.get(member.id))
-//                                .otherwise(0L).desc()
-                        new CaseBuilder()
-                                .when(category.id.in(categoryMap.keySet()))
-                                .then(1L)
-                                .otherwise(0L).desc(),
-                        new CaseBuilder()
-                                .when(member.id.in(sellerMap.keySet()))
-                                .then(1L)
-                                .otherwise(0L).desc()
+                        combineOrderSpecifiers(
+                                createCategoryOrderSpecifiers(categoryMap), createSellerOrderSpecifiers(sellerMap))
                 )
                 .limit(size * 2L)
                 .fetch();
@@ -207,10 +194,57 @@ public class ProductQueryRepository {
         return recommendedProducts.stream()
                 .limit(size)
                 .toList();
-
     }
 
     private BooleanExpression isNotDeleted(QProduct product) {
         return product.deletedAt.isNull();
+    }
+
+    private OrderSpecifier<?>[] combineOrderSpecifiers(OrderSpecifier<?>[]... orderSpecifierArrays) {
+        List<OrderSpecifier<?>> combinedList = new ArrayList<>();
+
+        for (OrderSpecifier<?>[] array : orderSpecifierArrays) {
+            combinedList.addAll(Arrays.asList(array));
+        }
+
+        return combinedList.toArray(new OrderSpecifier[0]);
+    }
+
+    private OrderSpecifier<?>[] createCategoryOrderSpecifiers(Map<Long, Long> categoryMap) {
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+
+        for (Map.Entry<Long, Long> entry : categoryMap.entrySet()) {
+            Long categoryId = entry.getKey();
+            Long count = entry.getValue();
+
+            orderSpecifiers.add(
+                    new CaseBuilder()
+                            .when(category.id.eq(categoryId))
+                            .then(count)
+                            .otherwise(0L)
+                            .desc()
+            );
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[0]); // OrderSpecifier 배열로 변환하여 반환
+    }
+
+    private OrderSpecifier<?>[] createSellerOrderSpecifiers(Map<Long, Long> sellerMap) {
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+
+        for (Map.Entry<Long, Long> entry : sellerMap.entrySet()) {
+            Long sellerId = entry.getKey();
+            Long count = entry.getValue();
+
+            orderSpecifiers.add(
+                    new CaseBuilder()
+                            .when(member.id.eq(sellerId))
+                            .then(count)
+                            .otherwise(0L)
+                            .desc()
+            );
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[0]); // OrderSpecifier 배열로 변환하여 반환
     }
 }
