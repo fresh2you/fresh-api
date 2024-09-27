@@ -17,7 +17,7 @@ public class MemberReader {
     private final MemberQueryRepository memberQueryRepository;
 
     public Member getById(final Long id) {
-        return memberJpaRepository.findById(id)
+        return memberJpaRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_MEMBER));
     }
 
