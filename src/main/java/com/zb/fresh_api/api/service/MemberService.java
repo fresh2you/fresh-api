@@ -89,7 +89,7 @@ public class MemberService {
         validatePassword(request.password(), member.getPassword());
 
         final LoginMember loginMember = LoginMember.fromEntity(member);
-        final Token token = tokenProvider.getTokenByEmail(request.email());
+        final Token token = tokenProvider.getTokenByEmail(request.email(), Provider.EMAIL);
         return new LoginResponse(token, loginMember);
     }
 
@@ -101,7 +101,7 @@ public class MemberService {
 
         final String email = oAuthUser.email();
         final boolean isSignup = memberReader.existsByEmailAndProvider(email, provider);
-        final Token token = resolveToken(isSignup, email);
+        final Token token = resolveToken(isSignup, email, provider);
         return new OauthLoginResponse(token, new OauthLoginMember(email, provider, oAuthUser.id()), isSignup);
     }
 
@@ -262,8 +262,8 @@ public class MemberService {
         }
     }
 
-    protected Token resolveToken(final boolean isSignup, final String email) {
-        return !isSignup ? Token.emptyToken() : tokenProvider.getTokenByEmail(email);
+    protected Token resolveToken(final boolean isSignup, final String email, Provider provider) {
+        return !isSignup ? Token.emptyToken() : tokenProvider.getTokenByEmail(email, provider);
     }
 
     private void validateAddressCount(final int addressCount) {
