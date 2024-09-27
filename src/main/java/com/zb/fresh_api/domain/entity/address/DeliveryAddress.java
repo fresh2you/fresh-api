@@ -83,5 +83,4 @@ public class DeliveryAddress extends BaseTimeEntity {
         this.isDefault = true;
     }
 
-
 }
