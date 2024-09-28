@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +30,7 @@ public class SmsAuthController {
         summary = "판매자 인증 문자 전송",
         description = "입력한 휴대전화로 인증번호를 전송합니다"
     )
-    @GetMapping
+    @PostMapping
     public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestParam String phoneNumber) {
         smsService.sendSms(phoneNumber);
         return ApiResponse.success(ResponseCode.SUCCESS);
@@ -40,7 +40,7 @@ public class SmsAuthController {
         summary = "판매자 인증 코드 인증",
         description = "휴대전화로 온 인증코드를 통해 인증합니다"
     )
-    @GetMapping("/verify")
+    @PostMapping("/verify")
     public ResponseEntity<ApiResponse<Void>> verifySmsCode(@RequestParam String phoneNumber,
         @RequestParam String verificationCode, @Parameter(hidden = true) @LoginMember Member member) {
         smsService.verifyCode(phoneNumber, verificationCode, member);

@@ -1,10 +1,28 @@
 package com.zb.fresh_api.api.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
+import com.zb.fresh_api.api.dto.request.ChargePointRequest;
 import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
+import com.zb.fresh_api.api.dto.response.ChargePointResponse;
+import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
 import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.common.base.ServiceTest;
@@ -23,8 +41,18 @@ import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
 import com.zb.fresh_api.domain.repository.reader.MemberReader;
+import com.zb.fresh_api.domain.repository.reader.PointReader;
 import com.zb.fresh_api.domain.repository.reader.TermsReader;
-import com.zb.fresh_api.domain.repository.writer.*;
+import com.zb.fresh_api.domain.repository.writer.DeliveryAddressWriter;
+import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
+import com.zb.fresh_api.domain.repository.writer.MemberWriter;
+import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
+import com.zb.fresh_api.domain.repository.writer.PointWriter;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import net.jqwik.api.Arbitraries;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -33,17 +61,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @DisplayName("회원 비즈니스 테스트")
 class MemberServiceTest extends ServiceTest {
@@ -75,6 +92,8 @@ class MemberServiceTest extends ServiceTest {
     @Mock
     private PointWriter pointWriter;
 
+    @Mock
+    private PointReader  pointReader;
     @Mock
     private PointHistoryWriter pointHistoryWriter;
 
@@ -531,6 +550,52 @@ class MemberServiceTest extends ServiceTest {
             requestTermsAgreementDtos, Provider.EMAIL, "1"))
             .isInstanceOf(CustomException.class)
             .hasMessage(ResponseCode.TERMS_MANDATORY_NOT_AGREED.getMessage());
+    }
+
+    @Test
+    @DisplayName("포인트 충전 성공")
+    void chargePoint_success(){
+        // given
+        BigDecimal pointBalance = Arbitraries.bigDecimals().between(BigDecimal.valueOf(1000), BigDecimal.valueOf(10000)).sample();
+        ChargePointRequest request = getConstructorMonkey().giveMeBuilder(ChargePointRequest.class)
+            .set("point", BigDecimal.valueOf(1000)).sample();
+        Member member = getMember();
+        Point point = getConstructorMonkey().giveMeBuilder(Point.class)
+            .set("member", member)
+            .set("balance" , pointBalance)
+            .sample();
+        doReturn(member).when(memberReader).getById(member.getId());
+        doReturn(point).when(pointReader).getByMemberId(member.getId());
+
+        // when
+        ChargePointResponse response = memberService.chargePoint(request, member.getId());
+
+        // then
+        assertNotNull(response);
+        assertEquals(response.balance(), request.point().add(pointBalance));
+        assertEquals(response.chargePoint(), request.point());
+        verify(pointHistoryWriter, times(1)).store(any(PointHistory.class));
+    }
+
+    @Test
+    @DisplayName("배송지 목록 조회")
+    void getAllAddress_success(){
+        // given
+        Member member = getMember();
+        List<DeliveryAddress> deliveryList = new ArrayList<>(List.of(
+            getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).set("member", member).sample(),
+            getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).set("member", member).sample(),
+            getConstructorMonkey().giveMeBuilder(DeliveryAddress.class).set("member", member).sample()
+        ));
+        doReturn(deliveryList).when(deliveryAddressReader).getAllActiveDeliveryAddressByMemberId(member.getId());
+
+        // when
+        GetAllAddressResponse response = memberService.getAllAddress(member.getId());
+
+        // then
+        assertNotNull(response);
+        assertEquals(response.addressList().size(), deliveryList.size());
+        verify(deliveryAddressReader, times(1)).getAllActiveDeliveryAddressByMemberId(member.getId());
     }
 }
 

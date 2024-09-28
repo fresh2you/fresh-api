@@ -8,6 +8,7 @@ import com.zb.fresh_api.api.dto.response.AddBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.AddBoardResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardMessageResponse;
 import com.zb.fresh_api.api.dto.response.DeleteBoardResponse;
+import com.zb.fresh_api.api.dto.response.GetAllBoardResponse;
 import com.zb.fresh_api.api.dto.response.GetBoardMessagesResponse;
 import com.zb.fresh_api.api.dto.response.UpdateBoardResponse;
 import com.zb.fresh_api.api.service.BoardService;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,16 +82,16 @@ public class BoardController {
         return ApiResponse.success(ResponseCode.SUCCESS,response);
     }
 
-//    @Operation(
-//        summary = "게시판 목록 조회",
-//        description = "게시판 목록 조회를 위한 API입니다"
-//    )
-//    @GetMapping
-//    public ResponseEntity<ApiResponse<GetAllBoardResponse>> getAllBoard(
-//        @Parameter(hidden = true) @LoginMember Member loginMember) {
-//        GetAllBoardResponse boardList = boardService.getAllBoard(loginMember.getId());
-//        return ApiResponse.success(ResponseCode.SUCCESS, boardList);
-//    }
+    @Operation(
+        summary = "게시판 목록 조회",
+        description = "게시판 목록 조회를 위한 API입니다"
+    )
+    @GetMapping
+    public ResponseEntity<ApiResponse<GetAllBoardResponse>> getAllBoard(
+        @Parameter(hidden = true) @LoginMember Member loginMember) {
+        GetAllBoardResponse boardList = boardService.getAllBoard(loginMember.getId());
+        return ApiResponse.success(ResponseCode.SUCCESS, boardList);
+    }
 
     @Operation(
         summary = "게시판 상세 조회",
@@ -107,11 +109,11 @@ public class BoardController {
         summary = "게시글 추가",
         description = "게시판에 게시글을 추가하기 위한 API입니다"
     )
-    @PostMapping("/{boardId}/messages")
+    @PostMapping(value = "/{boardId}/messages",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<AddBoardMessageResponse>> addBoardMessage(
         @Parameter(hidden = true) @LoginMember Member loginMember,
         @PathVariable(name = "boardId") Long boardId,
-        @RequestBody @Valid AddBoardMessageRequest request,
+        @Parameter @RequestPart(value = "request", required = true) @Valid  AddBoardMessageRequest request,
         @Parameter @RequestPart(value = "image", required = false) MultipartFile image
     ){
         AddBoardMessageResponse response = boardService.addBoardMessage(
