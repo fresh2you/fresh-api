@@ -27,8 +27,8 @@ import org.springframework.util.StringUtils;
 @Component
 public class TokenProvider {
 
+    private static final String EMAIL_SEPARATOR = "|";
     public static final Long ACCESS_TOKEN_EXPIRE_TIME = Duration.ofHours(6).toMillis();
-
     private final SecretKey key;
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -52,7 +52,7 @@ public class TokenProvider {
         long accessTokenExpireTime = now.getTime() + ACCESS_TOKEN_EXPIRE_TIME;
 
         return Jwts.builder()
-                .subject(email + provider.name())
+                .subject(email + EMAIL_SEPARATOR + provider.name())
                 .issuedAt(now)
                 .expiration(new Date(accessTokenExpireTime))
                 .signWith(key)
