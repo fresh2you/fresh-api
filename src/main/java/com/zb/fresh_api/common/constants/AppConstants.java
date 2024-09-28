@@ -7,4 +7,6 @@ import lombok.NoArgsConstructor;
 public class AppConstants {
 
     public static final String DATE_FORMAT_YYYYMMDD = "yyyy/MM/dd";
+
+    public static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 }

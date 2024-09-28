@@ -24,6 +24,7 @@ public enum ResponseCode {
     S3_UPLOADER_ERROR("0606", "S3 업로드 중 오류가 발생하였습니다."),
     METHOD_ARG_NOT_VALID("0607", "유효성 오류가 발생했습니다."),
     INVALID_FILE_NAME_OR_EXTENSIONS("0608", "파일 이름 또는 확장자가 잘못되었습니다."),
+    INVALID_LIST("0609", "리스트가 비어있거나 NULL 입니다."),
 
     FORBIDDEN("0700", "접근 권한이 없습니다."),
     UNAUTHORIZED("0701", "유효한 인증 자격이 없습니다."),

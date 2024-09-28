@@ -2,15 +2,12 @@ package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.*;
-import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
-import com.zb.fresh_api.api.dto.response.ChargePointResponse;
-import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
-import com.zb.fresh_api.api.dto.response.LoginResponse;
-import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
+import com.zb.fresh_api.api.dto.response.*;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.api.principal.CustomUserDetails;
 import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
+import com.zb.fresh_api.api.utils.RandomUtil;
 import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -22,6 +19,7 @@ import com.zb.fresh_api.domain.dto.token.Token;
 import com.zb.fresh_api.domain.entity.address.DeliveryAddress;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.member.MemberTerms;
+import com.zb.fresh_api.domain.entity.member.Word;
 import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.entity.point.PointHistory;
 import com.zb.fresh_api.domain.entity.terms.Terms;
@@ -31,10 +29,7 @@ import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.enums.point.PointStatus;
 import com.zb.fresh_api.domain.enums.point.PointTransactionType;
-import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
-import com.zb.fresh_api.domain.repository.reader.MemberReader;
-import com.zb.fresh_api.domain.repository.reader.PointReader;
-import com.zb.fresh_api.domain.repository.reader.TermsReader;
+import com.zb.fresh_api.domain.repository.reader.*;
 import com.zb.fresh_api.domain.repository.writer.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +59,8 @@ public class MemberService {
 
     private final TermsReader termsReader;
 
+    private final WordReader wordReader;
+
     private final PasswordEncoder passwordEncoder;
     private final PointWriter pointWriter;
     private final PointReader pointReader;
@@ -74,6 +71,8 @@ public class MemberService {
     private final CustomUserDetailsService customUserDetailsService;
 
     private final S3Uploader s3Uploader;
+
+    private static final int RANDOM_SUFFIX = 3;
 
     @Transactional
     public LoginResponse login(final LoginRequest request) {
@@ -202,6 +201,31 @@ public class MemberService {
         final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getAllActiveDeliveryAddressByMemberId(member.getId());
         deliveryAddresses.forEach(DeliveryAddress::delete);
     }
+
+    private String generateRandomNickname() {
+        final List<Word> adjectiveWords = wordReader.getAllAdjectiveWord();
+        final List<Word> nounWords = wordReader.getAllNounWord();
+        String nickname;
+        boolean exists;
+
+        do {
+            final String adjectiveWord = getRandomWord(adjectiveWords);
+            final String randomWord = getRandomWord(nounWords);
+            final String suffix = RandomUtil.generateRandomSuffix(RANDOM_SUFFIX);
+
+            nickname = adjectiveWord + randomWord + suffix;
+            exists = memberReader.existActiveNickname(nickname);
+
+        } while (exists);
+
+        return nickname;
+    }
+
+    public static String getRandomWord(List<Word> words) {
+        Word word = RandomUtil.getRandomElement(words);
+        return word.getWord();
+    }
+
 
     /**
      * 필수인 약관이 request의 약관리스트에 포함되었는지 확인하는 로직
