@@ -42,4 +42,9 @@ public class MemberReader {
         return memberQueryRepository.existsByPhone(phone);
     }
 
+    public Member getByEmailAndProvider(String email, Provider provider) {
+        return memberJpaRepository.findByEmailAndProvider(email, provider).orElseThrow(
+            () -> new CustomException(ResponseCode.NOT_FOUND_MEMBER)
+        );
+    }
 }
