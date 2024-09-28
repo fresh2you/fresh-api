@@ -9,6 +9,7 @@ public class SecurityConstants {
 
     public static final String[] ALLOW_ORIGINS = {
             "http://localhost:8080",
+            "http://localhost:3000",
             "https://api.jihun-dev.kr",
             "https://jihun-dev.kr",
     };
@@ -40,7 +41,17 @@ public class SecurityConstants {
             /**
              * Terms
             */
-            "/v1/api/terms/**"
+            "/v1/api/terms/**",
+
+            /**
+             * Recommend
+            */
+            "/v1/api/recommendations/**",
+
+            /**
+             * Auth
+            */
+            "/v1/api/auth/**"
     };
 
     public static final String[] PUBLIC_URLS = {

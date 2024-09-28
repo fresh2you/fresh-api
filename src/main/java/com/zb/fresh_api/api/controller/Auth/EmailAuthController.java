@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +29,7 @@ public class EmailAuthController {
         summary = "이메일 인증 전송",
         description = "입력한 이메일로 인증번호를 전송합니다"
     )
-    @GetMapping
+    @PostMapping
     public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@Valid @Email @RequestParam String email) {
         emailService.sendMail(email);
         return ApiResponse.success(ResponseCode.SUCCESS);
@@ -39,7 +39,7 @@ public class EmailAuthController {
         summary = "인증 코드 인증",
         description = "이메일로 인증코드를 통해 인증합니다"
     )
-    @GetMapping("/verify")
+    @PostMapping("/verify")
     public ResponseEntity<ApiResponse<Void>> verifyEmailCode(@Valid @Email @RequestParam String email,
         @RequestParam String verificationCode) {
         emailService.verifyCode(email, verificationCode);

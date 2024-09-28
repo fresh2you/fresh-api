@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface BoardJpaRepository extends JpaRepository<Board, Long> {
     boolean existsByProductId(Long productId);
     Optional<Board> findByProductId(Long productId);
+
 }
