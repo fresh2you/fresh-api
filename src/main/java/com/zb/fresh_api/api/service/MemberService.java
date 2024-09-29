@@ -1,31 +1,25 @@
 package com.zb.fresh_api.api.service;
 
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
-import com.zb.fresh_api.api.dto.request.AddDeliveryAddressRequest;
-import com.zb.fresh_api.api.dto.request.ChargePointRequest;
-import com.zb.fresh_api.api.dto.request.LoginRequest;
-import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
-import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
-import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
-import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
-import com.zb.fresh_api.api.dto.response.ChargePointResponse;
-import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
-import com.zb.fresh_api.api.dto.response.LoginResponse;
-import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
+import com.zb.fresh_api.api.dto.request.*;
+import com.zb.fresh_api.api.dto.response.*;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
 import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
+import com.zb.fresh_api.api.utils.RandomUtil;
 import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.dto.file.UploadedFile;
 import com.zb.fresh_api.domain.dto.member.LoginMember;
+import com.zb.fresh_api.domain.dto.member.MemberWithPoint;
 import com.zb.fresh_api.domain.dto.member.OauthLoginMember;
 import com.zb.fresh_api.domain.dto.member.OauthUser;
 import com.zb.fresh_api.domain.dto.token.Token;
 import com.zb.fresh_api.domain.entity.address.DeliveryAddress;
 import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.member.MemberTerms;
+import com.zb.fresh_api.domain.entity.member.Word;
 import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.entity.point.PointHistory;
 import com.zb.fresh_api.domain.entity.terms.Terms;
@@ -35,26 +29,21 @@ import com.zb.fresh_api.domain.enums.member.MemberStatus;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import com.zb.fresh_api.domain.enums.point.PointStatus;
 import com.zb.fresh_api.domain.enums.point.PointTransactionType;
-import com.zb.fresh_api.domain.repository.reader.DeliveryAddressReader;
-import com.zb.fresh_api.domain.repository.reader.MemberReader;
-import com.zb.fresh_api.domain.repository.reader.PointReader;
-import com.zb.fresh_api.domain.repository.reader.TermsReader;
-import com.zb.fresh_api.domain.repository.writer.DeliveryAddressWriter;
-import com.zb.fresh_api.domain.repository.writer.MemberTermsWriter;
-import com.zb.fresh_api.domain.repository.writer.MemberWriter;
-import com.zb.fresh_api.domain.repository.writer.PointHistoryWriter;
-import com.zb.fresh_api.domain.repository.writer.PointWriter;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.zb.fresh_api.domain.repository.reader.*;
+import com.zb.fresh_api.domain.repository.writer.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -71,6 +60,8 @@ public class MemberService {
 
     private final TermsReader termsReader;
 
+    private final WordReader wordReader;
+
     private final PasswordEncoder passwordEncoder;
     private final PointWriter pointWriter;
     private final PointReader pointReader;
@@ -82,13 +73,17 @@ public class MemberService {
 
     private final S3Uploader s3Uploader;
 
+    private static final int RANDOM_SUFFIX = 3;
+
     @Transactional
     public LoginResponse login(final LoginRequest request) {
-        Member member = memberReader.getByEmailAndProvider(request.email(), Provider.EMAIL);
+        final MemberWithPoint memberWithPoint = memberReader.getMemberWithPointByEmailAndProvider(request.email(), Provider.EMAIL);
+        final Member member = memberWithPoint.member();
+        final Point point = memberWithPoint.point();
 
         validatePassword(request.password(), member.getPassword());
 
-        final LoginMember loginMember = LoginMember.fromEntity(member);
+        final LoginMember loginMember = LoginMember.fromEntity(member, point);
         final Token token = tokenProvider.getTokenByEmail(request.email(), Provider.EMAIL);
         return new LoginResponse(token, loginMember);
     }
@@ -100,9 +95,15 @@ public class MemberService {
         final OauthUser oAuthUser = oauthProviderFactory.getOauthUser(provider, accessToken);
 
         final String email = oAuthUser.email();
-        final boolean isSignup = memberReader.existsByEmailAndProvider(email, provider);
+        final MemberWithPoint memberWithPoint = memberReader.findMemberWithPointByEmailAndProvider(email, provider);
+        final boolean isSignup = !Objects.isNull(memberWithPoint);
         final Token token = resolveToken(isSignup, email, provider);
-        return new OauthLoginResponse(token, new OauthLoginMember(email, provider, oAuthUser.id()), isSignup);
+
+        final OauthLoginMember loginMember = isSignup ?
+                OauthLoginMember.fromSignupMember(memberWithPoint.member(), memberWithPoint.point()) :
+                OauthLoginMember.beforeSignupMember(email, generateRandomNickname(), provider, oAuthUser.id());
+
+        return new OauthLoginResponse(token, loginMember, isSignup);
     }
 
     @Transactional
@@ -208,6 +209,31 @@ public class MemberService {
         final List<DeliveryAddress> deliveryAddresses = deliveryAddressReader.getAllActiveDeliveryAddressByMemberId(member.getId());
         deliveryAddresses.forEach(DeliveryAddress::delete);
     }
+
+    private String generateRandomNickname() {
+        final List<Word> adjectiveWords = wordReader.getAllAdjectiveWord();
+        final List<Word> nounWords = wordReader.getAllNounWord();
+        String nickname;
+        boolean exists;
+
+        do {
+            final String adjectiveWord = getRandomWord(adjectiveWords);
+            final String randomWord = getRandomWord(nounWords);
+            final String suffix = RandomUtil.generateRandomSuffix(RANDOM_SUFFIX);
+
+            nickname = adjectiveWord + randomWord + suffix;
+            exists = memberReader.existActiveNickname(nickname);
+
+        } while (exists);
+
+        return nickname;
+    }
+
+    public static String getRandomWord(List<Word> words) {
+        Word word = RandomUtil.getRandomElement(words);
+        return word.getWord();
+    }
+
 
     /**
      * 필수인 약관이 request의 약관리스트에 포함되었는지 확인하는 로직
