@@ -22,7 +22,7 @@ import java.util.List;
 @Tag(name = "v1 채팅 API", description = "v1 채팅방과 관련된 API.")
 @Slf4j
 @RestController
-@RequestMapping("/v1/chat")
+@RequestMapping("/v1/api/chat")
 @RequiredArgsConstructor
 public class ChatController {
 

@@ -24,8 +24,8 @@ public class MemberReader {
                 .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_MEMBER));
     }
 
-    public Member getByEmail(String email) {
-        return memberJpaRepository.findByEmail(email)
+    public Member getByEmailAndProvider(String email, Provider provider) {
+        return memberJpaRepository.findByEmailAndProvider(email, provider)
                 .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_MEMBER));
     }
 
