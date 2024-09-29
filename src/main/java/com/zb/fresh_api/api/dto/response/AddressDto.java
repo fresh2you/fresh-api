@@ -9,6 +9,8 @@ public record AddressDto(
 
     String address,
 
+    String phoneNumber,
+
     String detailedAddress,
 
     String postalCode,
@@ -17,6 +19,6 @@ public record AddressDto(
 ) {
     public static AddressDto fromEntity(DeliveryAddress address) {
         return new AddressDto(address.getId(),address.getRecipientName(), address.getAddress(),
-            address.getDetailedAddress(), address.getPostalCode(), address.isDefault());
+            address.getPhone(),address.getDetailedAddress(), address.getPostalCode(), address.isDefault());
     }
 }
