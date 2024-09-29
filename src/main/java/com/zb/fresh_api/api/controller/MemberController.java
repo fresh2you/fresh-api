@@ -8,11 +8,7 @@ import com.zb.fresh_api.api.dto.request.LoginRequest;
 import com.zb.fresh_api.api.dto.request.ModifyDeliveryAddressRequest;
 import com.zb.fresh_api.api.dto.request.OauthLoginRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProfileRequest;
-import com.zb.fresh_api.api.dto.response.AddDeliveryAddressResponse;
-import com.zb.fresh_api.api.dto.response.ChargePointResponse;
-import com.zb.fresh_api.api.dto.response.GetAllAddressResponse;
-import com.zb.fresh_api.api.dto.response.LoginResponse;
-import com.zb.fresh_api.api.dto.response.OauthLoginResponse;
+import com.zb.fresh_api.api.dto.response.*;
 import com.zb.fresh_api.api.service.MemberService;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.common.response.ApiResponse;
@@ -77,6 +73,16 @@ public class MemberController {
     }
 
     @Operation(
+            summary = "회원 정보 조회",
+            description = "회원의 정보(마이페이지 정보)를 조회한다."
+    )
+    @GetMapping("/check-email")
+    public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(@RequestParam String email) {
+        memberService.emailValidate(email, Provider.EMAIL);
+        return ApiResponse.success(ResponseCode.SUCCESS);
+    }
+
+    @Operation(
             summary = "닉네임 중복 검사",
             description = "중복된 닉네임이 있는지 검사합니다"
     )
@@ -90,10 +96,11 @@ public class MemberController {
             summary = "이메일 중복 검사",
             description = "이메일로 회원가입한 사용자 중 중복된 이메일이 있는지 검사합니다"
     )
-    @GetMapping("/check-email")
-    public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(@RequestParam String email) {
-        memberService.emailValidate(email, Provider.EMAIL);
-        return ApiResponse.success(ResponseCode.SUCCESS);
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<LoadProfileResponse>> loadProfile(
+            @Parameter(hidden = true) @LoginMember Member loginMember
+    ) {
+        return ApiResponse.success(ResponseCode.SUCCESS, memberService.loadProfile(loginMember));
     }
 
     @Operation(
