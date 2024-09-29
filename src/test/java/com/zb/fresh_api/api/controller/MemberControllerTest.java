@@ -1,15 +1,5 @@
 package com.zb.fresh_api.api.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zb.fresh_api.api.dto.SignUpRequest;
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
@@ -18,7 +8,6 @@ import com.zb.fresh_api.api.service.MemberService;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.enums.member.Provider;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +17,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = MemberController.class,
     excludeAutoConfiguration = SecurityAutoConfiguration.class
@@ -117,8 +116,7 @@ class MemberControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(ResponseCode.SUCCESS.getCode()));
 
-        verify(memberService, times(1)).signUp(request.email(), request.password(),
-            request.nickname(), request.termsAgreements(), request.provider(),request.providerId());
+        verify(memberService, times(1)).signUp(request);
     }
 
 }

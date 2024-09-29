@@ -12,10 +12,10 @@ public record SignUpRequest (
     @NotBlank(message = "아이디는 필수입니다")
     String email,
 
-    @NotBlank(message = "비밀번호는 필수입니다")
+//    @NotBlank(message = "비밀번호는 필수입니다")
     String password,
 
-    @NotBlank(message = "비밀번호 확인은 필수입니다")
+//    @NotBlank(message = "비밀번호 확인은 필수입니다")
     String confirmPassword,
 
     @NotBlank(message = "닉네임은 필수입니다")
