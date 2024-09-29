@@ -4,7 +4,6 @@ import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.*;
 import com.zb.fresh_api.api.dto.response.*;
 import com.zb.fresh_api.api.factory.OauthProviderFactory;
-import com.zb.fresh_api.api.principal.CustomUserDetails;
 import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
 import com.zb.fresh_api.api.utils.RandomUtil;
@@ -13,6 +12,7 @@ import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.dto.file.UploadedFile;
 import com.zb.fresh_api.domain.dto.member.LoginMember;
+import com.zb.fresh_api.domain.dto.member.MemberWithPoint;
 import com.zb.fresh_api.domain.dto.member.OauthLoginMember;
 import com.zb.fresh_api.domain.dto.member.OauthUser;
 import com.zb.fresh_api.domain.dto.token.Token;
@@ -41,6 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,11 +77,13 @@ public class MemberService {
 
     @Transactional
     public LoginResponse login(final LoginRequest request) {
-        Member member = memberReader.getByEmailAndProvider(request.email(), Provider.EMAIL);
+        final MemberWithPoint memberWithPoint = memberReader.getMemberWithPointByEmailAndProvider(request.email(), Provider.EMAIL);
+        final Member member = memberWithPoint.member();
+        final Point point = memberWithPoint.point();
 
         validatePassword(request.password(), member.getPassword());
 
-        final LoginMember loginMember = LoginMember.fromEntity(member);
+        final LoginMember loginMember = LoginMember.fromEntity(member, point);
         final Token token = tokenProvider.getTokenByEmail(request.email(), Provider.EMAIL);
         return new LoginResponse(token, loginMember);
     }
@@ -92,9 +95,15 @@ public class MemberService {
         final OauthUser oAuthUser = oauthProviderFactory.getOauthUser(provider, accessToken);
 
         final String email = oAuthUser.email();
-        final boolean isSignup = memberReader.existsByEmailAndProvider(email, provider);
+        final MemberWithPoint memberWithPoint = memberReader.findMemberWithPointByEmailAndProvider(email, provider);
+        final boolean isSignup = !Objects.isNull(memberWithPoint);
         final Token token = resolveToken(isSignup, email, provider);
-        return new OauthLoginResponse(token, new OauthLoginMember(email, provider, oAuthUser.id()), isSignup);
+
+        final OauthLoginMember loginMember = isSignup ?
+                OauthLoginMember.fromSignupMember(memberWithPoint.member(), memberWithPoint.point()) :
+                OauthLoginMember.beforeSignupMember(email, generateRandomNickname(), provider, oAuthUser.id());
+
+        return new OauthLoginResponse(token, loginMember, isSignup);
     }
 
     @Transactional
