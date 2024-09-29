@@ -1,5 +1,7 @@
 package com.zb.fresh_api.api.controller;
 
+import com.zb.fresh_api.api.dto.request.ChatRoomRequest;
+import com.zb.fresh_api.api.dto.response.ChatRoomResponse;
 import com.zb.fresh_api.common.response.ApiResponse;
 import com.zb.fresh_api.api.service.ChatMessageService;
 import com.zb.fresh_api.api.service.ChatRoomService;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@Tag(name = "v1 채팅 API", description = "v1 채팅방과 관련된 API.")
+@Tag(name = "채팅 API", description = "채팅방과 관련된 API.")
 @Slf4j
 @RestController
 @RequestMapping("/v1/api/chat")
@@ -47,6 +49,20 @@ public class ChatController {
         log.info("Sending message to topic: /sub/chatroom/" + chatRoomId);
         String encodedMessage = new String(chatMessage.message().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
         messagingTemplate.convertAndSend("/sub/chatroom/" + chatRoomId, encodedMessage);
+    }
+
+    @Operation(summary = "1:1 채팅방 생성", description = "1:1 채팅방을 생성합니다.")
+    @PostMapping("/one-to-one")
+    public ResponseEntity<ApiResponse<ChatRoomResponse>> createOneToOneChatRoom(@RequestBody ChatRoomRequest chatRoomRequest) {
+        ChatRoomResponse chatRoomResponse = chatRoomService.createOneToOneChatRoom(chatRoomRequest);
+        return ApiResponse.success(ResponseCode.SUCCESS, chatRoomResponse);
+    }
+
+    @Operation(summary = "1:10 그룹 채팅방 생성", description = "1:10 그룹 채팅방을 생성합니다.")
+    @PostMapping("/one-to-many")
+    public ResponseEntity<ApiResponse<ChatRoomResponse>> createOneToManyChatRoom(@RequestBody ChatRoomRequest chatRoomRequest) {
+        ChatRoomResponse chatRoomResponse = chatRoomService.createOneToManyChatRoom(chatRoomRequest);
+        return ApiResponse.success(ResponseCode.SUCCESS, chatRoomResponse);
     }
 
     @Operation(summary = "채팅방 나가기", description = "사용자가 채팅방을 나가면 채팅방 멤버에서 제거되고, 마지막 멤버가 나가면 채팅방 삭제")

@@ -114,6 +114,7 @@ public enum ResponseCode {
     ALREADY_BLOCKED("2003", "이미 차단한 사용자입니다."),
     NOT_BLOCKED("2004", "차단된 사용자가 아닙니다."),
     BLOCKED_BY_USER("2005", "차단된 사용자로 인해 메시지를 보낼 수 없습니다."),
+    CHATROOM_ALREADY_EXISTS("2006","채팅방이 이미 존재합니다."),
 
     /**
      * Point (2100 ~ 2200)
