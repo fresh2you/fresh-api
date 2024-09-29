@@ -5,17 +5,25 @@ import static com.zb.fresh_api.domain.entity.address.QDeliveryAddressSnapshot.de
 import static com.zb.fresh_api.domain.entity.member.QMember.member;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.zb.fresh_api.domain.entity.address.QDeliveryAddress;
+import com.zb.fresh_api.domain.entity.address.QDeliveryAddressSnapshot;
+import com.zb.fresh_api.domain.entity.member.QMember;
 import com.zb.fresh_api.domain.entity.order.QProductOrder;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class OrderQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
+    QMember member = QMember.member;
     QProductOrder productOrder = QProductOrder.productOrder;
+    QDeliveryAddress deliveryAddress = QDeliveryAddress.deliveryAddress;
+    QDeliveryAddressSnapshot deliveryAddressSnapshot = QDeliveryAddressSnapshot.deliveryAddressSnapshot;
 
     public boolean existsByProductIdAndMemberId(Long productId, Long memberId) {
         Integer fetchOne = jpaQueryFactory
@@ -36,6 +44,18 @@ public class OrderQueryRepository {
             .join(deliveryAddress.member, member)
             .where(deliveryAddress.member.id.eq(memberId))
             .fetch();
+    }
+
+    public boolean existsProductOrderByMemberId(Long memberId) {
+        return jpaQueryFactory
+                .selectOne()
+                .from(deliveryAddressSnapshot)
+                .innerJoin(deliveryAddress).on(deliveryAddressSnapshot.deliveryAddress.eq(deliveryAddress))
+                .innerJoin(member).on(deliveryAddress.member.eq(member))
+                .where(
+                        member.id.eq(memberId)
+                )
+                .fetchFirst() != null;
     }
 
 }

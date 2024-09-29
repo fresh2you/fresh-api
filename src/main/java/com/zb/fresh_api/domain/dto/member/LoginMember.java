@@ -1,8 +1,11 @@
 package com.zb.fresh_api.domain.dto.member;
 
 import com.zb.fresh_api.domain.entity.member.Member;
+import com.zb.fresh_api.domain.entity.point.Point;
 import com.zb.fresh_api.domain.enums.member.Provider;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.math.BigDecimal;
 
 @Schema(description = "로그인된 유저의 정보")
 public record LoginMember(
@@ -16,9 +19,18 @@ public record LoginMember(
         String nickname,
 
         @Schema(description = "가입 경로", example = "KAKAO")
-        Provider provider
+        Provider provider,
+
+        @Schema(description = "프로필 이미지")
+        String profileImage,
+
+        @Schema(description = "판매자 여부")
+        Boolean isSeller,
+
+        @Schema(description = "포인트", example = "농부")
+        BigDecimal point
 ) {
-        public static LoginMember fromEntity(Member member) {
-                return new LoginMember(member.getId(), member.getEmail(), member.getNickname(), member.getProvider());
+        public static LoginMember fromEntity(Member member, Point point) {
+                return new LoginMember(member.getId(), member.getEmail(), member.getNickname(), member.getProvider(), member.getProfileImage(), member.isSeller(), point.getBalance());
         }
 }

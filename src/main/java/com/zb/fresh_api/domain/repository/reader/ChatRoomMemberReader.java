@@ -13,7 +13,6 @@ public class ChatRoomMemberReader {
 
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
-    // 채팅방 ID와 멤버 ID로 채팅방 멤버 찾기 (Optional 반환)
     public Optional<ChatRoomMember> findByChatRoomIdAndMemberId(String chatRoomId, Long memberId) {
         return chatRoomMemberRepository.findByChatRoom_ChatRoomIdAndMemberId(chatRoomId, memberId);
     }

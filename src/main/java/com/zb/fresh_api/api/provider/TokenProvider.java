@@ -6,25 +6,29 @@ import com.zb.fresh_api.common.constants.AuthConstants;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.dto.token.Token;
-import io.jsonwebtoken.*;
+import com.zb.fresh_api.domain.enums.member.Provider;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import java.time.Duration;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Optional;
+import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.SecretKey;
-import java.time.Duration;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Optional;
-
 @Component
 public class TokenProvider {
 
+    private static final String EMAIL_SEPARATOR = "|";
     public static final Long ACCESS_TOKEN_EXPIRE_TIME = Duration.ofHours(6).toMillis();
-
     private final SecretKey key;
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -37,18 +41,18 @@ public class TokenProvider {
         this.customUserDetailsService = customUserDetailsService;
     }
 
-    public Token getTokenByEmail(String email) {
-        String accessToken = createAccessToken(email);
+    public Token getTokenByEmail(String email, Provider provider) {
+        String accessToken = createAccessToken(email, provider);
         final Date accessExpiredAt = getExpirationByToken(accessToken);
         return new Token(accessToken, accessExpiredAt);
     }
 
-    public String createAccessToken(String email) {
+    public String createAccessToken(String email, Provider provider) {
         Date now = new Date();
         long accessTokenExpireTime = now.getTime() + ACCESS_TOKEN_EXPIRE_TIME;
 
         return Jwts.builder()
-                .subject(email)
+                .subject(email + EMAIL_SEPARATOR + provider.name())
                 .issuedAt(now)
                 .expiration(new Date(accessTokenExpireTime))
                 .signWith(key)

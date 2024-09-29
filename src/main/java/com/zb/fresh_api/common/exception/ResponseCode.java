@@ -24,6 +24,7 @@ public enum ResponseCode {
     S3_UPLOADER_ERROR("0606", "S3 업로드 중 오류가 발생하였습니다."),
     METHOD_ARG_NOT_VALID("0607", "유효성 오류가 발생했습니다."),
     INVALID_FILE_NAME_OR_EXTENSIONS("0608", "파일 이름 또는 확장자가 잘못되었습니다."),
+    INVALID_LIST("0609", "리스트가 비어있거나 NULL 입니다."),
 
     FORBIDDEN("0700", "접근 권한이 없습니다."),
     UNAUTHORIZED("0701", "유효한 인증 자격이 없습니다."),
@@ -111,6 +112,9 @@ public enum ResponseCode {
     NOT_FOUND_CHATROOM("2000", "채팅방을 찾을 수 없습니다."),
     MAX_PARTICIPANTS_EXCEEDED("2001", "참가자 수가 최대 인원을 초과했습니다."),
     NOT_FOUND_CHATROOM_MEMBER("2002", "채팅방 멤버를 찾을 수 없습니다."),
+    ALREADY_BLOCKED("2003", "이미 차단한 사용자입니다."),
+    NOT_BLOCKED("2004", "차단된 사용자가 아닙니다."),
+    BLOCKED_BY_USER("2005", "차단된 사용자로 인해 메시지를 보낼 수 없습니다."),
 
     /**
      * Point (2100 ~ 2200)
