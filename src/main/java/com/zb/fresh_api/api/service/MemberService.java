@@ -135,6 +135,12 @@ public class MemberService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public LoadProfileResponse loadProfile(final Member member) {
+        final MemberWithPoint memberWithPoint = memberReader.getMemberWithPointByEmailAndProvider(member.getEmail(), member.getProvider());
+        return new LoadProfileResponse(LoginMember.fromEntity(memberWithPoint.member(), memberWithPoint.point()));
+    }
+
     /**
      * 회원가입 로직
      * 1. 이메일, 비밀번호, 닉네임, 약관동의관련 리스트를 입력 받습니다
