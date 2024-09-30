@@ -368,5 +368,10 @@ public class MemberService {
         if (memberReader.existActiveNickname(nickname)) {
             throw new CustomException(ResponseCode.NICKNAME_ALREADY_IN_USE);
         }
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Member member = memberReader.getById(memberId);
+        member.delete();
     }
 }

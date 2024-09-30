@@ -137,4 +137,7 @@ public class Member extends BaseTimeEntity {
         this.sellerVerifiedAt = LocalDateTime.now();
     }
 
+    public void delete(){
+        this.deletedAt = LocalDateTime.now();
+    }
 }
