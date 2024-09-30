@@ -37,6 +37,9 @@ public enum ResponseCode {
     PARAM_EMAIL_NOT_VALID("1002", "입력한 이메일이 잘못되었습니다"),
     PARAM_NICKNAME_NOT_VALID("1003", "입력한 닉네임이 잘못되었습니다"),
     NOT_FOUND_MEMBER("1004", "회원 정보를 찾을 수 없습니다."),
+    INVALID_PASSWORD_MATCH("1005", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+    INVALID_PASSWORD_FORMAT("1006", "비밀번호는 최소 8글자 이상, 최대 16글자 이하로 작성해야 하며, 비밀번호는 영어와 숫자를 혼용해야 하며, 공백은 사용할 수 없습니다."),
+    INVALID_PROVIDER("1007", "회원가입 경로를 확인해주세요.(이메일, 소셜)"),
 
     /**
      * Terms (1100 ~ 1200)

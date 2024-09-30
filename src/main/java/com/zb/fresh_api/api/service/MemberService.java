@@ -1,5 +1,6 @@
 package com.zb.fresh_api.api.service;
 
+import com.zb.fresh_api.api.dto.SignUpRequest;
 import com.zb.fresh_api.api.dto.TermsAgreementDto;
 import com.zb.fresh_api.api.dto.request.*;
 import com.zb.fresh_api.api.dto.response.*;
@@ -8,6 +9,7 @@ import com.zb.fresh_api.api.principal.CustomUserDetailsService;
 import com.zb.fresh_api.api.provider.TokenProvider;
 import com.zb.fresh_api.api.utils.RandomUtil;
 import com.zb.fresh_api.api.utils.S3Uploader;
+import com.zb.fresh_api.common.constants.AppConstants;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.dto.file.UploadedFile;
@@ -117,11 +119,7 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public void nickNameValidate(String nickname) {
-        boolean existsByNicknameIgnoreCase = memberReader.existActiveNickname(
-            nickname);
-        if (existsByNicknameIgnoreCase) {
-            throw new CustomException(ResponseCode.NICKNAME_ALREADY_IN_USE);
-        }
+        validateDuplicatedNickname(nickname);
     }
 
     @Transactional(readOnly = true)
@@ -129,10 +127,7 @@ public class MemberService {
         if (email == null || email.isEmpty()) {
             throw new CustomException(ResponseCode.PARAM_EMAIL_NOT_VALID);
         }
-        boolean existsByEmailAndProvider = memberReader.existsByEmailAndProvider(email, provider);
-        if (existsByEmailAndProvider) {
-            throw new CustomException(ResponseCode.EMAIL_ALREADY_IN_USE);
-        }
+        validateDuplicatedEmail(email, provider);
     }
 
     @Transactional(readOnly = true)
@@ -152,22 +147,50 @@ public class MemberService {
      * 7. 이벤트로 받은 500원을 추가합니다
      */
     @Transactional
-    public void signUp(String email, String password, String nickName,
-        List<TermsAgreementDto> termsAgreementDtos, Provider provider, String providerId) {
-        nickNameValidate(nickName);
-        emailValidate(email, provider);
+    public void signUp(SignUpRequest request) {
+        final String email = request.email();
+        final String password = request.password();
+        final String nickname = request.nickname();
+        final Provider provider = request.provider();
+        final List<TermsAgreementDto> termsAgreementDtos = request.termsAgreements();
+
+        validateDuplication(email, nickname, provider);
         validateMandatoryTermsIncluded(termsAgreementDtos);
-        Member member = memberWriter.store(
-            Member.create(nickName, email, passwordEncoder.encode(password), provider, providerId,
-                MemberRole.ROLE_USER, MemberStatus.ACTIVE));
+
+        if(provider == Provider.EMAIL) {
+            validatePasswordMatch(password, request.confirmPassword());
+            validatePasswordFormat(password);
+        }
+
+        final Member member = memberWriter.store(createMember(nickname, email, password, provider, request.providerId()));
         processTermsAgreements(termsAgreementDtos, member);
-        Point point = pointWriter.store(
-            Point.create(member, BigDecimal.valueOf(500), PointStatus.ACTIVE)
+
+        final Point point = pointWriter.store(Point.create(member, BigDecimal.valueOf(500), PointStatus.ACTIVE));
+        final PointHistory pointHistory = PointHistory.create(point, PointTransactionType.CHARGE, BigDecimal.valueOf(500), BigDecimal.valueOf(0), BigDecimal.valueOf(500), "회원가입 기념 500원 충전");
+        pointHistoryWriter.store(pointHistory);
+    }
+
+    private void validatePasswordMatch(String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) {
+            throw new CustomException(ResponseCode.INVALID_PASSWORD_MATCH);
+        }
+    }
+
+    private void validatePasswordFormat(String password) {
+        if (password.length() < AppConstants.PASSWORD_MIN_LENGTH || password.length() > AppConstants.PASSWORD_MAX_LENGTH) {
+            throw new CustomException(ResponseCode.INVALID_PASSWORD_FORMAT);
+        }
+
+        if (!password.matches(AppConstants.PASSWORD_PATTERN)) {
+            throw new CustomException(ResponseCode.INVALID_PASSWORD_FORMAT);
+        }
+    }
+
+    private Member createMember(String nickname, String email, String password, Provider provider, String providerId) {
+        return (provider == Provider.EMAIL)
+                ? Member.createForEmail(nickname, email, passwordEncoder.encode(password), provider, providerId, MemberRole.ROLE_USER, MemberStatus.ACTIVE)
+                : Member.createForOauth(nickname, email, password, provider, providerId, MemberRole.ROLE_USER, MemberStatus.ACTIVE
         );
-        pointHistoryWriter.store(
-            PointHistory.create(point, PointTransactionType.CHARGE, BigDecimal.valueOf(500),
-                BigDecimal.valueOf(0), BigDecimal.valueOf(500),
-                "회원가입 기념 500원 충전"));
     }
 
     @Transactional
@@ -328,6 +351,23 @@ public class MemberService {
 
         return GetAllAddressResponse.fromEntities(deliveryAddressList);
     }
+
+    private void validateDuplication(final String email, final String nickname, final Provider provider) {
+        validateDuplicatedEmail(email, provider);
+        validateDuplicatedNickname(nickname);
+    }
+
+    private void validateDuplicatedEmail(final String email, final Provider provider) {
+        boolean existsByEmailAndProvider = memberReader.existsByEmailAndProvider(email, provider);
+        if (existsByEmailAndProvider) {
+            throw new CustomException(ResponseCode.EMAIL_ALREADY_IN_USE);
+        }
+    }
+
+    private void validateDuplicatedNickname(final String nickname) {
+        if (memberReader.existActiveNickname(nickname)) {
+            throw new CustomException(ResponseCode.NICKNAME_ALREADY_IN_USE);
+        }
 
     @Transactional
     public void deleteMember(Long memberId) {
