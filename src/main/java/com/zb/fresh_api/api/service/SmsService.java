@@ -28,13 +28,17 @@ public class SmsService {
      * 3. 인증 유효시간 설정
      * 4. 인증 문자 전송 횟수 기록
      */
-    public void sendSms(String toNumber) {
+    public void sendSms(String toNumber, Member member) {
         if (redisUtil.hasExceededAttemptLimit(toNumber, VerificationType.PHONE)) {
             throw new CustomException(ResponseCode.EXCEEDED_VERIFICATION_ATTEMPS);
         }
 
         if(memberReader.existsByPhone(toNumber)){
             throw new CustomException(ResponseCode.PHONE_ALREADY_IN_USE);
+        }
+
+        if(member.isSeller()){
+            throw new CustomException(ResponseCode.MEMBER_ALREADY_SELLER);
         }
 
         String verificationCode = VerificationCodeUtil.generateRandomString();
