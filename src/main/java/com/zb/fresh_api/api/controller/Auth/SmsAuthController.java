@@ -33,7 +33,7 @@ public class SmsAuthController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestParam String phoneNumber,
         @Parameter(hidden = true) @LoginMember Member member) {
-        smsService.sendSms(phoneNumber);
+        smsService.sendSms(phoneNumber,member);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
 
