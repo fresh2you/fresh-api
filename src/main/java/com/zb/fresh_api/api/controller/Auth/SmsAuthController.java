@@ -31,7 +31,8 @@ public class SmsAuthController {
         description = "입력한 휴대전화로 인증번호를 전송합니다"
     )
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestParam String phoneNumber) {
+    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestParam String phoneNumber,
+        @Parameter(hidden = true) @LoginMember Member member) {
         smsService.sendSms(phoneNumber);
         return ApiResponse.success(ResponseCode.SUCCESS);
     }
