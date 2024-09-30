@@ -107,7 +107,7 @@ public class MemberController {
             summary = "프로필 변경",
             description = "회원의 이미지 또는 닉네임을 변경한다."
     )
-    @PatchMapping(value = "/profile", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PatchMapping(value = "/profile", consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Void>> updateProfile(
             @Parameter(hidden = true) @LoginMember Member loginMember,
             @Parameter @RequestPart(value = "request", required = false) @Valid UpdateProfileRequest request,
