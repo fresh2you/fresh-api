@@ -5,8 +5,9 @@ import com.zb.fresh_api.api.dto.response.ChatRoomResponse;
 import com.zb.fresh_api.common.response.ApiResponse;
 import com.zb.fresh_api.api.service.ChatMessageService;
 import com.zb.fresh_api.api.service.ChatRoomService;
-import com.zb.fresh_api.domain.dto.chat.ChatMessageDto;
 import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.domain.dto.chat.ChatMessageDto;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
@@ -68,8 +71,10 @@ public class ChatController {
     @Operation(summary = "채팅방 나가기", description = "사용자가 채팅방을 나가면 채팅방 멤버에서 제거되고, 마지막 멤버가 나가면 채팅방 삭제")
     @PostMapping("/{chatRoomId}/leave")
     public ResponseEntity<ApiResponse<Void>> leaveChatRoom(
-            @Parameter(description = "채팅방 ID") @PathVariable String chatRoomId,
-            @Parameter(description = "사용자 ID") @RequestParam Long memberId) {
+            @Parameter(description = "채팅방 ID") @PathVariable String chatRoomId
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long memberId = Long.parseLong(authentication.getName());
 
         chatRoomService.leaveChatRoom(chatRoomId, memberId);
         return ApiResponse.success(ResponseCode.SUCCESS, null);
