@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 @Schema(description = "상품 추천 목록 조회시 사용되는 상품 정보")
 public record RecommendProductSummary(
 
+        @Schema(description = "상품 고유 번호")
+        Long productId,
+
         @Schema(description = "상품명")
         String productName,
 
