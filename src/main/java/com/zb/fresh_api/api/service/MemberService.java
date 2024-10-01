@@ -147,7 +147,7 @@ public class MemberService {
      * 7. 이벤트로 받은 500원을 추가합니다
      */
     @Transactional
-    public void signUp(SignUpRequest request) {
+    public SignupResponse signUp(SignUpRequest request) {
         final String email = request.email();
         final String password = request.password();
         final String nickname = request.nickname();
@@ -168,6 +168,8 @@ public class MemberService {
         final Point point = pointWriter.store(Point.create(member, BigDecimal.valueOf(500), PointStatus.ACTIVE));
         final PointHistory pointHistory = PointHistory.create(point, PointTransactionType.CHARGE, BigDecimal.valueOf(500), BigDecimal.valueOf(0), BigDecimal.valueOf(500), "회원가입 기념 500원 충전");
         pointHistoryWriter.store(pointHistory);
+
+        return new SignupResponse(member.getId(), resolveToken(email, provider));
     }
 
     private void validatePasswordMatch(String password, String confirmPassword) {
@@ -317,8 +319,12 @@ public class MemberService {
         }
     }
 
-    protected Token resolveToken(final boolean isSignup, final String email, Provider provider) {
+    protected Token resolveToken(final boolean isSignup, final String email, final Provider provider) {
         return !isSignup ? Token.emptyToken() : tokenProvider.getTokenByEmail(email, provider);
+    }
+
+    protected Token resolveToken(final String email, final Provider provider) {
+        return provider == Provider.EMAIL ? Token.emptyToken() : tokenProvider.getTokenByEmail(email, provider);
     }
 
     private void validateAddressCount(final int addressCount) {
