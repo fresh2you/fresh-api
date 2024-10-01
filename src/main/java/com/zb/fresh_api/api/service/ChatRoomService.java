@@ -20,14 +20,14 @@ public class ChatRoomService {
 
     @Transactional
     public ChatRoomResponse createOneToOneChatRoom(ChatRoomRequest chatRoomRequest) {
-        // 1:1 채팅방 ID 생성
-        String chatRoomId = ChatRoom.createOneToOne(chatRoomRequest.sellerId(), chatRoomRequest.buyerId()).getChatRoomId();
+        // 1:1 채팅방 ID 생성 (닉네임 기반)
+        String chatRoomId = ChatRoom.createOneToOne(chatRoomRequest.sellerName(), chatRoomRequest.buyerName()).getChatRoomId();
 
         if (chatRoomReader.findById(chatRoomId).isPresent()) {
             throw new CustomException(ResponseCode.CHATROOM_ALREADY_EXISTS);
         }
 
-        ChatRoom chatRoom = ChatRoom.createOneToOne(chatRoomRequest.sellerId(), chatRoomRequest.buyerId());
+        ChatRoom chatRoom = ChatRoom.createOneToOne(chatRoomRequest.sellerName(), chatRoomRequest.buyerName());
         chatRoomWriter.save(chatRoom);
 
         return new ChatRoomResponse(chatRoom.getChatRoomId(), "OPENED");
@@ -35,7 +35,7 @@ public class ChatRoomService {
 
     @Transactional
     public ChatRoomResponse createOneToManyChatRoom(ChatRoomRequest chatRoomRequest) {
-        ChatRoom chatRoom = ChatRoom.createOneToMany(chatRoomRequest.sellerId(), chatRoomRequest.productId(), chatRoomRequest.categoryId());
+        ChatRoom chatRoom = ChatRoom.createOneToMany(chatRoomRequest.sellerName(), chatRoomRequest.productId(), chatRoomRequest.categoryId());
         chatRoomWriter.save(chatRoom);
 
         return new ChatRoomResponse(chatRoom.getChatRoomId(), "OPENED");
