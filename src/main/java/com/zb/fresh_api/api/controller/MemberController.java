@@ -49,9 +49,8 @@ public class MemberController {
             description = "이메일회원가입, Oauth2회원가입에 사용되는 API입니다"
     )
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signup(@RequestBody @Valid SignUpRequest request) {
-        memberService.signUp(request);
-        return ApiResponse.success(ResponseCode.SUCCESS);
+    public ResponseEntity<ApiResponse<SignupResponse>> signup(@RequestBody @Valid SignUpRequest request) {
+        return ApiResponse.success(ResponseCode.SUCCESS, memberService.signUp(request));
     }
 
     @Operation(
@@ -93,8 +92,8 @@ public class MemberController {
     }
 
     @Operation(
-            summary = "이메일 중복 검사",
-            description = "이메일로 회원가입한 사용자 중 중복된 이메일이 있는지 검사합니다"
+            summary = "회원 정보 조회",
+            description = "회원 정보를 조회합니다.(로그인 정보)"
     )
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<LoadProfileResponse>> loadProfile(
