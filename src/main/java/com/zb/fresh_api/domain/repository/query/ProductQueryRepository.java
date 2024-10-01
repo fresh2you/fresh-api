@@ -77,6 +77,7 @@ public class ProductQueryRepository {
                         Projections
                                 .constructor(
                                         RecommendProductSummary.class,
+                                        product.id,
                                         product.name,
                                         product.productImage,
 //                                        product.member.nickname.as("sellerName"),
@@ -164,6 +165,7 @@ public class ProductQueryRepository {
                         Projections
                                 .constructor(
                                         RecommendProductSummary.class,
+                                        product.id,
                                         product.name,
                                         product.productImage,
                                         product.member.nickname,
