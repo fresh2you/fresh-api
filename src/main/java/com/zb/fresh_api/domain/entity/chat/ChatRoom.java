@@ -17,8 +17,8 @@ public class ChatRoom {
     @Column(name = "chat_room_id")
     private String chatRoomId;
 
-    private Long sellerId;
-    private Long buyerId;
+    private String sellerName;
+    private String buyerName;
     private Long productId;
     private Long categoryId;
     private String lastMessage;
@@ -36,24 +36,24 @@ public class ChatRoom {
     }
 
     /**
-     * 1:1 채팅방 생성 (SellerId와 BuyerId를 조합하여 ChatRoomId 생성)
+     * 1:1 채팅방 생성 (SellerName과 BuyerName을 조합하여 ChatRoomId 생성)
      */
-    public static ChatRoom createOneToOne(Long sellerId, Long buyerId) {
+    public static ChatRoom createOneToOne(String sellerName, String buyerName) {
         ChatRoom chatRoom = new ChatRoom();
-        chatRoom.chatRoomId = generateChatRoomId(sellerId, buyerId);
-        chatRoom.sellerId = sellerId;
-        chatRoom.buyerId = buyerId;
+        chatRoom.chatRoomId = generateChatRoomId(sellerName, buyerName); // 닉네임 조합으로 ID 생성
+        chatRoom.sellerName = sellerName;
+        chatRoom.buyerName = buyerName;
         chatRoom.maxParticipants = 2;  // 1:1 채팅방이므로 최대 인원을 2로 설정
         return chatRoom;
     }
 
     /**
-     * 1:10 그룹 채팅방 생성 (SellerId와 현재 시간을 조합하여 ChatRoomId 생성)
+     * 1:10 그룹 채팅방 생성 (SellerName과 현재 시간을 조합하여 ChatRoomId 생성)
      */
-    public static ChatRoom createOneToMany(Long sellerId, Long productId, Long categoryId) {
+    public static ChatRoom createOneToMany(String sellerName, Long productId, Long categoryId) {
         ChatRoom chatRoom = new ChatRoom();
-        chatRoom.chatRoomId = generateChatRoomIdForGroup(sellerId);
-        chatRoom.sellerId = sellerId;
+        chatRoom.chatRoomId = generateChatRoomIdForGroup(sellerName); // 판매자 닉네임 기반 ID 생성
+        chatRoom.sellerName = sellerName;
         chatRoom.productId = productId;
         chatRoom.categoryId = categoryId;
         chatRoom.maxParticipants = 10;  // 1:10 채팅방이므로 최대 인원을 10으로 설정
@@ -61,17 +61,17 @@ public class ChatRoom {
     }
 
     /**
-     * 1:1 채팅방 ID 생성 메서드 (SellerId + BuyerId)
+     * 1:1 채팅방 ID 생성 메서드 (SellerName + BuyerName)
      */
-    private static String generateChatRoomId(Long sellerId, Long buyerId) {
-        return sellerId + "_" + buyerId;
+    private static String generateChatRoomId(String sellerName, String buyerName) {
+        return sellerName + "_" + buyerName;
     }
 
     /**
-     * 1:10 그룹 채팅방 ID 생성 메서드 (SellerId + 현재 시스템 시간)
+     * 1:10 그룹 채팅방 ID 생성 메서드 (SellerName + 현재 시스템 시간)
      */
-    private static String generateChatRoomIdForGroup(Long sellerId) {
-        return sellerId + "_" + System.currentTimeMillis();
+    private static String generateChatRoomIdForGroup(String sellerName) {
+        return sellerName + "_" + System.currentTimeMillis();
     }
 
     /**
