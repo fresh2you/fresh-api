@@ -2,6 +2,7 @@ package com.zb.fresh_api.api.controller;
 
 import com.zb.fresh_api.api.dto.request.ChatRoomRequest;
 import com.zb.fresh_api.api.dto.response.ChatRoomResponse;
+import com.zb.fresh_api.api.principal.CustomUserDetails;
 import com.zb.fresh_api.common.response.ApiResponse;
 import com.zb.fresh_api.api.service.ChatMessageService;
 import com.zb.fresh_api.api.service.ChatRoomService;
@@ -71,10 +72,11 @@ public class ChatController {
     @Operation(summary = "채팅방 나가기", description = "사용자가 채팅방을 나가면 채팅방 멤버에서 제거되고, 마지막 멤버가 나가면 채팅방 삭제")
     @PostMapping("/{chatRoomId}/leave")
     public ResponseEntity<ApiResponse<Void>> leaveChatRoom(
-            @Parameter(description = "채팅방 ID") @PathVariable String chatRoomId
+            @Parameter(description = "채팅방 ID") @PathVariable Long chatRoomId
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long memberId = Long.parseLong(authentication.getName());
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long memberId = userDetails.member().getId();
 
         chatRoomService.leaveChatRoom(chatRoomId, memberId);
         return ApiResponse.success(ResponseCode.SUCCESS, null);

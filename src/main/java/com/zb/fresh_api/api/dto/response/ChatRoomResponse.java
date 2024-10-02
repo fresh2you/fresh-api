@@ -1,7 +1,7 @@
 package com.zb.fresh_api.api.dto.response;
 
 public record ChatRoomResponse(
-        String chatRoomId,
+        Long chatRoomId,
         String status
 ) {
 }
