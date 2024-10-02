@@ -3,7 +3,9 @@ package com.zb.fresh_api.api.service;
 import com.zb.fresh_api.api.dto.request.ChatRoomRequest;
 import com.zb.fresh_api.api.dto.response.ChatRoomResponse;
 import com.zb.fresh_api.domain.entity.chat.ChatRoom;
+import com.zb.fresh_api.domain.entity.chat.ChatRoomMember;
 import com.zb.fresh_api.domain.repository.reader.ChatRoomReader;
+import com.zb.fresh_api.domain.repository.writer.ChatRoomMemberWriter;
 import com.zb.fresh_api.domain.repository.writer.ChatRoomWriter;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -17,6 +19,7 @@ public class ChatRoomService {
 
     private final ChatRoomReader chatRoomReader;
     private final ChatRoomWriter chatRoomWriter;
+    private final ChatRoomMemberWriter chatRoomMemberWriter;
 
     @Transactional
     public ChatRoomResponse createOneToOneChatRoom(ChatRoomRequest chatRoomRequest) {
@@ -30,6 +33,9 @@ public class ChatRoomService {
         ChatRoom chatRoom = ChatRoom.createOneToOne(chatRoomRequest.sellerName(), chatRoomRequest.buyerName());
         chatRoomWriter.save(chatRoom);
 
+        chatRoomMemberWriter.save(new ChatRoomMember(chatRoom, chatRoomRequest.sellerId(), true, true));
+        chatRoomMemberWriter.save(new ChatRoomMember(chatRoom, chatRoomRequest.buyerId(), false, true));
+
         return new ChatRoomResponse(chatRoom.getChatRoomId(), "OPENED");
     }
 
@@ -37,6 +43,9 @@ public class ChatRoomService {
     public ChatRoomResponse createOneToManyChatRoom(ChatRoomRequest chatRoomRequest) {
         ChatRoom chatRoom = ChatRoom.createOneToMany(chatRoomRequest.sellerName(), chatRoomRequest.productId(), chatRoomRequest.categoryId());
         chatRoomWriter.save(chatRoom);
+
+        chatRoomMemberWriter.save(new ChatRoomMember(chatRoom, chatRoomRequest.sellerId(), true, true));
+        chatRoomMemberWriter.save(new ChatRoomMember(chatRoom, chatRoomRequest.buyerId(), false, true));
 
         return new ChatRoomResponse(chatRoom.getChatRoomId(), "OPENED");
     }
