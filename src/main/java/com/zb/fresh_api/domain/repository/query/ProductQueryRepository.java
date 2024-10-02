@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
+import com.zb.fresh_api.api.dto.request.GetSellerProducts;
 import com.zb.fresh_api.domain.dto.recommend.CategoryProductOrder;
 import com.zb.fresh_api.domain.dto.recommend.RecommendProductSummary;
 import com.zb.fresh_api.domain.dto.recommend.SellerProductOrder;
@@ -69,6 +70,20 @@ public class ProductQueryRepository {
         long total = query.fetchCount();
 
         return new PageImpl<>(products, pageable, total);
+    }
+
+    public Page<Product> findByMemberId(GetSellerProducts request, Long memberId){
+        Pageable pageable = PageRequest.of(request.page(), request.size());
+        JPAQuery<Product> query = jpaQueryFactory.selectFrom(product)
+            .where(product.member.id.eq(memberId))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize());
+
+        List<Product> products = query.fetch();
+        long total = query.fetchCount();
+
+        return new PageImpl<>(products, pageable, total);
+
     }
 
     public List<RecommendProductSummary> findAllRandomProduct(int size) {

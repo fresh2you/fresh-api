@@ -40,6 +40,7 @@ public enum ResponseCode {
     INVALID_PASSWORD_MATCH("1005", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
     INVALID_PASSWORD_FORMAT("1006", "비밀번호는 최소 8글자 이상, 최대 16글자 이하로 작성해야 하며, 비밀번호는 영어와 숫자를 혼용해야 하며, 공백은 사용할 수 없습니다."),
     INVALID_PROVIDER("1007", "회원가입 경로를 확인해주세요.(이메일, 소셜)"),
+    MEMBER_NOT_SELLER("1008", "사용자가 판매자가 아닙니다"),
 
     /**
      * Terms (1100 ~ 1200)
