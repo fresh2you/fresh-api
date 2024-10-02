@@ -28,7 +28,11 @@ api:
       endpoint: /ws
       allowed-origins:
         - http://localhost:3000
+        - https://localhost:3000
         - http://localhost:8080
+        - https://localhost:8080
+        - http://api.jihun-dev.kr
+        - https://api.jihun-dev.kr
     broker:
       relay:
         enabled: true

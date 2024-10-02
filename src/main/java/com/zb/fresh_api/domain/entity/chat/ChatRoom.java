@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -15,8 +14,7 @@ public class ChatRoom {
 
     @Id
     @Column(name = "chat_room_id")
-    private String chatRoomId;
-
+    private Long chatRoomId;
     private String sellerName;
     private String buyerName;
     private Long productId;
@@ -27,20 +25,20 @@ public class ChatRoom {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChatRoomMember> members = new HashSet<>();
 
-    // UUID 자동 생성 로직 추가
+    // ID가 없는 경우 예외 처리
     @PrePersist
-    public void generateUUID() {
+    public void validateId() {
         if (this.chatRoomId == null) {
-            this.chatRoomId = UUID.randomUUID().toString();
+            throw new IllegalStateException("ChatRoom ID가 설정되지 않았습니다.");
         }
     }
 
     /**
-     * 1:1 채팅방 생성 (SellerName과 BuyerName을 조합하여 ChatRoomId 생성)
+     * 1:1 채팅방 생성 (SellerName과 BuyerName을 숫자로 변환하여 ChatRoomId 생성)
      */
     public static ChatRoom createOneToOne(String sellerName, String buyerName) {
         ChatRoom chatRoom = new ChatRoom();
-        chatRoom.chatRoomId = generateChatRoomId(sellerName, buyerName); // 닉네임 조합으로 ID 생성
+        chatRoom.chatRoomId = ChatRoomIdGenerator.generateSha256ChatRoomId(sellerName, buyerName);  // SHA-256 또는 hashCode 방식 사용
         chatRoom.sellerName = sellerName;
         chatRoom.buyerName = buyerName;
         chatRoom.maxParticipants = 2;  // 1:1 채팅방이므로 최대 인원을 2로 설정
@@ -48,30 +46,16 @@ public class ChatRoom {
     }
 
     /**
-     * 1:10 그룹 채팅방 생성 (SellerName과 현재 시간을 조합하여 ChatRoomId 생성)
+     * 1:10 그룹 채팅방 생성 (SellerName을 숫자로 변환하여 ChatRoomId 생성)
      */
     public static ChatRoom createOneToMany(String sellerName, Long productId, Long categoryId) {
         ChatRoom chatRoom = new ChatRoom();
-        chatRoom.chatRoomId = generateChatRoomIdForGroup(sellerName); // 판매자 닉네임 기반 ID 생성
+        chatRoom.chatRoomId = ChatRoomIdGenerator.generateSha256ChatRoomId(sellerName, "GROUP_CHAT");  // 그룹 ID 생성
         chatRoom.sellerName = sellerName;
         chatRoom.productId = productId;
         chatRoom.categoryId = categoryId;
         chatRoom.maxParticipants = 10;  // 1:10 채팅방이므로 최대 인원을 10으로 설정
         return chatRoom;
-    }
-
-    /**
-     * 1:1 채팅방 ID 생성 메서드 (SellerName + BuyerName)
-     */
-    private static String generateChatRoomId(String sellerName, String buyerName) {
-        return sellerName + "_" + buyerName;
-    }
-
-    /**
-     * 1:10 그룹 채팅방 ID 생성 메서드 (SellerName + 현재 시스템 시간)
-     */
-    private static String generateChatRoomIdForGroup(String sellerName) {
-        return sellerName + "_" + System.currentTimeMillis();
     }
 
     /**

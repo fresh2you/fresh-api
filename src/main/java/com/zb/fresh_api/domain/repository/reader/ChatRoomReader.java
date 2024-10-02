@@ -13,7 +13,7 @@ public class ChatRoomReader {
 
     private final ChatRoomRepository chatRoomRepository;
 
-    public Optional<ChatRoom> findById(String chatRoomId) {
+    public Optional<ChatRoom> findById(Long chatRoomId) {
         return chatRoomRepository.findById(chatRoomId);
     }
 
