@@ -1,6 +1,7 @@
 package com.zb.fresh_api.domain.repository.reader;
 
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
+import com.zb.fresh_api.api.dto.request.GetSellerProducts;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
 import com.zb.fresh_api.domain.annotation.Reader;
@@ -22,7 +23,11 @@ public class ProductReader {
     private final ProductQueryRepository productQueryRepository;
 
     public Optional<Product> findById(Long id){
-        return productJpaRepository.findById(id);
+        return productJpaRepository.findByIdAndDeletedAtIsNull(id);
+    }
+
+    public Page<Product> findByMemberId(GetSellerProducts request, Long memberId) {
+        return productQueryRepository.findByMemberId(request, memberId);
     }
 
     public Product getById(Long id){

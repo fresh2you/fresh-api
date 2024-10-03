@@ -37,6 +37,17 @@ public class RecommendController {
             @Parameter(hidden = true) @LoginMember Member loginMember,
             @Valid LoadProductRecommendListRequest request
     ) {
-        return ApiResponse.success(ResponseCode.SUCCESS, recommendService.loadRecommendedProductList(loginMember, request));
+        return ApiResponse.success(ResponseCode.SUCCESS, recommendService.loadProductRecommendList(loginMember, request));
+    }
+
+    @Operation(
+            summary = "랜덤 상품 추천",
+            description = "랜덤으로 상품을 조회합니다."
+    )
+    @GetMapping("/random")
+    public ResponseEntity<ApiResponse<LoadProductRecommendListResponse>> loadRandomProductRecommendList(
+            @Valid LoadProductRecommendListRequest request
+    ) {
+        return ApiResponse.success(ResponseCode.SUCCESS, recommendService.loadRandomProductRecommendList(request));
     }
 }

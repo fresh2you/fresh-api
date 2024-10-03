@@ -5,6 +5,7 @@ import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.BuyProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
+import com.zb.fresh_api.api.dto.request.GetSellerProducts;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.BuyProductResponse;
@@ -113,19 +114,23 @@ public class ProductController {
         return ApiResponse.success(ResponseCode.SUCCESS,response);
     }
 
-    // TODO 키워드
-    //  제목
-    //  상품 설명
-    //  판매자 이름
-    @Operation(
-        summary = "상품 목록 조회",
-        description = "키워드 또는 카테고리 타입 등을 통해 상품을 상세 조회합니다."
-    )
     @GetMapping()
     public ResponseEntity<ApiResponse<GetAllProductByConditionsResponse>> getAllProductByConditions(
         GetAllProductByConditionsRequest request) {
         GetAllProductByConditionsResponse products = productService.findProducts(request);
         return ApiResponse.success(ResponseCode.SUCCESS, products);
+    }
+
+    @Operation(
+        summary = "판매자 상품 목록 조회",
+        description = "판매자가 등록한 상품 목록을 조회합니다."
+    )
+    @GetMapping("/seller")
+    public ResponseEntity<ApiResponse<GetAllProductByConditionsResponse>> getSellerProducts(
+        GetSellerProducts request,
+        @Parameter(hidden = true) @LoginMember Member loginMember) {
+        GetAllProductByConditionsResponse sellerProducts = productService.getSellerProducts(request, loginMember);
+        return ApiResponse.success(ResponseCode.SUCCESS, sellerProducts);
     }
 
     @Operation(

@@ -4,6 +4,7 @@ import com.zb.fresh_api.api.dto.request.AddProductRequest;
 import com.zb.fresh_api.api.dto.request.BuyProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
+import com.zb.fresh_api.api.dto.request.GetSellerProducts;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.BuyProductResponse;
@@ -209,6 +210,14 @@ public class ProductService {
         return GetAllProductByConditionsResponse.fromEntities(products);
     }
 
+    public GetAllProductByConditionsResponse getSellerProducts(GetSellerProducts request, Member member) {
+        if(!member.isSeller()){
+            throw new CustomException(ResponseCode.MEMBER_NOT_SELLER);
+        }
+
+        return GetAllProductByConditionsResponse.fromEntities( productReader.findByMemberId(request, member.getId()));
+    }
+
     public FindAllProductLikeResponse findAllProductLike(Long memberId){
         List<Long> productLikes = productLikeReader.findProductIdByMemberId(memberId);
 
@@ -249,5 +258,6 @@ public class ProductService {
 
         productLikeWriter.delete(productLike);
     }
+
 
 }
