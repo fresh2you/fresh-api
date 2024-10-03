@@ -112,8 +112,12 @@ public class MemberService {
     public void updateProfile(final Member member,
                               final UpdateProfileRequest request,
                               final MultipartFile image) {
-        final UploadedFile file = s3Uploader.upload(CategoryType.MEMBER, image);
-        member.updateProfile(request.nickname(), file.url());
+        if (image != null && !image.isEmpty()) {
+            final UploadedFile file = s3Uploader.upload(CategoryType.MEMBER, image);
+            member.updateProfileImage(file.url());
+        }
+
+        member.updateNickname(request.nickname());
         memberWriter.store(member);
     }
 
