@@ -22,8 +22,8 @@ public class RecommendService {
     private final ProductReader productReader;
 
     @Transactional(readOnly = true)
-    public LoadProductRecommendListResponse loadRecommendedProductList(final Member member,
-                                                                       final LoadProductRecommendListRequest request) {
+    public LoadProductRecommendListResponse loadProductRecommendList(final Member member,
+                                                                     final LoadProductRecommendListRequest request) {
         // 1. 상품 구매 여부
         final List<RecommendProductSummary> products;
         final boolean hasProductOrder = orderReader.existsProductOrderByMemberId(member);
@@ -36,6 +36,12 @@ public class RecommendService {
             products = productReader.getAllRecommendProduct(member, request.size());
         }
 
+        return new LoadProductRecommendListResponse(products, products.size());
+    }
+
+    @Transactional(readOnly = true)
+    public LoadProductRecommendListResponse loadRandomProductRecommendList(final LoadProductRecommendListRequest request) {
+        final List<RecommendProductSummary> products = productReader.getAllRandomProduct(request.size());
         return new LoadProductRecommendListResponse(products, products.size());
     }
 

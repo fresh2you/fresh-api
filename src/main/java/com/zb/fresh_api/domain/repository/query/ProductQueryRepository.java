@@ -95,15 +95,12 @@ public class ProductQueryRepository {
                                         product.id,
                                         product.name,
                                         product.productImage,
-//                                        product.member.nickname.as("sellerName"),
                                         product.member.nickname,
                                         product.price,
-//                                        product.description,
                                         new CaseBuilder()
                                                 .when(product.description.length().gt(17))
-                                                .then(product.description.substring(0, 17).concat("...")) // 20글자까지 잘라서 "..." 추가
+                                                .then(product.description.substring(0, 17).concat("..."))
                                                 .otherwise(product.description)
-//                                        product.description.length().gt(20)
                                 ))
                 .from(product)
                 .innerJoin(member).on(product.member.eq(member))
@@ -164,15 +161,11 @@ public class ProductQueryRepository {
                         CategoryProductOrder::count
                 ));
 
-        categoryMap.forEach((key, value) -> System.out.println("Category ID: " + key + ", Count: " + value));
-
         Map<Long, Long> sellerMap = sellerProductOrders.stream()
                 .collect(Collectors.toMap(
                         SellerProductOrder::sellerId,
                         SellerProductOrder::count
                 ));
-
-//        sellerMap.forEach((key, value) -> System.out.println("seller ID: " + key + ", Count: " + value));
 
         // Step 4: 추천 상품 조회 (카테고리, 판매자 가중치를 기반으로)
         List<RecommendProductSummary> recommendedProducts = jpaQueryFactory
@@ -185,7 +178,6 @@ public class ProductQueryRepository {
                                         product.productImage,
                                         product.member.nickname,
                                         product.price,
-//                                        product.description,
                                         new CaseBuilder()
                                                 .when(product.description.length().gt(17))
                                                 .then(product.description.substring(0, 17).concat("...")) // 20글자까지 잘라서 "..." 추가
@@ -198,7 +190,6 @@ public class ProductQueryRepository {
                 .where(
                         isNotDeleted(product)
                 )
-                // TODO Map get() 오류 해결해야함.
                 .orderBy(
                         combineOrderSpecifiers(
                                 createCategoryOrderSpecifiers(categoryMap), createSellerOrderSpecifiers(sellerMap))
@@ -243,7 +234,7 @@ public class ProductQueryRepository {
             );
         }
 
-        return orderSpecifiers.toArray(new OrderSpecifier[0]); // OrderSpecifier 배열로 변환하여 반환
+        return orderSpecifiers.toArray(new OrderSpecifier[0]);
     }
 
     private OrderSpecifier<?>[] createSellerOrderSpecifiers(Map<Long, Long> sellerMap) {
@@ -262,6 +253,6 @@ public class ProductQueryRepository {
             );
         }
 
-        return orderSpecifiers.toArray(new OrderSpecifier[0]); // OrderSpecifier 배열로 변환하여 반환
+        return orderSpecifiers.toArray(new OrderSpecifier[0]);
     }
 }
