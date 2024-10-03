@@ -49,17 +49,20 @@ public class ProductQueryRepository {
 
     public Page<Product> findAll(GetAllProductByConditionsRequest request) {
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(isNotDeleted(product));
 
         if (request.categoryId() != null) {
             builder.and(product.category.id.eq(request.categoryId()));
         }
 
         if (request.keyword() != null && !request.keyword().isEmpty()) {
-            builder.and(product.name.containsIgnoreCase(request.keyword())
-                .or(product.description.containsIgnoreCase(request.keyword()))
-                .or(product.member.nickname.containsIgnoreCase(request.keyword()))
-                .and(isNotDeleted(product)));
+            builder.and(
+                product.name.containsIgnoreCase(request.keyword())
+                    .or(product.description.containsIgnoreCase(request.keyword()))
+                    .or(product.member.nickname.containsIgnoreCase(request.keyword()))
+            );
         }
+
         Pageable pageable = PageRequest.of(request.page(), request.size());
         JPAQuery<Product> query = jpaQueryFactory.selectFrom(product)
             .where(builder)
