@@ -91,10 +91,10 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
         config.addExposedHeader(HttpHeaders.AUTHORIZATION);
         config.setMaxAge(3600L);
         config.setAllowCredentials(true);
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedOrigins(List.of(SecurityConstants.ALLOW_ORIGINS));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

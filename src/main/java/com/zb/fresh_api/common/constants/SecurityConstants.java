@@ -12,6 +12,7 @@ public class SecurityConstants {
             "http://localhost:3000",
             "https://api.jihun-dev.kr",
             "https://jihun-dev.kr",
+            "https://www.jihun-dev.kr",
     };
 
     public static final String[] SWAGGER_PATH = {
