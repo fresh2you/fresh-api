@@ -14,6 +14,6 @@ public class ChatRoomMemberReader {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     public Optional<ChatRoomMember> findByChatRoomIdAndMemberId(String chatRoomId, Long memberId) {
-        return chatRoomMemberRepository.findByChatRoom_ChatRoomIdAndMemberId(chatRoomId, memberId);
+        return chatRoomMemberRepository.findByChatRoomIdAndMemberId(chatRoomId, memberId);
     }
 }

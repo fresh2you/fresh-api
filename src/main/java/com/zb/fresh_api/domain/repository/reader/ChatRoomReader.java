@@ -17,7 +17,7 @@ public class ChatRoomReader {
         return chatRoomRepository.findById(chatRoomId);
     }
 
-    public Optional<ChatRoom> findBySellerIdAndBuyerIdAndProductId(Long sellerId, Long buyerId, Long productId) {
-        return chatRoomRepository.findBySellerIdAndBuyerIdAndProductId(sellerId, buyerId, productId);
-    }
+//    public Optional<ChatRoom> findBySellerIdAndBuyerIdAndProductId(Long sellerId, Long buyerId, Long productId) {
+//        return chatRoomRepository.findBySellerIdAndBuyerIdAndProductId(sellerId, buyerId, productId);
+//    }
 }
