@@ -57,7 +57,8 @@ public class ProductQueryRepository {
         if (request.keyword() != null && !request.keyword().isEmpty()) {
             builder.and(product.name.containsIgnoreCase(request.keyword())
                 .or(product.description.containsIgnoreCase(request.keyword()))
-                .or(product.member.nickname.containsIgnoreCase(request.keyword())));
+                .or(product.member.nickname.containsIgnoreCase(request.keyword()))
+                .and(isNotDeleted(product)));
         }
         Pageable pageable = PageRequest.of(request.page(), request.size());
         JPAQuery<Product> query = jpaQueryFactory.selectFrom(product)
