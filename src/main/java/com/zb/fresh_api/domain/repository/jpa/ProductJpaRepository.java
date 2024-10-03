@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductJpaRepository extends JpaRepository<Product, Long> {
 
-    Optional<Product> findByIdAndDeletedAtIsNotNull(Long id);
+    Optional<Product> findByIdAndDeletedAtIsNull(Long id);
 }
