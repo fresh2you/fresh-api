@@ -111,20 +111,14 @@ public class Member extends BaseTimeEntity {
                 .build();
     }
 
-    public void updateProfile(final String nickname,
-                              final String profileImage) {
-        updateNickname(nickname);
-        updateProfileImage(profileImage);
-    }
-
-    private void updateNickname(final String nickname) {
+    public void updateNickname(final String nickname) {
         if (Objects.isNull(nickname) || this.nickname.equals(nickname)) {
             return;
         }
         this.nickname = nickname;
     }
 
-    private void updateProfileImage(final String profileImage) {
+    public void updateProfileImage(final String profileImage) {
         if (Objects.isNull(profileImage)) {
             return;
         }
