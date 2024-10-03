@@ -23,7 +23,7 @@ public class ProductReader {
     private final ProductQueryRepository productQueryRepository;
 
     public Optional<Product> findById(Long id){
-        return productJpaRepository.findByIdAndDeletedAtIsNotNull(id);
+        return productJpaRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     public Page<Product> findByMemberId(GetSellerProducts request, Long memberId) {
