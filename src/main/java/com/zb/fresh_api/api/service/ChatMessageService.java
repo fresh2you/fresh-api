@@ -29,7 +29,7 @@ public class ChatMessageService {
         return chatMessageReader.getMessagesByChatRoomId(chatRoomId)
                 .stream()
                 .map(message -> {
-                    ChatRoomMember sender = chatRoomMemberReader.findByChatRoomIdAndMemberId(String.valueOf(chatRoomId), message.senderId())
+                    ChatRoomMember sender = chatRoomMemberReader.findByChatRoomIdAndMemberId(Long.valueOf(chatRoomId), message.senderId())
                             .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_CHATROOM_MEMBER));
 
                     Member member = memberReader.getById(sender.getMemberId());

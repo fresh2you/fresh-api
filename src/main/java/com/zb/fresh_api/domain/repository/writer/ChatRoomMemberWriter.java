@@ -13,7 +13,7 @@ public class ChatRoomMemberWriter {
 
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
-    public Optional<ChatRoomMember> findByChatRoom_ChatRoomIdAndMemberId(String chatRoomId, Long memberId) {
+    public Optional<ChatRoomMember> findByChatRoom_ChatRoomIdAndMemberId(Long chatRoomId, Long memberId) {
         return chatRoomMemberRepository.findByChatRoom_ChatRoomIdAndMemberId(chatRoomId, memberId);
     }
 

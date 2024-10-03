@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 public record ChatMessage(
-        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long chatMessageId,
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY) Long chatMessageId,
         Long chatRoomId,
         Long senderId,
         String message,
