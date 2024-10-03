@@ -75,7 +75,8 @@ public class ProductQueryRepository {
     public Page<Product> findByMemberId(GetSellerProducts request, Long memberId){
         Pageable pageable = PageRequest.of(request.page(), request.size());
         JPAQuery<Product> query = jpaQueryFactory.selectFrom(product)
-            .where(product.member.id.eq(memberId))
+            .where(product.member.id.eq(memberId)
+                .and(isNotDeleted(product)))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize());
 
