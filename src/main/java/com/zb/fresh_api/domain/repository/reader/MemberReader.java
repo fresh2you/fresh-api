@@ -30,7 +30,7 @@ public class MemberReader {
     }
 
     public boolean existsByEmailAndProvider(String email, Provider provider) {
-        return memberJpaRepository.existsByEmailAndProvider(email, provider);
+        return memberJpaRepository.existsByEmailAndProviderAndDeletedAtIsNull(email, provider);
     }
 
     public MemberWithPoint getMemberWithPointByEmailAndProvider(String email, Provider provider) {
