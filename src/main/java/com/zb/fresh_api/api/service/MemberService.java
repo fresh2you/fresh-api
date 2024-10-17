@@ -317,9 +317,9 @@ public class MemberService {
         }
     }
 
-    private void validatePassword(final String password, final String encPassword) {
+    private void  validatePassword(final String password, final String encPassword) {
         if (!passwordEncoder.matches(password, encPassword)) {
-            throw new CustomException(ResponseCode.COMMON_INVALID_PARAM);
+            throw new CustomException(ResponseCode.INVALID_PASSWORD);
         }
     }
 
