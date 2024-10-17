@@ -25,7 +25,7 @@ public class MemberReader {
     }
 
     public Member getByEmailAndProvider(String email, Provider provider) {
-        return memberJpaRepository.findByEmailAndProvider(email, provider)
+        return memberJpaRepository.findByEmailAndProviderAndDeletedAtIsNull(email, provider)
                 .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_MEMBER));
     }
 
