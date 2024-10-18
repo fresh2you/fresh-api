@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Profile;
 @OpenAPIDefinition(
         servers = {
                 @Server(url = "http://localhost:8080", description = "Local"),
-                @Server(url = "https://api.jihun-dev.kr", description = "Dev")
+                @Server(url = "https://api.fresh2you.shop", description = "Dev")
         }
 )
 @io.swagger.v3.oas.annotations.security.SecurityScheme(

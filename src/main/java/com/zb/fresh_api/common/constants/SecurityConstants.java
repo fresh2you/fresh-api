@@ -10,9 +10,9 @@ public class SecurityConstants {
     public static final String[] ALLOW_ORIGINS = {
             "http://localhost:8080",
             "http://localhost:3000",
-            "https://api.jihun-dev.kr",
-            "https://jihun-dev.kr",
-            "https://www.jihun-dev.kr",
+            "https://api.fresh2you.shop",
+            "https://fresh2you.shop",
+            "https://www.fresh2you.shop",
     };
 
     public static final String[] SWAGGER_PATH = {
@@ -52,14 +52,12 @@ public class SecurityConstants {
             /**
              * Auth
             */
-            "/v1/api/auth/**"
+            "/v1/api/auth/**",
+
+            /**
+             * Web Socket
+            */
+            "/ws/**"
     };
 
-    public static final String[] PUBLIC_URLS = {
-            "/login","/register","/ws/**"
-    };
-
-    public static final String[] MEMBER_ONLY_URLS = {
-            "/chat/**", "/chatrooms/**"
-    };
 }

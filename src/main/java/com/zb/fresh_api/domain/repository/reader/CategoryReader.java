@@ -4,9 +4,10 @@ import com.zb.fresh_api.domain.annotation.Reader;
 import com.zb.fresh_api.domain.entity.category.Category;
 import com.zb.fresh_api.domain.repository.jpa.CategoryJpaRepository;
 import com.zb.fresh_api.domain.repository.query.CategoryQueryRepository;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 
 @Reader
 @RequiredArgsConstructor

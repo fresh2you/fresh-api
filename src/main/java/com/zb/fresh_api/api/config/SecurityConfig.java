@@ -64,8 +64,6 @@ public class SecurityConfig {
                                 .requestMatchers(OPTIONS, "**").permitAll()
                                 .requestMatchers(SecurityConstants.SWAGGER_PATH).permitAll()
                                 .requestMatchers(SecurityConstants.PERMIT_ALL_PATH).permitAll()
-                                .requestMatchers(SecurityConstants.PUBLIC_URLS).permitAll()
-                                .requestMatchers(SecurityConstants.MEMBER_ONLY_URLS).authenticated()
                                 .anyRequest().authenticated()
                 )
 
