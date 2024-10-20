@@ -40,6 +40,10 @@ public class ProductOrder {
     @Column(name = "order_id", nullable = false, columnDefinition = "varchar(12) comment '고유 코드'")
     private String orderId;
 
+    @Column(name = "quantity", nullable = false, columnDefinition = "INT UNSIGNED comment '구매 수량'")
+    private int quantity;
+
+
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, columnDefinition = "varchar(20) comment '상태'")
@@ -49,6 +53,16 @@ public class ProductOrder {
         return ProductOrder.builder()
             .productSnapshot(productSnapshot)
             .deliveryAddressSnapshot(deliveryAddressSnapshot)
+            .build();
+    }
+
+    public static ProductOrder create(ProductSnapshot productSnapshot, DeliveryAddressSnapshot deliveryAddressSnapshot, String orderId, int quantity) {
+        return ProductOrder.builder()
+            .productSnapshot(productSnapshot)
+            .deliveryAddressSnapshot(deliveryAddressSnapshot)
+            .orderId(orderId)
+            .quantity(quantity)
+            .productOrderStatus(ProductOrderStatus.REQUESTED)
             .build();
     }
 }
