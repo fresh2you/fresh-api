@@ -114,6 +114,12 @@ public class ProductController {
         return ApiResponse.success(ResponseCode.SUCCESS,response);
     }
 
+
+
+    @Operation(
+        summary = "상품 조회",
+        description = "전체 상품 조회를 위한 API입니다"
+    )
     @GetMapping()
     public ResponseEntity<ApiResponse<GetAllProductByConditionsResponse>> getAllProductByConditions(
         GetAllProductByConditionsRequest request) {
