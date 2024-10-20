@@ -4,7 +4,7 @@ import com.zb.fresh_api.domain.entity.address.DeliveryAddressSnapshot;
 import com.zb.fresh_api.domain.entity.product.ProductSnapshot;
 import jakarta.persistence.*;
 import lombok.*;
-
+import com.zb.fresh_api.domain.enums.order.ProductOrderStatus;
 import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -32,6 +32,10 @@ public class ProductOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "delivery_address_snapshot_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '배송지 스냅샷 고유 번호'")
     private DeliveryAddressSnapshot deliveryAddressSnapshot;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "product_order_status", nullable = false, columnDefinition = "varchar(20) comment '주문 상태'")
+    private ProductOrderStatus productOrderStatus;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, columnDefinition = "varchar(20) comment '상태'")
