@@ -6,6 +6,7 @@ import com.zb.fresh_api.api.dto.request.BuyProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.GetSellerProducts;
+import com.zb.fresh_api.api.dto.request.PrepareTossPaymentRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.BuyProductResponse;
@@ -14,6 +15,7 @@ import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.LikeProductResponse;
+import com.zb.fresh_api.api.dto.response.PrepareTossPaymentResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
 import com.zb.fresh_api.api.service.ProductService;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -114,7 +116,20 @@ public class ProductController {
         return ApiResponse.success(ResponseCode.SUCCESS,response);
     }
 
+    @Operation(
+        summary = "토스페이먼츠 결제 정보 사전 저장",
+        description = "토스페이먼츠를 통한 상품 결제 전 결제 정보를 사전에 저장하는 API 입니다"
+    )
+    @PostMapping("/{productId}/prepare-payment/toss")
+    public ResponseEntity<ApiResponse<PrepareTossPaymentResponse>> prepareTossPayment(
+        @PathVariable(name = "productId") Long productId,
+        @RequestBody @Valid PrepareTossPaymentRequest request,
+        @Parameter(hidden = true) @LoginMember Member member) {
+        PrepareTossPaymentResponse response = productService.prepareTossPayment(
+            productId, request, member);
 
+        return ApiResponse.success(ResponseCode.SUCCESS, response);
+    }
 
     @Operation(
         summary = "상품 조회",

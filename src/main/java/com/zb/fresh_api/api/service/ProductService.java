@@ -5,6 +5,7 @@ import com.zb.fresh_api.api.dto.request.BuyProductRequest;
 import com.zb.fresh_api.api.dto.request.DeleteProductRequest;
 import com.zb.fresh_api.api.dto.request.GetAllProductByConditionsRequest;
 import com.zb.fresh_api.api.dto.request.GetSellerProducts;
+import com.zb.fresh_api.api.dto.request.PrepareTossPaymentRequest;
 import com.zb.fresh_api.api.dto.request.UpdateProductRequest;
 import com.zb.fresh_api.api.dto.response.AddProductResponse;
 import com.zb.fresh_api.api.dto.response.BuyProductResponse;
@@ -13,7 +14,9 @@ import com.zb.fresh_api.api.dto.response.FindAllProductLikeResponse;
 import com.zb.fresh_api.api.dto.response.GetAllProductByConditionsResponse;
 import com.zb.fresh_api.api.dto.response.GetProductDetailResponse;
 import com.zb.fresh_api.api.dto.response.LikeProductResponse;
+import com.zb.fresh_api.api.dto.response.PrepareTossPaymentResponse;
 import com.zb.fresh_api.api.dto.response.UpdateProductResponse;
+import com.zb.fresh_api.api.utils.RandomUtil;
 import com.zb.fresh_api.api.utils.S3Uploader;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -164,7 +167,7 @@ public class ProductService {
 
         // 포인트 부족한지 검사, 재고가 부족한지 검사
         checkBalanceEnough(memberPoint,totalPrice);
-        checkQuantityEnough(request, product);
+        checkQuantityEnough(request.quantity(), product);
 
         // point_history 추가, point balance 감소
         PointHistory pointHistory = PointHistory.create(memberPoint, PointTransactionType.PAYMENT,
@@ -191,8 +194,8 @@ public class ProductService {
             productOrder.getDeliveryAddressSnapshot().getRecipientName(), totalPrice);
     }
 
-    private static void checkQuantityEnough(BuyProductRequest request, Product product) {
-        if(product.getQuantity() < request.quantity()){
+    private static void checkQuantityEnough(int quantity, Product product) {
+        if(product.getQuantity() < quantity){
             throw new CustomException(ResponseCode.NOT_ENOUGH_QUANTITY);
         }
     }
@@ -259,5 +262,38 @@ public class ProductService {
         productLikeWriter.delete(productLike);
     }
 
+    @Transactional
+    public PrepareTossPaymentResponse prepareTossPayment(final Long productId, final PrepareTossPaymentRequest request,
+        final Member member) {
+        // productId 유효, memberId 유효, deliveryAddressId 유효 검사
+        Product product = productReader.getById(productId);
+        DeliveryAddress deliveryAddress = deliveryAddressReader.getActiveDeliveryAddressByIdAndMemberId(
+            request.deliveryAddressId(), member.getId());
+        Point memberPoint = pointReader.getByMemberId(member.getId());
+        BigDecimal totalPrice = product.getPrice().multiply(BigDecimal.valueOf(request.quantity()));
 
+        // 포인트 부족한지 검사, 재고가 부족한지 검사
+        checkBalanceEnough(memberPoint,totalPrice);
+        checkQuantityEnough(request.quantity(), product);
+
+
+        // product의 quantity 감소
+        product.decreaseQuantity(request.quantity());
+
+        // orderId 생성,
+        String orderId = RandomUtil.generateRandomOrderId();
+
+        // product_snapshot 생성, deliveryAddress_snapshot 생성
+        ProductSnapshot productSnapshot = ProductSnapshot.create(product);
+        productSnapshotWriter.store(productSnapshot);
+        DeliveryAddressSnapshot deliveryAddressSnapshot = DeliveryAddressSnapshot.of(deliveryAddress);
+        deliveryAddressSnapshotWriter.store(deliveryAddressSnapshot);
+
+        // product_order 생성
+        ProductOrder productOrder = ProductOrder.create(productSnapshot, deliveryAddressSnapshot
+        ,orderId, request.quantity());
+        productOrderWriter.store(productOrder);
+
+        return new PrepareTossPaymentResponse(orderId, member.getId(), productOrder.getQuantity(),product.getName());
+    }
 }
