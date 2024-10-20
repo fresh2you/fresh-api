@@ -82,14 +82,11 @@ dependencies {
 	// email - certificate
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-	// WebSocket
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-
 	//Jackson JSON
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-	//hibernate
-	implementation 'org.hibernate:hibernate-core:6.2.7.Final'
+	// websocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
