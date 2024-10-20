@@ -37,6 +37,10 @@ public class ProductOrder {
     @Column(name = "product_order_status", nullable = false, columnDefinition = "varchar(20) comment '주문 상태'")
     private ProductOrderStatus productOrderStatus;
 
+    @Column(name = "order_id", nullable = false, columnDefinition = "varchar(12) comment '고유 코드'")
+    private String orderId;
+
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, columnDefinition = "varchar(20) comment '상태'")
     private LocalDateTime createdAt;
