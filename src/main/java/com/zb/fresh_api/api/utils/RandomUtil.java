@@ -1,5 +1,6 @@
 package com.zb.fresh_api.api.utils;
 
+
 import com.zb.fresh_api.common.constants.AppConstants;
 import com.zb.fresh_api.common.exception.CustomException;
 import com.zb.fresh_api.common.exception.ResponseCode;
@@ -17,7 +18,7 @@ public class RandomUtil {
 
     /**
      * @param list 요소가 들어있는 리스트
-     * @param <T> 리스트의 타입
+     * @param <T>  리스트의 타입
      * @return 리스트에서 랜덤하게 선택된 요소
      */
     public static <T> T getRandomElement(List<T> list) {
@@ -45,4 +46,19 @@ public class RandomUtil {
         return randomString.toString();
     }
 
+
+    /**
+     * @return 특수문자가 포함된 랜덤 문자열
+     */
+    public static String generateRandomOrderId() {
+        final String characters = AppConstants.CHARACTERS + AppConstants.SPECIAL_CHARACTERS;
+        final StringBuilder randomString = new StringBuilder(AppConstants.ORDER_ID_LENGTH);
+
+        for (int i = 0; i < AppConstants.ORDER_ID_LENGTH; i++) {
+            int randomIndex = random.nextInt(characters.length());
+            randomString.append(characters.charAt(randomIndex));
+        }
+
+        return randomString.toString();
+    }
 }
