@@ -61,6 +61,7 @@ public class Member extends BaseTimeEntity {
     @Column(name = "deleted_at", columnDefinition = "datetime comment '탈퇴 일시'")
     private LocalDateTime deletedAt;
 
+    @Builder.Default
     @Column(name = "is_seller", columnDefinition = "boolean comment '판매자 인증 여부'")
     private boolean isSeller = false;
 
