@@ -294,6 +294,6 @@ public class ProductService {
         ,orderId, request.quantity());
         productOrderWriter.store(productOrder);
 
-        return new PrepareTossPaymentResponse(orderId, member.getId(), productOrder.getQuantity(),product.getName());
+        return new PrepareTossPaymentResponse(orderId, member.getId(), productOrder.getQuantity(),product.getName(),totalPrice);
     }
 }
