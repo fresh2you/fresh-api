@@ -1,7 +1,6 @@
 package com.zb.fresh_api.domain.entity.chat;
 
 import com.zb.fresh_api.domain.entity.base.BaseTimeEntity;
-import com.zb.fresh_api.domain.entity.member.Member;
 import com.zb.fresh_api.domain.entity.product.Product;
 import com.zb.fresh_api.domain.enums.chat.ChatRoomStatus;
 import com.zb.fresh_api.domain.enums.chat.ChatRoomType;
@@ -26,8 +25,8 @@ public class ChatRoom extends BaseTimeEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '방 생성자, 회원 고유 번호'")
-    private Member owner;
+    @JoinColumn(name = "chat_room_member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '방 생성자, 회원 고유 번호'")
+    private ChatRoomMember owner;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '연결 상품, 상품 고유 번호'")
