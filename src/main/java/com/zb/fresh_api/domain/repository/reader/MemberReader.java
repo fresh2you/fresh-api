@@ -25,12 +25,12 @@ public class MemberReader {
     }
 
     public Member getByEmailAndProvider(String email, Provider provider) {
-        return memberJpaRepository.findByEmailAndProvider(email, provider)
+        return memberJpaRepository.findByEmailAndProviderAndDeletedAtIsNull(email, provider)
                 .orElseThrow(() -> new CustomException(ResponseCode.NOT_FOUND_MEMBER));
     }
 
     public boolean existsByEmailAndProvider(String email, Provider provider) {
-        return memberJpaRepository.existsByEmailAndProvider(email, provider);
+        return memberJpaRepository.existsByEmailAndProviderAndDeletedAtIsNull(email, provider);
     }
 
     public MemberWithPoint getMemberWithPointByEmailAndProvider(String email, Provider provider) {

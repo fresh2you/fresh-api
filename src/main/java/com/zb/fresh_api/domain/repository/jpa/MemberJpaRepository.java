@@ -13,11 +13,10 @@ public interface MemberJpaRepository extends JpaRepository<Member, Long> {
 
     boolean existsByNicknameIgnoreCase(String nickname);
 
-    boolean existsByEmailAndProvider(String email, Provider provider);
-
+    boolean existsByEmailAndProviderAndDeletedAtIsNull(String email, Provider provider);
     boolean existsByNickname(String nickname);
 
-    Optional<Member> findByEmailAndProvider(String email, Provider provider);
+    Optional<Member> findByEmailAndProviderAndDeletedAtIsNull(String email, Provider provider);
 
     Optional<Member> findByIdAndDeletedAtIsNull(Long id);
 
