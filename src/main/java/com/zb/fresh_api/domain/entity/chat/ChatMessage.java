@@ -28,7 +28,7 @@ public class ChatMessage {
     @JoinColumn(name = "chat_room_member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '회원 고유 번호'")
     private ChatRoomMember sender;
 
-    @Column(name = "message", columnDefinition = "varchar(20) comment '메세지'")
+    @Column(name = "message", columnDefinition = "varchar(255) comment '메세지'")
     private String message;
 
     @Column(name = "created_at", updatable = false, columnDefinition = "datetime comment '발송 일시'")
