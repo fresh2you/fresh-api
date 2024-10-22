@@ -24,10 +24,6 @@ public class ChatRoom extends BaseTimeEntity {
     @Column(name = "id", columnDefinition = "BIGINT UNSIGNED comment '고유 번호'")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_room_member_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '방 생성자, 회원 고유 번호'")
-    private ChatRoomMember owner;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false, columnDefinition = "BIGINT UNSIGNED comment '연결 상품, 상품 고유 번호'")
     private Product product;
