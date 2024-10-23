@@ -1,6 +1,6 @@
 package com.zb.fresh_api.common.response;
 
-import com.zb.fresh_api.common.exception.ResponseCode;
+import com.zb.fresh_api.common.exception.CommonResponseCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,23 +18,23 @@ public record ApiResponse<T>(
         @Schema(description = "응답 결과")
         T data) {
 
-    public static <T> ResponseEntity<ApiResponse<T>> success(ResponseCode responseCode) {
+    public static <T> ResponseEntity<ApiResponse<T>> success(CommonResponseCode responseCode) {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, responseCode.getCode(), responseCode.getMessage(), null));
     }
 
-    public static <T> ResponseEntity<ApiResponse<T>> success(ResponseCode responseCode, T data) {
+    public static <T> ResponseEntity<ApiResponse<T>> success(CommonResponseCode responseCode, T data) {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, responseCode.getCode(), responseCode.getMessage(), data));
     }
 
-    public static <T> ResponseEntity<ApiResponse<T>> fail(ResponseCode responseCode) {
+    public static <T> ResponseEntity<ApiResponse<T>> fail(CommonResponseCode responseCode) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, responseCode.getCode(), responseCode.getMessage(), null));
     }
 
-    public static <T> ResponseEntity<ApiResponse<T>> fail(ResponseCode responseCode, T data) {
+    public static <T> ResponseEntity<ApiResponse<T>> fail(CommonResponseCode responseCode, T data) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, responseCode.getCode(), responseCode.getMessage(), data));
     }
 
-    public static ResponseEntity<ApiResponse<String>> error(ResponseCode responseCode, RuntimeException exception) {
+    public static ResponseEntity<ApiResponse<String>> error(CommonResponseCode responseCode, RuntimeException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, responseCode.getCode(), responseCode.getMessage(), exception.getMessage()));
     }
 

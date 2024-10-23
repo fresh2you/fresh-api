@@ -57,7 +57,12 @@ public class SecurityConstants {
             /**
              * Web Socket
             */
-            "/ws/**"
+            "/ws/**",
+
+            /**
+             * Toss payments
+            */
+            "/v1/api/payments/**"
     };
 
 }

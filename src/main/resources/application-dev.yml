@@ -6,7 +6,12 @@ spring:
     activate:
       on-profile: dev
     import: aws-parameterstore:/param/fresh2you_${spring.profiles.active}/
-
+  payment:
+    toss:
+      client-key: test_ck_P9BRQmyarYxjwxpd0BKNVJ07KzLN
+      secret-key: test_sk_DpexMgkW36P5lGL1n5GdrGbR5ozO
+      security-key: 6a0012a9c2e442c91e6756c6e2dac9b0ee95c54f9707f9aeb5aa2115f19e68c6
+      url: api.tosspayments.com/v1/payments
   security:
     oauth2:
       client:
@@ -74,7 +79,6 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true      # 쿼리 로그 포맷 (정렬)
         show_sql: false        # 쿼리 로그 출력
-
 
 cloud:
   aws:

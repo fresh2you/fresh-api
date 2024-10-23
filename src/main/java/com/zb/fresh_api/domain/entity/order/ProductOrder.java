@@ -65,4 +65,12 @@ public class ProductOrder {
             .productOrderStatus(ProductOrderStatus.REQUESTED)
             .build();
     }
+
+    public void paymentSuccess(){
+        this.productOrderStatus = ProductOrderStatus.APPROVED;
+    }
+
+    public void paymentFail(){
+        this.productOrderStatus = ProductOrderStatus.FAILED;
+    }
 }
