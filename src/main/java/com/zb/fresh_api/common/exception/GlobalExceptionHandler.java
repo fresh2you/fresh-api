@@ -30,7 +30,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<String>> handle(final CustomException e) {
         log.error("Custom Exception : {} ", e.getMessage());
-        return ApiResponse.fail(e.getResponseCode());
+        return ApiResponse.fail(e.getCommonResponseCode());
     }
 
     @ExceptionHandler(RuntimeException.class)

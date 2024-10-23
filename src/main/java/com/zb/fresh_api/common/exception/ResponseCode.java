@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum ResponseCode {
+public enum ResponseCode implements CommonResponseCode {
 
     /**
      * Success (0200 ~ 0300)
@@ -126,9 +126,19 @@ public enum ResponseCode {
      * Point (2100 ~ 2200)
      */
     POINT_NOT_FOUND("2100", "포인트 정보를 찾을 수 없습니다"),
-    POINT_NOT_ENOUGH("2101", "포인트가 충분하지 않습니다")
+    POINT_NOT_ENOUGH("2101", "포인트가 충분하지 않습니다"),
 
+    /**
+     * ProductOrder (2200 ~ 2300)
+     */
+    PRODUCTORDER_NOT_FOUND("2200", "주문 내역을 찾을 수 없습니다"),
+    AMOUNT_NOT_CORRECT("2201", "주문 수량이 일치하지 않습니다")
+
+    /**
+     * Toss payment - PaymentResponseCode에 위치 (2300 ~ 2400)
+     */
     ;
+
 
     private final String code;
     private final String message;
